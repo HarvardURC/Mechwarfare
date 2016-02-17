@@ -1,5 +1,17 @@
 #include <PololuMaestro.h>
 #include <SoftwareSerial.h>
+
+// servo indicates which servo or -1 for delays
+typedef struct rotation
+{
+  int servo;
+  int degree;
+};
+
+// function declarations (needed because parameter is of custom type)
+void execute(rotation commands[], int dir);
+
+// Motor controller constants
 SoftwareSerial maestroSerial(10, 11);
 MiniMaestro maestro(maestroSerial);
 
@@ -9,7 +21,12 @@ int homecrouch = 5000;
 int rotate = 4000;
 int std_delay = 100;
 
-// Servo assignments
+
+/*
+  #####################
+  # Servo assignments #
+  #####################
+*/
 
 // legs
 int flh = 0; // front left hip
@@ -29,15 +46,12 @@ int bra = 11; // back right ankle
 int tp = 12; // turret pan
 int tt = 13; // turret tilt
 
-// servo indicates which servo or -1 for delays
-typedef struct rotation
-{
-  int servo;
-  int degree;
-};
 
-// function declarations (needed because parameter is of custom type)
-void execute(rotation commands[], int dir);
+/*
+  ######################
+  # movement sequences #
+  ######################
+*/
 
 // rotates bot right
 rotation turn[22] =
@@ -107,6 +121,13 @@ rotation walk[36] =
   {1, homecrouch}
 };
 
+
+/*
+  ######################
+  # Movement functions #
+  ######################
+*/
+
 // dir = 0 for forward, 1 for backwards.
 void execute(rotation commands[], int dir)
 {
@@ -152,13 +173,19 @@ void move_back()
   execute(walk, 1);
 }
 
+
+/*
+  ##################
+  # Main functions #
+  ##################
+*/
+
 void setup()
 {
 
   // Set the serial port's baud rate
   maestroSerial.begin(9600);
   Serial.begin(9600);
-
 }
 
 void loop()
