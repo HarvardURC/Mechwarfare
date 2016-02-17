@@ -3,10 +3,31 @@
 SoftwareSerial maestroSerial(10, 11);
 MiniMaestro maestro(maestroSerial);
 
+// rotation and delay constants
 int home1 = 6000;
 int homecrouch = 5000;
 int rotate = 4000;
 int std_delay = 100;
+
+// Servo assignments
+
+// legs
+int flh = 0; // front left hip
+int flk = 1; // front left knee
+int fla = 2; // front left ankle
+int frh = 3; // front right hip
+int frk = 4; // front right knee
+int fra = 5; // front right ankle
+int blh = 6; // back left hip
+int blk = 7; // back left knee
+int bla = 8; // back left ankle
+int brh = 9; // back right hip
+int brk = 10; // back right knee
+int bra = 11; // back right ankle
+
+// turret
+int tp = 12; // turret pan
+int tt = 13; // turret tilt
 
 // servo indicates which servo or -1 for delays
 typedef struct rotation
@@ -19,7 +40,7 @@ typedef struct rotation
 void execute(rotation commands[], int dir);
 
 // rotates bot right
-rotation turn[22] = 
+rotation turn[22] =
 {
   {7, rotate},
   {1, rotate},
@@ -46,7 +67,7 @@ rotation turn[22] =
 };
 
 // moves bot forward
-rotation walk[36] = 
+rotation walk[36] =
 {
   {7, rotate},
   {1, rotate},
@@ -133,11 +154,11 @@ void move_back()
 
 void setup()
 {
-  
+
   // Set the serial port's baud rate
   maestroSerial.begin(9600);
   Serial.begin(9600);
-  
+
 }
 
 void loop()
