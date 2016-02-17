@@ -15,11 +15,14 @@ typedef struct rotation
   int degree;
 };
 
+// function declarations (needed because parameter is of custom type)
+void execute(rotation commands[], int dir);
+
 // rotates bot right
-rotation[22] turn = 
+rotation turn[22] = 
 {
   {7, rotate},
-  {1, rotate}.
+  {1, rotate},
   {-1, std_delay},
   {0, rotate},
   {6, rotate},
@@ -40,13 +43,13 @@ rotation[22] turn =
   {9, home1},
   {0, home1},
   {6, home1}
-}
+};
 
 // moves bot forward
-rotation[22] walk = 
+rotation walk[36] = 
 {
   {7, rotate},
-  {1, rotate}.
+  {1, rotate},
   {-1, std_delay},
   {6, rotate},
   {0, 2*home1 - rotate},
@@ -81,13 +84,12 @@ rotation[22] walk =
   {-1, std_delay},
   {7, homecrouch},
   {1, homecrouch}
-  
-}
+};
 
 // dir = 0 for forward, 1 for backwards.
 void execute(rotation commands[], int dir)
 {
-  int start = 0
+  int start = 0;
   int incrementor = 1;
   int fin = sizeof(commands);
   if (dir == 1)
@@ -106,6 +108,7 @@ void execute(rotation commands[], int dir)
     {
       maestro.setTarget(commands[i].servo, commands[i].degree);
     }
+  }
 }
 
 void turn_right()
