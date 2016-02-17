@@ -1,13 +1,18 @@
 
 #include <PololuMaestro.h>
- #include <SoftwareSerial.h>
- SoftwareSerial maestroSerial(10, 11);
+#include <SoftwareSerial.h>
+SoftwareSerial maestroSerial(10, 11);
 MiniMaestro maestro(maestroSerial);
 
-  int home1 = 6000;
-  int homecrouch = 5000;
-
+int home1 = 6000;
+int homecrouch = 5000;
 int rotate = 4000;
+
+typedef struct rotation
+{
+  int servo;
+  int degree;
+};
  
 void setup()
 {
