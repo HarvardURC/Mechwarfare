@@ -15,14 +15,17 @@ void execute(rotation commands[], int dir, int len);
 SoftwareSerial maestroSerial(10, 11);
 MiniMaestro maestro(maestroSerial);
 
+
+
 // rotation and delay constants
-int homeankle = 8000;
-int homeknee = 3600;
-int homehip = 6800;
 int home1 = 6000;
 int homecrouch = 5000;
-int rotate = 4000;
-int std_delay = 300;
+int rotation_raise = 1000;
+int rotate = 2000;
+int std_delay = 50;
+int w_raise = 600;
+int w_rot = 750;
+int w_lean = 0;
 
 
 /*
@@ -45,6 +48,8 @@ int blh = 9; // back left hip
 int blk = 10; // back left knee
 int bla = 11; // back left ankle
 
+int servo_homes[12] = {8304,3776,8296,4944,3392,8620,7672,2924,7780,5488,3584,7672};
+
 // turret
 int tp = 12; // turret pan
 int tt = 13; // turret tilt
@@ -57,89 +62,85 @@ int tt = 13; // turret tilt
 */
 
 // rotates bot right
-rotation turn[22] =
+rotation turn[27] =
 {
-  {flk, rotate},
-  {brk, rotate},
+  {flk, rotation_raise},
+  {brk, rotation_raise},
   {-1, std_delay},
   {flh, rotate},
   {brh, rotate},
   {-1, std_delay},
-  {flk, homecrouch},
-  {brk, homecrouch},
-  {-1, std_delay},
-  {frk, rotate},
-  {blk, rotate},
-  {-1, std_delay},
+  {flk, 0},
+  {brk, 0},
   {frh, rotate},
   {blh, rotate},
   {-1, std_delay},
-  {frk, homecrouch},
-  {blk, homecrouch},
+  {frk, rotation_raise},
+  {blk, rotation_raise},
   {-1, std_delay},
-  {flh, home1},
-  {frh, home1},
-  {blh, home1},
-  {brh, home1}
+  {frh, 0},
+  {blh, 0},
+  {flh, rotate},
+  {brh, rotate},
+  {-1, std_delay},
+  {frk, rotation_raise},
+  {blk, rotation_raise},
+  {-1, std_delay},
+  {frh, 0},
+  {blh, 0},
+  {-1, std_delay},
+  {frk, 0},
+  {blk, 0}
 };
 
 // moves bot forward
-rotation walk[36] =
+rotation walk[26] =
 {
-  {7, rotate},
-  {1, rotate},
+  {bra, w_lean},
+  {bla, w_lean},
   {-1, std_delay},
-  {6, rotate},
-  {0, 2*home1 - rotate},
+  {flk, w_raise},
+  {brk, w_raise},
   {-1, std_delay},
-  {7, homecrouch},
-  {1, homecrouch},
+  {flh, -w_rot},
+  {brh, w_rot},
   {-1, std_delay},
-  {10, homecrouch - (homecrouch - rotate)/2.0},
-  {4, homecrouch - (homecrouch - rotate)/2.0},
-  {0, home1},
-  {6, home1},
+  {flk, 0},
+  {blk, 0},
   {-1, std_delay},
-  {10, homecrouch},
-  {4, homecrouch},
+  {frk, w_raise},
+  {blk, w_raise},
   {-1, std_delay},
-  {10, rotate},
-  {4, rotate},
+  {frh, w_rot},
+  {blh, -w_rot},
   {-1, std_delay},
-  {10, rotate},
-  {4, rotate},
+  {frk, 0},
+  {blk, 0},
   {-1, std_delay},
-  {9, rotate},
-  {3, 2*home1 - rotate},
-  {-1, std_delay},
-  {10, homecrouch},
-  {4, homecrouch},
-  {-1, std_delay},
-  {7, homecrouch - (homecrouch - rotate)/2.0},
-  {1, homecrouch - (homecrouch - rotate)/2.0},
-  {3, home1},
-  {9, home1},
-  {-1, std_delay},
-  {7, homecrouch},
-  {1, homecrouch}
+  {flh, 0},
+  {frh, 0},
+  {blh, 0},
+  {brh, 0},
+  {-1, std_delay}
+  
 };
 
 // legs down
 rotation start_pos[13] =
 {
-  {frh, homehip},
-  {frk, homeknee},
-  {fra, homeankle},
-  {flh, homehip},
-  {flk, homeknee},
-  {fla, homeankle},
-  {brh, homehip},
-  {brk, homeknee},
-  {bra, homeankle},
-  {blh, homehip},
-  {blk, homeknee},
-  {bla, homeankle},
-  {-1, 1000}
+  {frh, 0},
+  {frk, 0},
+  {fra, 0},
+  {flh, 0},
+  {flk, 0},
+  {fla, 0},
+  {brh, 0},
+  {brk, 0},
+  {bra, 0},
+  {blh, 0},
+  {blk, 0},
+  {bla, 0},
+  {-1, std_delay}
 };
 
 
@@ -162,7 +163,7 @@ void execute(rotation commands[], int dir, int len)
       }
       else
       {
-        maestro.setTarget(commands[i].servo, commands[i].degree);
+        maestro.setTarget(commands[i].servo, servo_homes[commands[i].servo] + commands[i].degree);
       }
     }
   }
@@ -175,29 +176,29 @@ void execute(rotation commands[], int dir, int len)
     }
     else
     {
-      maestro.setTarget(commands[i].servo, commands[i].degree);
+      maestro.setTarget(commands[i].servo, servo_homes[commands[i].servo] + commands[i].degree);
     }
   }
 }
 
 void turn_right()
 {
-  execute(turn, 0, 22);
+  execute(turn, 0, 27);
 }
 
 void turn_left()
 {
-  execute(turn, 1, 22);
+  execute(turn, 1, 27);
 }
 
 void move_forward()
 {
-  execute(walk, 0, 36);
+  execute(walk, 0, 25);
 }
 
 void move_back()
 {
-  execute(walk, 1, 36);
+  execute(walk, 1, 24);
 }
 
 void stand()
@@ -219,16 +220,12 @@ void setup()
   maestroSerial.begin(9600);
   Serial.begin(9600);
   stand();
-  turn_right();
-  turn_right();
-  Serial.print("LOL");
-  turn_left();
-  turn_left();
-  stand();
+  delay(3000);
+
   
 }
 
 void loop()
 {
-  stand();
+  move_forward();
 }
