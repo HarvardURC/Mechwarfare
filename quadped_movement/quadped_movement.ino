@@ -9,17 +9,20 @@ typedef struct rotation
 };
 
 // function declarations (needed because parameter is of custom type)
-void execute(rotation commands[], int dir);
+void execute(rotation commands[], int dir, int len);
 
 // Motor controller constants
 SoftwareSerial maestroSerial(10, 11);
 MiniMaestro maestro(maestroSerial);
 
 // rotation and delay constants
+int homeankle = 8000;
+int homeknee = 3600;
+int homehip = 6800;
 int home1 = 6000;
 int homecrouch = 5000;
 int rotate = 4000;
-int std_delay = 100;
+int std_delay = 300;
 
 
 /*
@@ -35,12 +38,12 @@ int fla = 2; // front left ankle
 int frh = 3; // front right hip
 int frk = 4; // front right knee
 int fra = 5; // front right ankle
-int blh = 6; // back left hip
-int blk = 7; // back left knee
-int bla = 8; // back left ankle
-int brh = 9; // back right hip
-int brk = 10; // back right knee
-int bra = 11; // back right ankle
+int brh = 6; // back right hip
+int brk = 7; // back right knee
+int bra = 8; // back right ankle
+int blh = 9; // back left hip
+int blk = 10; // back left knee
+int bla = 11; // back left ankle
 
 // turret
 int tp = 12; // turret pan
@@ -121,6 +124,24 @@ rotation walk[36] =
   {1, homecrouch}
 };
 
+// legs down
+rotation start_pos[13] =
+{
+  {frh, homehip},
+  {frk, homeknee},
+  {fra, homeankle},
+  {flh, homehip},
+  {flk, homeknee},
+  {fla, homeankle},
+  {brh, homehip},
+  {brk, homeknee},
+  {bra, homeankle},
+  {blh, homehip},
+  {blk, homeknee},
+  {bla, homeankle},
+  {-1, 1000}
+};
+
 
 /*
   ######################
@@ -129,18 +150,24 @@ rotation walk[36] =
 */
 
 // dir = 0 for forward, 1 for backwards.
-void execute(rotation commands[], int dir)
+void execute(rotation commands[], int dir, int len)
 {
-  int start = 0;
-  int incrementor = 1;
-  int fin = sizeof(commands);
   if (dir == 1)
   {
-    start = fin;
-    fin = 0;
-    incrementor = -1;
+    for(int i = len; i > 0; i--)
+    {
+      if(commands[i].servo == -1)
+      {
+        delay(commands[i].degree);
+      }
+      else
+      {
+        maestro.setTarget(commands[i].servo, commands[i].degree);
+      }
+    }
   }
-  for(int i = start; i < fin; i+=incrementor)
+
+  for(int i = 0; i < len; i++)
   {
     if(commands[i].servo == -1)
     {
@@ -155,22 +182,27 @@ void execute(rotation commands[], int dir)
 
 void turn_right()
 {
-  execute(turn, 0);
+  execute(turn, 0, 22);
 }
 
 void turn_left()
 {
-  execute(turn, 1);
+  execute(turn, 1, 22);
 }
 
 void move_forward()
 {
-  execute(walk, 0);
+  execute(walk, 0, 36);
 }
 
 void move_back()
 {
-  execute(walk, 1);
+  execute(walk, 1, 36);
+}
+
+void stand()
+{
+  execute(start_pos, 0, 13);
 }
 
 
@@ -186,12 +218,17 @@ void setup()
   // Set the serial port's baud rate
   maestroSerial.begin(9600);
   Serial.begin(9600);
+  stand();
+  turn_right();
+  turn_right();
+  Serial.print("LOL");
+  turn_left();
+  turn_left();
+  stand();
+  
 }
 
 void loop()
 {
-  turn_right();
-  turn_left();
-  move_forward();
-  move_back();
+  stand();
 }
