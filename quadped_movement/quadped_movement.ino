@@ -22,7 +22,7 @@ int homehip = 6800;
 int home1 = 6000;
 int homecrouch = 5000;
 int rotate = 4000;
-int std_delay = 300;
+int std_delay = 1000;
 
 
 /*
