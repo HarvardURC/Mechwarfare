@@ -59,28 +59,28 @@ int tt = 13; // turret tilt
 // rotates bot right
 rotation turn[22] =
 {
-  {7, rotate},
-  {1, rotate},
+  {flk, rotate},
+  {brk, rotate},
   {-1, std_delay},
-  {0, rotate},
-  {6, rotate},
+  {flh, rotate},
+  {brh, rotate},
   {-1, std_delay},
-  {7, homecrouch},
-  {1, homecrouch},
+  {flk, homecrouch},
+  {brk, homecrouch},
   {-1, std_delay},
-  {10, rotate},
-  {4, rotate},
+  {frk, rotate},
+  {blk, rotate},
   {-1, std_delay},
-  {3, rotate},
-  {9, rotate},
+  {frh, rotate},
+  {blh, rotate},
   {-1, std_delay},
-  {10, homecrouch},
-  {4, homecrouch},
+  {frk, homecrouch},
+  {blk, homecrouch},
   {-1, std_delay},
-  {3, home1},
-  {9, home1},
-  {0, home1},
-  {6, home1}
+  {flh, home1},
+  {frh, home1},
+  {blh, home1},
+  {brh, home1}
 };
 
 // moves bot forward
@@ -154,7 +154,7 @@ void execute(rotation commands[], int dir, int len)
 {
   if (dir == 1)
   {
-    for(int i = len; i > 0; i--)
+    for(int i = len-1; i >= 0; i--)
     {
       if(commands[i].servo == -1)
       {
