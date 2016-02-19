@@ -15,18 +15,26 @@ void execute(rotation commands[], int dir, int len);
 SoftwareSerial maestroSerial(10, 11);
 MiniMaestro maestro(maestroSerial);
 
-
-
 // rotation and delay constants
-int home1 = 6000;
-int homecrouch = 5000;
+int std_delay = 250;
+
+// turning
 int rotation_raise = 1000;
 int rotate = 2000;
-int std_delay = 250;
+
+//walk
 int w_raise = 600;
 int w_rot = 750;
 int w_lean = 250;
 int w_araise = 400;
+
+//creep
+int c_small_rot = 200;
+int c_small_ankle = 200;
+int c_knee = 600;
+int c_ankle = 600;
+int c_rot = 3000;
+int c_small_rot = 1000;
 
 
 /*
@@ -49,6 +57,7 @@ int blh = 9; // back left hip
 int blk = 10; // back left knee
 int bla = 11; // back left ankle
 
+// shuffle movement
 int servo_homes[12] = {7704,3676,8296,5794,3092,8620,7222,3074,7780,6088,3584,8072};
 
 // turret
@@ -94,8 +103,8 @@ rotation turn[27] =
   {blk, 0}
 };
 
-// moves bot forward
-rotation walk[32] =
+// shuffles bot forward
+rotation shuffle[32] =
 {
   {-1, std_delay},
   {flk, w_raise},
@@ -129,8 +138,37 @@ rotation walk[32] =
   {blh, 0},
   {brh, 0},
   {-1, std_delay}
-
 };
+
+// creeping move
+rotation creep[24] =
+{
+  {flh, c_small_rot},
+  {brh, -c_small_rot},
+  {fra, c_small_ankle},
+  {fla, c_small_ankle},
+  {bra, -c_small_ankle},
+  {blk, c_knee},
+  {bla, c_ankle},
+  {-1, std_delay},
+  {blh, c_rot},
+  {flh, -c_rot}
+  {-1, std_delay},
+  {blk, 0},
+  {bla, 0},
+  {-1, std_delay},
+  {brh, 0},
+  {blh, -c_small_rot},
+  {flh, c_small_rot},
+  {flk, c_knee},
+  {fla, c_ankle},
+  {-1, std_delay},
+  {flh, 0},
+  {-1, std_delay},
+  {flk, 0},
+  {fla, 0}
+}
+
 
 // legs down
 rotation start_pos[13] =
@@ -154,38 +192,42 @@ void calibrate()
 {
   while (true)
   {
-    Serial.setTimeout(1000);
     Serial.print("Which servo?\n");
+    Serial.setTimeout(3000);
     int inp = Serial.parseInt();
     if (inp > -1 && inp < 14)
     {
+      Serial.setTimeout(200);
       Serial.print("tweaking servo: ");
       Serial.println(inp);
-      int offset = 0;
       while(true)
       {
-          maestro.setTarget(inp, servo_homes[inp] + offset);
-          Serial.print("position: ");
-          Serial.println(maestro.getPosition(inp));
-          int contrl = Serial.parseInt();
-          if (contrl == 2)
-          {
-            offset = offset + 50;
-          }
-          else if (contrl == 1)
-          {
-            offset = offset - 50;
-          }
-          else if (contrl != 0)
-          {
-            Serial.print("final pos: ");
-            Serial.println(offset+servo_homes[inp]);
-            servo_homes[inp] += offset;
-            break;
-          }
-
+        maestro.setTarget(inp, servo_homes[inp]);
+        int contrl = Serial.parseInt();
+        if (contrl == 2)
+        {
+          servo_homes[inp] += 50;
+        }
+        else if (contrl == 1)
+        {
+          servo_homes[inp] -= 50;
+        }
+        else if (contrl != 0)
+        {
+          Serial.print("final pos: ");
+          Serial.println(servo_homes[inp]);
+          break;
+        }
       }
     }
+    Serial.setTimeout(100);
+    Serial.print("final position matrix: ");
+    for(int i = 0; i < 13; i++)
+    {
+      Serial.print(servo_homes[i]);
+      Serial.print(", ");
+    }
+    Serial.println(servo_homes[13]);
     Serial.setTimeout(1000);
     return;
   }
@@ -215,16 +257,18 @@ void execute(rotation commands[], int dir, int len)
       }
     }
   }
-
-  for(int i = 0; i < len; i++)
+  else
   {
-    if(commands[i].servo == -1)
+    for(int i = 0; i < len; i++)
     {
-      delay(commands[i].degree);
-    }
-    else
-    {
-      maestro.setTarget(commands[i].servo, servo_homes[commands[i].servo] + commands[i].degree);
+      if(commands[i].servo == -1)
+      {
+        delay(commands[i].degree);
+      }
+      else
+      {
+        maestro.setTarget(commands[i].servo, servo_homes[commands[i].servo] + commands[i].degree);
+      }
     }
   }
 }
@@ -234,19 +278,9 @@ void turn_right()
   execute(turn, 0, 27);
 }
 
-void turn_left()
+void shuffle_walk()
 {
-  execute(turn, 1, 27);
-}
-
-void move_forward()
-{
-  execute(walk, 0, 32);
-}
-
-void move_back()
-{
-  execute(walk, 1, 28);
+  execute(shuffle, 0, 32);
 }
 
 void stand()
@@ -270,12 +304,11 @@ void setup()
   stand();
   delay(3000);
 
-
 }
 
 void loop()
 {
   //stand();
-  move_forward();
+  //shuffle_walk();
   calibrate();
-}//
+}
