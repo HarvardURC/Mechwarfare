@@ -288,6 +288,11 @@ void stand()
   execute(start_pos, 0, 13);
 }
 
+void creep_walk()
+{
+  execute(creep, 0, 24);
+}
+
 
 /*
   ##################
@@ -310,5 +315,6 @@ void loop()
 {
   //stand();
   //shuffle_walk();
+  //creep_walk();
   calibrate();
 }
