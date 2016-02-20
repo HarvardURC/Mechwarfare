@@ -16,17 +16,19 @@ SoftwareSerial maestroSerial(10, 11);
 MiniMaestro maestro(maestroSerial);
 
 // rotation and delay constants
-int std_delay = 100;
+int std_delay = 1000;
 
 // turning
-int rotation_raise = 1000;
-int rotate = 2000;
+int rotation_raise = 800;
+int rotate = 1200;
+int r_lean = -400;
 
 //walk
-int w_raise = 1300;
-int w_rot = 1150;
-int w_lean = 550;
-int w_araise = 600;
+int w_raise = 1100;
+int w_rot = 450;
+int w_lean = 400;
+int w_araise = 550;
+int w_adrop = 450;
 
 //creep
 int c_small_rot = 400;
@@ -57,7 +59,7 @@ int blk = 10; // back left knee
 int bla = 11; // back left ankle
 
 // shuffle movement
-int servo_homes[14] = {7704,3826,8496,5644,3292,8720,6872,3224,8080,6238,3134,7822, 4000, 4000};
+int servo_homes[14] = {7704,3826,8496,5644,3292,8720,6872,3224,8080,6238,3134,7522, 4000, 4000};
 
 // turret
 int tp = 12; // turret pan
@@ -70,9 +72,14 @@ int tt = 13; // turret tilt
   ######################
 */
 
-// rotates bot right
-rotation turn[27] =
+// rotates bot left
+rotation turn_l[28] =
 {
+  {fla, r_lean},
+  {fra, r_lean},
+  {bla, -r_lean},
+  {bra, -r_lean},
+  
   {flk, rotation_raise},
   {brk, rotation_raise},
   {-1, std_delay},
@@ -81,31 +88,65 @@ rotation turn[27] =
   {-1, std_delay},
   {flk, 0},
   {brk, 0},
+  {-1, std_delay},
+  {flh, 0},
+  {brh, 0},
+  {-1, std_delay},
+  
+  {frk, rotation_raise},
+  {blk, rotation_raise},
+  {-1, std_delay},
   {frh, rotate},
   {blh, rotate},
   {-1, std_delay},
-  {frk, rotation_raise},
-  {blk, rotation_raise},
-  {-1, std_delay},
-  {frh, 0},
-  {blh, 0},
-  {flh, rotate},
-  {brh, rotate},
-  {-1, std_delay},
-  {frk, rotation_raise},
-  {blk, rotation_raise},
-  {-1, std_delay},
-  {frh, 0},
-  {blh, 0},
-  {-1, std_delay},
   {frk, 0},
-  {blk, 0}
+  {blk, 0},
+  {-1, std_delay},
+  {frh, 0},
+  {blh, 0},
+  {-1, std_delay}
 };
 
-// shuffles bot forward
-rotation shuffle[32] =
+// rotates bot right
+rotation turn_r[28] =
 {
+  {fla, r_lean},
+  {fra, r_lean},
+  {bla, -r_lean},
+  {bra, -r_lean},
+  
+  {flk, rotation_raise},
+  {brk, rotation_raise},
   {-1, std_delay},
+  {flh, -rotate},
+  {brh, -rotate},
+  {-1, std_delay},
+  {flk, 0},
+  {brk, 0},
+  {-1, std_delay},
+  {flh, 0},
+  {brh, 0},
+  {-1, std_delay},
+  
+  {frk, rotation_raise},
+  {blk, rotation_raise},
+  {-1, std_delay},
+  {frh, -rotate},
+  {blh, -rotate},
+  {-1, std_delay},
+  {frk, 0},
+  {blk, 0},
+  {-1, std_delay},
+  {frh, 0},
+  {blh, 0},
+  {-1, std_delay}
+};
+
+
+// shuffles bot forward
+rotation shuffle[35] =
+{
+  //front left leg and back right leg
   {flk, w_raise},
   {fla, w_araise},
   {brk, w_raise},
@@ -113,29 +154,36 @@ rotation shuffle[32] =
   {-1, std_delay},
   {flh, -w_rot},
   {brh, w_rot},
+  {fla, -w_adrop},
+  {bra, w_adrop},
   {-1, std_delay},
   {flk, 0},
-  {fla, 0},
   {brk, 0},
-  {bra, 0},
   {-1, std_delay},
+  
+  // front right leg and back left leg
   {frk, w_raise},
   {fra, w_araise},
   {blk, w_raise},
   {bla, w_araise},
   {-1, std_delay},
-  {frh, w_rot},
-  {blh, -w_rot},
+  {frh, -w_rot},
+  {blh, w_rot},
+  {fra, -w_adrop},
+  {bla, w_adrop},
   {-1, std_delay},
   {frk, 0},
-  {fra, 0},
   {blk, 0},
-  {bla, 0},
   {-1, std_delay},
+  
   {flh, 0},
   {frh, 0},
   {blh, 0},
   {brh, 0},
+  {fra, 0},
+  {fla, 0},
+  {bra, w_lean},
+  {bla, w_lean},
   {-1, std_delay}
 };
 
@@ -274,12 +322,17 @@ void execute(rotation commands[], int dir, int len)
 
 void turn_right()
 {
-  execute(turn, 0, 27);
+  execute(turn_r, 0, 28);
+}
+
+void turn_left()
+{
+  execute(turn_l, 0, 28);
 }
 
 void shuffle_walk()
 {
-  execute(shuffle, 0, 32);
+  execute(shuffle, 0, 35);
 }
 
 void stand()
@@ -313,8 +366,15 @@ void setup()
 void loop()
 {
   //stand();
-  //shuffle_walk();
-  turn_right();
+  shuffle_walk();
+//  for(int i = 0; i < 6; i++)
+//  {
+//    turn_left();
+//  }
+//  for(int i = 0; i < 6; i++)
+//  {
+//    turn_right();
+//  }
   //creep_walk();
   //calibrate();
 }
