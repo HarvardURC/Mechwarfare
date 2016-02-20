@@ -16,25 +16,24 @@ SoftwareSerial maestroSerial(10, 11);
 MiniMaestro maestro(maestroSerial);
 
 // rotation and delay constants
-int std_delay = 250;
+int std_delay = 100;
 
 // turning
 int rotation_raise = 1000;
 int rotate = 2000;
 
 //walk
-int w_raise = 600;
-int w_rot = 750;
-int w_lean = 250;
-int w_araise = 400;
+int w_raise = 1300;
+int w_rot = 1150;
+int w_lean = 550;
+int w_araise = 600;
 
 //creep
-int c_small_rot = 200;
-int c_small_ankle = 200;
-int c_knee = 600;
-int c_ankle = 600;
+int c_small_rot = 400;
+int c_small_ankle = 400;
+int c_knee = 1000;
+int c_ankle = 1500;
 int c_rot = 3000;
-int c_small_rot = 1000;
 
 
 /*
@@ -58,7 +57,7 @@ int blk = 10; // back left knee
 int bla = 11; // back left ankle
 
 // shuffle movement
-int servo_homes[12] = {7704,3676,8296,5794,3092,8620,7222,3074,7780,6088,3584,8072};
+int servo_homes[14] = {7704,3826,8496,5644,3292,8720,6872,3224,8080,6238,3134,7822, 4000, 4000};
 
 // turret
 int tp = 12; // turret pan
@@ -144,15 +143,15 @@ rotation shuffle[32] =
 rotation creep[24] =
 {
   {flh, c_small_rot},
-  {brh, -c_small_rot},
+  {brh, c_small_rot},
   {fra, c_small_ankle},
   {fla, c_small_ankle},
   {bra, -c_small_ankle},
   {blk, c_knee},
   {bla, c_ankle},
   {-1, std_delay},
-  {blh, c_rot},
-  {flh, -c_rot}
+  {blh, -c_rot},
+  {flh, -c_rot},
   {-1, std_delay},
   {blk, 0},
   {bla, 0},
@@ -167,7 +166,7 @@ rotation creep[24] =
   {-1, std_delay},
   {flk, 0},
   {fla, 0}
-}
+};
 
 
 // legs down
@@ -315,6 +314,7 @@ void loop()
 {
   //stand();
   //shuffle_walk();
+  turn_right();
   //creep_walk();
-  calibrate();
+  //calibrate();
 }
