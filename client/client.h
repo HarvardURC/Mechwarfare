@@ -41,7 +41,7 @@
 
 #define ZERO_ANGLE 0
 
-#define STAND_NUM_ACTIONS       13
+#define STAND_NUM_ACTIONS           13
 #define TURN_LEFT_NUM_ACTIONS       26
 #define TURN_RIGHT_NUM_ACTIONS      26
 #define SHUFFLE_FORWARD_NUM_ACTIONS 31
