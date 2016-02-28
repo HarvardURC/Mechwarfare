@@ -71,7 +71,9 @@ void calibrate() {
     Serial.setTimeout(1000);
 }
 
-void execute(event_t events[], int len) {
+void exec(event_t events[]) {
+    int len = sizeof(events) / sizeof(event_t);
+
     for (int idx = 0; idx < len; idx++) {
         int servo = events[idx].servo;
         int value = events[idx].value;
@@ -84,36 +86,26 @@ void execute(event_t events[], int len) {
     }
 }
 
-void turn_right() {
-    execute(TURN_RIGHT, TURN_RIGHT_NUM_ACTIONS);
-}
-
-void turn_left() {
-    execute(TURN_LEFT, TURN_LEFT_NUM_ACTIONS);
-}
-
-void shuffle_forward() {
-    execute(SHUFFLE_FORWARD, SHUFFLE_FORWARD_NUM_ACTIONS);
-}
-
-void stand() {
-    execute(STAND, STAND_NUM_ACTIONS);
-}
-
 void setup() {
     Serial.begin(BAUD_RATE);
     maestro_serial.begin(BAUD_RATE);
     xbee.begin(BAUD_RATE);
 
-    stand();
+    // exec(STAND);
+
+    // calibrate();
+
+    exec(CREEP_HOME);
+    exec(CREEP_FORWARD);
+    exec(CREEP_FORWARD);
+    exec(CREEP_FORWARD);
+
     delay(SETUP_DELAY_TIME);
 }
 
 void loop() {
-    // we should have a threshold value for movement, joystick will often go
-    // back to a value thats not exactly (pos_x, pos_y) = (0, 0)
-
     /*
+
     if (INPUT_SIZE <= xbee.available()) {
         pos_x = xbee.read();
         pos_y = xbee.read();
@@ -125,17 +117,18 @@ void loop() {
         z_dwn = xbee.read();
         c_dwn = xbee.read();
     }
-    */
 
-    for (int cnt = 0; cnt < 10; cnt++) {
+    for (int cnt = 0; cnt < 2; cnt++) {
         turn_left();
     }
 
     delay(LOOP_DELAY_TIME);
 
-    for (int cnt = 0; cnt < 10; cnt++) {
+    for (int cnt = 0; cnt < 2; cnt++) {
         turn_right();
     }
 
     delay(LOOP_DELAY_TIME);
+
+    */
 }
