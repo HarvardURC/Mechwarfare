@@ -71,8 +71,7 @@ void calibrate() {
     Serial.setTimeout(1000);
 }
 
-void exec(event_t events[]) {
-    int len = sizeof(events) / sizeof(event_t);
+void exec(event_t events[], int len) {
 
     for (int idx = 0; idx < len; idx++) {
         int servo = events[idx].servo;
@@ -91,19 +90,19 @@ void setup() {
     maestro_serial.begin(BAUD_RATE);
     xbee.begin(BAUD_RATE);
 
-    // exec(STAND);
-
-    // calibrate();
-
-    exec(CREEP_HOME);
-    exec(CREEP_FORWARD);
-    exec(CREEP_FORWARD);
-    exec(CREEP_FORWARD);
-
+    exec(STAND, STAND_LENGTH);
     delay(SETUP_DELAY_TIME);
+    
+    exec(CREEP_HOME, CREEP_HOME_LENGTH);
+    exec(CREEP_FORWARD, CREEP_LENGTH);
+    exec(CREEP_FORWARD, CREEP_LENGTH);
+    exec(CREEP_FORWARD, CREEP_LENGTH);
+    exec(STAND, STAND_LENGTH);
+    
 }
 
 void loop() {
+
     /*
 
     if (INPUT_SIZE <= xbee.available()) {
