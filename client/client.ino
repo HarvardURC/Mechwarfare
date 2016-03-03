@@ -89,19 +89,17 @@ void setup() {
     Serial.begin(BAUD_RATE);
     maestro_serial.begin(BAUD_RATE);
     xbee.begin(BAUD_RATE);
-
-    exec(STAND, STAND_LENGTH);
-    delay(SETUP_DELAY_TIME);
     
-    exec(CREEP_HOME, CREEP_HOME_LENGTH);
-    exec(CREEP_FORWARD, CREEP_LENGTH);
-    exec(CREEP_FORWARD, CREEP_LENGTH);
-    exec(CREEP_FORWARD, CREEP_LENGTH);
-    exec(STAND, STAND_LENGTH);
+    exec(CREEP_STAND_RIGHT, CREEP_STAND_LENGTH);
+    delay(SETUP_DELAY_TIME);
     
 }
 
 void loop() {
+  
+  
+    exec(CREEP_FORWARD_RIGHT, CREEP_FORWARD_LENGTH);
+    exec(CREEP_FORWARD_LEFT, CREEP_FORWARD_LENGTH);
 
     /*
 
