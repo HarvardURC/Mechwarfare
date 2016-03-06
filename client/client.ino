@@ -89,15 +89,16 @@ void setup() {
     Serial.begin(BAUD_RATE);
     maestro_serial.begin(BAUD_RATE);
     xbee.begin(BAUD_RATE);
-    //exec(STAND, STAND_LENGTH);
-
-    //delay(SETUP_DELAY_TIME);
-    //exec(STAND_TO_CREEP_RIGHT, TO_CREEP_LENGTH);
+    exec(STAND, STAND_LENGTH);
+    delay(1000);
+    exec(STAND, STAND_LENGTH);
+    delay(SETUP_DELAY_TIME);
+    exec(STAND_TO_CREEP_RIGHT, TO_CREEP_LENGTH);
     
 }
 
-void loop() {  
-    exec(CREEP_FORWARD_RIGHT, CREEP_FORWARD_LENGTH);
+void test() {
+  exec(CREEP_FORWARD_RIGHT, CREEP_FORWARD_LENGTH);
     exec(CREEP_FORWARD_LEFT, CREEP_FORWARD_LENGTH);
     exec(CREEP_FORWARD_RIGHT, CREEP_FORWARD_LENGTH);
     exec(CREEP_FORWARD_LEFT, CREEP_FORWARD_LENGTH);
@@ -126,13 +127,18 @@ void loop() {
     exec(CREEP_FORWARD_RIGHT, CREEP_FORWARD_LENGTH);
     exec(CREEP_LEFT_TO_STAND, TO_CREEP_LENGTH);
     exec(TURRET_UP_DOWN, 6);
-    exec(TURRET_SIDE, 8)
+    exec(TURRET_SIDE, 8);
     exec(TURN_RIGHT, TURN_LENGTH);
     exec(TURN_RIGHT, TURN_LENGTH);
     exec(TURN_RIGHT, TURN_LENGTH);
     exec(TURN_RIGHT, TURN_LENGTH);
     exec(STAND_TO_CREEP_RIGHT, TO_CREEP_LENGTH);
+};
+
+void loop() {  
     //calibrate();
+    test();
+
     /*
 
     if (INPUT_SIZE <= xbee.available()) {
