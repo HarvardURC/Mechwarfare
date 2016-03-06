@@ -134,7 +134,6 @@ event_t TURN_LEFT[] = {
 };
 
 event_t TURN_RIGHT[] = {
-
     {FRONT_LEFT_KNEE,  TURNING_RAISE_ANGLE},
     {BACK_RIGHT_KNEE,  TURNING_RAISE_ANGLE},
     {DELAY,            EVENT_DELAY_TIME},
@@ -177,8 +176,8 @@ event_t CREEP_STAND_RIGHT[] = {
     {TURRET_TILT,       ZERO_ANGLE},
     {DELAY,             EVENT_DELAY_TIME}
 };
-    
-    
+
+
 event_t CREEP_STAND_LEFT[] = {
     {FRONT_RIGHT_HIP,   ZERO_ANGLE},
     {FRONT_RIGHT_KNEE,  ZERO_ANGLE},
@@ -239,7 +238,7 @@ event_t CREEP_FORWARD_LEFT[] = {
     {FRONT_RIGHT_HIP,   CREEP_ROTATION},
     {BACK_RIGHT_ANKLE,  -CREEP_ANKLE_PUSH},
     {FRONT_LEFT_KNEE,   ZERO_ANGLE},
-    {FRONT_LEFT_ANKLE,  ZERO_ANGLE},  
+    {FRONT_LEFT_ANKLE,  ZERO_ANGLE},
     {DELAY,              EVENT_DELAY_TIME},
     {BACK_RIGHT_KNEE,    CREEP_KNEE_RAISE},
     {BACK_RIGHT_ANKLE,   CREEP_ANKLE_RAISE},
@@ -329,20 +328,28 @@ event_t CREEP_LEFT_TO_STAND[] = {
 
 event_t TURRET_UP_DOWN[] = {
     {TURRET_TILT,   700},
-    {DELAY,             1000},
-    {TURRET_TILT,   -700},
-    {DELAY,             1000},
+    {DELAY,         1000},
+    {TURRET_TILT,  -700},
+    {DELAY,         1000},
     {TURRET_TILT,   0},
-    {DELAY,             1000}
+    {DELAY,         1000}
 };
+
+event_t TURRET_UP[] = {
+    {TURRET_TILT, 700},
+}
+
+event_t TURRET_DOWN[] = {
+    {TURRET_TILT, -700},
+}
 
 event_t TURRET_SIDE[] = {
     {TURRET_PAN,   1000},
-    {DELAY,             300},
-    {TURRET_PAN,   -1000},
-    {DELAY,             600},
+    {DELAY,        300},
+    {TURRET_PAN,  -1000},
+    {DELAY,        600},
     {TURRET_PAN,   1000},
-    {DELAY,             355},
+    {DELAY,        355},
     {TURRET_PAN,   0},
-    {DELAY,             300}
+    {DELAY,        300}
 };

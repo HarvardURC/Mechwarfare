@@ -93,10 +93,10 @@ void setup() {
 
     //delay(SETUP_DELAY_TIME);
     //exec(STAND_TO_CREEP_RIGHT, TO_CREEP_LENGTH);
-    
+
 }
 
-void loop() {  
+void test() {
     exec(CREEP_FORWARD_RIGHT, CREEP_FORWARD_LENGTH);
     exec(CREEP_FORWARD_LEFT, CREEP_FORWARD_LENGTH);
     exec(CREEP_FORWARD_RIGHT, CREEP_FORWARD_LENGTH);
@@ -132,9 +132,41 @@ void loop() {
     exec(TURN_RIGHT, TURN_LENGTH);
     exec(TURN_RIGHT, TURN_LENGTH);
     exec(STAND_TO_CREEP_RIGHT, TO_CREEP_LENGTH);
-    //calibrate();
-    /*
+}
 
+void print_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn, int c_dwn) {
+    Serial.print("POS_X: ");
+    Serial.print(pos_x);
+    Serial.print(" ");
+
+    Serial.print("POS_Y: ");
+    Serial.print(pos_y);
+    Serial.print(" ");
+
+    Serial.print("ACC_X: ");
+    Serial.print(acc_x);
+    Serial.print(" ");
+
+    Serial.print("ACC_Y: ");
+    Serial.print(acc_y);
+    Serial.print(" ");
+
+    Serial.print("ACC_Z: ");
+    Serial.print(acc_z);
+    Serial.print(" ");
+
+    Serial.print("Z_DWN: ");
+    Serial.print(z_dwn);
+    Serial.print(" ");
+
+    Serial.print("C_DWN: ");
+    Serial.print(c_dwn);
+    Serial.print(" ");
+
+    Serial.println();
+}
+
+void loop() {
     if (INPUT_SIZE <= xbee.available()) {
         pos_x = xbee.read();
         pos_y = xbee.read();
@@ -145,19 +177,15 @@ void loop() {
 
         z_dwn = xbee.read();
         c_dwn = xbee.read();
+
+        print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
+
+        if (c_dwn) {
+            exec(TURRET_UP, 1);
+        }
+
+        else if (z_dwn) {
+            exec(TURRET_DOWN, 1);
+        }
     }
-
-    for (int cnt = 0; cnt < 2; cnt++) {
-        turn_left();
-    }
-
-    delay(LOOP_DELAY_TIME);
-
-    for (int cnt = 0; cnt < 2; cnt++) {
-        turn_right();
-    }
-
-    delay(LOOP_DELAY_TIME);
-
-    */
 }
