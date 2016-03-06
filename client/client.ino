@@ -4,7 +4,7 @@
 #include <PololuMaestro.h>
 
 //: Include Macro Definitions
-#include "client.h"
+#include "clientv3.h"
 
 #include "math.h"
 
