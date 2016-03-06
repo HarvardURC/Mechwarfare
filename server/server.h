@@ -19,6 +19,6 @@
 #define MIN_VAL -100
 #define MAX_VAL 100
 
-#define BAUD_RATE 9600
+#define BAUD_RATE 38400
 
-#define DELAY_TIME 0
+#define DELAY_TIME 2
