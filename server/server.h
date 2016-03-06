@@ -21,4 +21,4 @@
 
 #define BAUD_RATE 9600
 
-#define DELAY_TIME 10
+#define DELAY_TIME 0
