@@ -211,78 +211,70 @@ void loop() {
             but joystick forward and backward will shuffle robot forward and backward.
             */
             if (points_up(theta)) {
-                if (z_dwn) {
-                    exec(SHUFFLE_FORWARD, SHUFFLE_FORWARD_LEN);
-                } else {
-                    switch (current_stance) {
-                        case FRONT:
-                            exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
-                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+                switch (current_stance) {
+                    case FRONT:
+                        exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                        exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
 
-                            current_stance = RIGHT;
-                        break;
-                        case BACK:
-                            exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
-                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+                        current_stance = RIGHT;
+                    break;
+                    case BACK:
+                        exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                        exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
 
-                            current_stance = RIGHT;
-                        break;
-                        case LEFT:
-                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+                        current_stance = RIGHT;
+                    break;
+                    case LEFT:
+                        exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
 
-                            current_stance = RIGHT;
-                        break;
-                        case RIGHT:
-                            exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
+                        current_stance = RIGHT;
+                    break;
+                    case RIGHT:
+                        exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
 
-                            current_stance = LEFT;
-                        break;
-                        case HOME:
-                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+                        current_stance = LEFT;
+                    break;
+                    case HOME:
+                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                        exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
 
-                            current_stance = RIGHT;
-                        break;
-                    }
+                        current_stance = RIGHT;
+                    break;
                 }
             } else if (points_down(theta)) {
-                if (z_dwn) {
-                    exec(SHUFFLE_BACKWARD, SHUFFLE_BACKWARD_LEN);
-                } else {
-                    switch (current_stance) {
-                        case FRONT:
-                            exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
-                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+                switch (current_stance) {
+                    case FRONT:
+                        exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                        exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
 
-                            current_stance = RIGHT;
-                        break;
-                        case BACK:
-                            exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
-                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+                        current_stance = RIGHT;
+                    break;
+                    case BACK:
+                        exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                        exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
 
-                            current_stance = RIGHT;
-                        break;
-                        case LEFT:
-                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+                        current_stance = RIGHT;
+                    break;
+                    case LEFT:
+                        exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
 
-                            current_stance = RIGHT;
-                        break;
-                        case RIGHT:
-                            exec(CREEP_BACKWARD_FROM_R, CREEP_BACKWARD_FROM_R_LEN);
+                        current_stance = RIGHT;
+                    break;
+                    case RIGHT:
+                        exec(CREEP_BACKWARD_FROM_R, CREEP_BACKWARD_FROM_R_LEN);
 
-                            current_stance = LEFT;
-                        break;
-                        case HOME:
-                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+                        current_stance = LEFT;
+                    break;
+                    case HOME:
+                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                        exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
 
-                            current_stance = RIGHT;
-                        break;
-                    }
+                        current_stance = RIGHT;
+                    break;
                 }
             } else if (points_left(theta)) {
                 if (c_dwn) {
@@ -310,8 +302,6 @@ void loop() {
                     }
 
                     exec(TURN_LEFT, TURN_LEFT_LEN);
-                } else if (z_dwn) {
-                    exec(SHUFFLE_LEFT, SHUFFLE_LEFT_LEN);
                 } else {
                     switch (current_stance) {
                         case FRONT:
@@ -372,8 +362,6 @@ void loop() {
                     }
 
                     exec(TURN_LEFT, TURN_LEFT_LEN);
-                } else if (z_dwn) {
-                    exec(SHUFFLE_RIGHT, SHUFFLE_RIGHT_LEN);
                 } else {
                     switch (current_stance) {
                         case FRONT:
@@ -409,6 +397,8 @@ void loop() {
                     }
                 }
             }
+        } else {
+            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
         }
     }
 }
