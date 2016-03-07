@@ -4,11 +4,9 @@
 #include <PololuMaestro.h>
 
 //: Include Macro Definitions
-#include "clientv3.h"
+#include "test.h"
 
-#include "math.h"
-
-//: variable declarations
+//: Global variable declarations
 SoftwareSerial maestro_serial(MAESTRO_RX, MAESTRO_TX);
 MiniMaestro maestro(maestro_serial);
 
@@ -82,15 +80,19 @@ void setup() {
     Serial.begin(BAUD_RATE);
     maestro_serial.begin(BAUD_RATE);
     xbee.begin(BAUD_RATE);
-    exec(STAND, STAND_LENGTH);
-    delay(1000);
-    exec(STAND, STAND_LENGTH);
-    delay(SETUP_DELAY_TIME);
-    exec(STAND_TO_CREEP_RIGHT, TO_CREEP_LENGTH);
 
+    exec(HOME_STANCE, HOME_STANCE_LEN);
+    delay(1000);
+
+    exec(HOME_STANCE, HOME_STANCE_LEN);
+    delay(SETUP_DELAY_TIME);
+
+    exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
+
+    // test_movements();
 }
 
-void test() {
+void test_movements() {
     exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
     exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
     exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
@@ -109,22 +111,22 @@ void test() {
     exec(TURN_LEFT,            TURN_RIGHT_LEN);
     exec(TURN_LEFT,            TURN_RIGHT_LEN);
     exec(HOME_TO_CREEP_R,      HOME_TO_CREEP_R_LEN);
-    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_LEN);
-    exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_LEN);
-    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_LEN);
-    exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_LEN);
-    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_LEN);
-    exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_LEN);
-    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_LEN);
-    exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_LEN);
-    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_LEN);
-    exec(CREEP_L_TO_HOME,      HOME_TO_CREEP_LEN);
+    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
+    exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
+    exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
+    exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
+    exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+    exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
+    exec(CREEP_L_TO_HOME,      CREEP_L_TO_HOME_LEN);
     exec(TURRET_V,             TURRET_V_LEN);
     exec(TURRET_H,             TURRET_H_LEN);
-    exec(TURN_RIGHT,           TURN_LEN);
-    exec(TURN_RIGHT,           TURN_LEN);
-    exec(TURN_RIGHT,           TURN_LEN);
-    exec(TURN_RIGHT,           TURN_LEN);
+    exec(TURN_RIGHT,           TURN_RIGHT_LEN);
+    exec(TURN_RIGHT,           TURN_RIGHT_LEN);
+    exec(TURN_RIGHT,           TURN_RIGHT_LEN);
+    exec(TURN_RIGHT,           TURN_RIGHT_LEN);
     exec(HOME_TO_CREEP_R,      HOME_TO_CREEP_R_LEN);
 }
 
@@ -160,20 +162,20 @@ void print_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn
     Serial.println();
 }
 
-void points_up(float theta) {
-    return pi/4 <= theta && theta < 3 * pi/4;
+float points_up(float theta) {
+    return M_PI/4 <= theta && theta < 3 * M_PI/4;
 }
 
-void points_down(float theta) {
-    return -3 * pi/4 <= theta && theta < -pi/4;
+float points_down(float theta) {
+    return -3 * M_PI/4 <= theta && theta < -M_PI/4;
 }
 
-void points_left(float theta) {
-    return 3 * pi/4 <= theta || theta < -3 * pi/4;
+float points_left(float theta) {
+    return 3 * M_PI/4 <= theta || theta < -3 * M_PI/4;
 }
 
-void points_right(float theta) {
-    return -pi/4 <= theta && theta < pi/4;
+float points_right(float theta) {
+    return -M_PI/4 <= theta && theta < M_PI/4;
 }
 
 void loop() {
@@ -188,9 +190,12 @@ void loop() {
         int z_dwn = xbee.read();
         int c_dwn = xbee.read();
 
+        // int shoot  = xbee.read();
+        // int reload = xbee.read();
+
         print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
 
-        float radius = sqrt(pos_x * pos_x, pos_y * pos_y);
+        float radius = sqrt(pos_x * pos_x + pos_y * pos_y);
 
         if (MOVEMENT_THRESHOLD < radius) {
             float theta = atan2(pos_y, pos_x);
@@ -210,209 +215,223 @@ void loop() {
             If c and z are pressed, joystick left or right still rotates the robot,
             but joystick forward and backward will shuffle robot forward and backward.
             */
-            if (points_up(theta)) {
-                switch (current_stance) {
-                    case FRONT:
-                        exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
-                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                        exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
-
-                        current_stance = RIGHT;
-                    break;
-                    case BACK:
-                        exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
-                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                        exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
-
-                        current_stance = RIGHT;
-                    break;
-                    case LEFT:
-                        exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
-
-                        current_stance = RIGHT;
-                    break;
-                    case RIGHT:
-                        exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
-
-                        current_stance = LEFT;
-                    break;
-                    case HOME:
-                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                        exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
-
-                        current_stance = RIGHT;
-                    break;
-                }
-            } else if (points_down(theta)) {
-                switch (current_stance) {
-                    case FRONT:
-                        exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
-                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                        exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
-
-                        current_stance = RIGHT;
-                    break;
-                    case BACK:
-                        exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
-                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                        exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
-
-                        current_stance = RIGHT;
-                    break;
-                    case LEFT:
-                        exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
-
-                        current_stance = RIGHT;
-                    break;
-                    case RIGHT:
-                        exec(CREEP_BACKWARD_FROM_R, CREEP_BACKWARD_FROM_R_LEN);
-
-                        current_stance = LEFT;
-                    break;
-                    case HOME:
-                        exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
-                        exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
-
-                        current_stance = RIGHT;
-                    break;
-                }
-            } else if (points_left(theta)) {
-                if (c_dwn) {
-                    switch (current_stance) {
-                        case FRONT:
-                            exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
-
-                            current_stance = HOME;
-                        break;
-                        case BACK:
-                            exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
-
-                            current_stance = HOME;
-                        break;
-                        case LEFT:
-                            exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
-
-                            current_stance = HOME;
-                        break;
-                        case RIGHT:
-                            exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
-
-                            current_stance = HOME;
-                        break;
-                    }
-
-                    exec(TURN_LEFT, TURN_LEFT_LEN);
+            if (z_dwn) {
+                if (points_up(theta)) {
+                    HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE;
+                } else if (points_down(theta)) {
+                    HOME_POS[TURRET_TILT] -= TURRET_TILT_ANGLE;
+                } else if (points_left(theta)) {
+                    HOME_POS[TURRET_PAN] = TURRET_PAN_LEFT_ANGLE;
+                    delay(TURRET_PAN_DELAY);
                 } else {
-                    switch (current_stance) {
-                        case FRONT:
-                            exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
-
-                            current_stance = BACK;
-                        break;
-                        case BACK:
-                            exec(CREEP_LEFT_FROM_B, CREEP_LEFT_FROM_B_LEN);
-
-                            current_stance = FRONT;
-                        break;
-                        case LEFT:
-                            exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
-                            exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
-                            exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
-
-                            current_stance = BACK;
-                        break;
-                        case RIGHT:
-                            exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
-                            exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
-                            exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
-
-                            current_stance = BACK;
-                        break;
-                        case HOME:
-                            exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
-                            exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
-
-                            current_stance = BACK;
-                        break;
-                    }
+                    HOME_POS[TURRET_PAN] = TURRET_PAN_RIGHT_ANGLE;
+                    delay(TURRET_PAN_DELAY);
                 }
             } else {
-                if (c_dwn) {
+                if (points_up(theta)) {
                     switch (current_stance) {
                         case FRONT:
                             exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
 
-                            current_stance = HOME;
+                            current_stance = RIGHT;
                         break;
                         case BACK:
                             exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
 
-                            current_stance = HOME;
+                            current_stance = RIGHT;
                         break;
                         case LEFT:
-                            exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
 
-                            current_stance = HOME;
+                            current_stance = RIGHT;
                         break;
                         case RIGHT:
-                            exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+                            exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
 
-                            current_stance = HOME;
-                        break;
-                    }
-
-                    exec(TURN_LEFT, TURN_LEFT_LEN);
-                } else {
-                    switch (current_stance) {
-                        case FRONT:
-                            exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
-
-                            current_stance = BACK;
-                        break;
-                        case BACK:
-                            exec(CREEP_RIGHT_FROM_B, CREEP_RIGHT_FROM_B_LEN);
-
-                            current_stance = FRONT;
-                        break;
-                        case LEFT:
-                            exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
-                            exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
-                            exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
-
-                            current_stance = BACK;
-                        break;
-                        case RIGHT:
-                            exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
-                            exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
-                            exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
-
-                            current_stance = BACK;
+                            current_stance = LEFT;
                         break;
                         case HOME:
-                            exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
-                            exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
 
-                            current_stance = BACK;
+                            current_stance = RIGHT;
                         break;
+                    }
+                } else if (points_down(theta)) {
+                    switch (current_stance) {
+                        case FRONT:
+                            exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case BACK:
+                            exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case LEFT:
+                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case RIGHT:
+                            exec(CREEP_BACKWARD_FROM_R, CREEP_BACKWARD_FROM_R_LEN);
+
+                            current_stance = LEFT;
+                        break;
+                        case HOME:
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                    }
+                } else if (points_left(theta)) {
+                    if (c_dwn) {
+                        switch (current_stance) {
+                            case FRONT:
+                                exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case BACK:
+                                exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case LEFT:
+                                exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case RIGHT:
+                                exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                        }
+
+                        exec(TURN_LEFT, TURN_LEFT_LEN);
+                    } else {
+                        switch (current_stance) {
+                            case FRONT:
+                                exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case BACK:
+                                exec(CREEP_LEFT_FROM_B, CREEP_LEFT_FROM_B_LEN);
+
+                                current_stance = FRONT;
+                            break;
+                            case LEFT:
+                                exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case RIGHT:
+                                exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case HOME:
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                        }
+                    }
+                } else {
+                    if (c_dwn) {
+                        switch (current_stance) {
+                            case FRONT:
+                                exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case BACK:
+                                exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case LEFT:
+                                exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case RIGHT:
+                                exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                        }
+
+                        exec(TURN_LEFT, TURN_LEFT_LEN);
+                    } else {
+                        switch (current_stance) {
+                            case FRONT:
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case BACK:
+                                exec(CREEP_RIGHT_FROM_B, CREEP_RIGHT_FROM_B_LEN);
+
+                                current_stance = FRONT;
+                            break;
+                            case LEFT:
+                                exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case RIGHT:
+                                exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case HOME:
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                        }
                     }
                 }
             }
         } else {
             switch(current_stance) {
               case FRONT:
-                  exec(FRONT_STANCE, FRONT_STANCE_LEN)
+                  exec(FRONT_STANCE, FRONT_STANCE_LEN);
               break;
               case BACK:
-                  exec(BACK_STANCE, BACK_STANCE_LEN)
+                  exec(BACK_STANCE, BACK_STANCE_LEN);
               break;
               case LEFT:
-                  exec(LEFT_STANCE, LEFT_STANCE_LEN)
+                  exec(LEFT_STANCE, LEFT_STANCE_LEN);
               break;
               case RIGHT:
-                  exec(RIGHT_STANCE, RIGHT_STANCE_LEN)
+                  exec(RIGHT_STANCE, RIGHT_STANCE_LEN);
               break;
               case HOME:
-                  exec(HOME_STANCE, HOME_STANCE_LEN)
+                  exec(HOME_STANCE, HOME_STANCE_LEN);
               break;
             }
         }
