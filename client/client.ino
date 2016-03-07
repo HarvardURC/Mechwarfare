@@ -217,15 +217,17 @@ void loop() {
             */
             if (z_dwn) {
                 if (points_up(theta)) {
-                    HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE;
+                    HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE; // should it be plus or minus, what should tilt angle be?
                 } else if (points_down(theta)) {
                     HOME_POS[TURRET_TILT] -= TURRET_TILT_ANGLE;
                 } else if (points_left(theta)) {
-                    HOME_POS[TURRET_PAN] = TURRET_PAN_LEFT_ANGLE;
+                    HOME_POS[TURRET_PAN] = TURRET_PAN_LEFT;
                     delay(TURRET_PAN_DELAY);
+                    HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
                 } else {
-                    HOME_POS[TURRET_PAN] = TURRET_PAN_RIGHT_ANGLE;
+                    HOME_POS[TURRET_PAN] = TURRET_PAN_RIGHT;
                     delay(TURRET_PAN_DELAY);
+                    HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
                 }
             } else {
                 if (points_up(theta)) {
