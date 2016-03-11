@@ -4,7 +4,7 @@
 #include <PololuMaestro.h>
 
 //: Include Macro Definitions
-#include "test.h"
+#include "clientv3.h"
 
 //: Global variable declarations
 SoftwareSerial maestro_serial(MAESTRO_RX, MAESTRO_TX);
@@ -77,19 +77,20 @@ void exec(event_t events[], int len) {
 }
 
 void setup() {
-    Serial.begin(BAUD_RATE);
-    maestro_serial.begin(BAUD_RATE);
-    xbee.begin(BAUD_RATE);
-
-    // exec(HOME_STANCE, HOME_STANCE_LEN);
-    delay(1000);
-
-    // exec(HOME_STANCE, HOME_STANCE_LEN);
-    // delay(SETUP_DELAY_TIME);
+    Serial.begin(BAUD_RATE_XBEE);
+    maestro_serial.begin(BAUD_RATE_SERVO);
+    xbee.begin(BAUD_RATE_XBEE);
+    pinMode(7, OUTPUT);    
+    pinMode(6, OUTPUT);
+    digitalWrite(6, HIGH);
+    digitalWrite(7, HIGH);
+    delay(3000);
+    exec(HOME_STANCE, HOME_STANCE_LEN);
+    delay(SETUP_DELAY_TIME);
 
     // exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
 
-    // test_movements();
+     test_movements();
 }
 
 void test_movements() {
@@ -106,6 +107,12 @@ void test_movements() {
     exec(CREEP_R_TO_HOME,      CREEP_R_TO_HOME_LEN);
     exec(TURRET_V,             TURRET_V_LEN);
     exec(TURRET_H,             TURRET_H_LEN);
+    digitalWrite(6, LOW);
+    delay(1000);
+    digitalWrite(6, HIGH);
+    digitalWrite(7, LOW);
+    delay(1000);
+    digitalWrite(7, HIGH);
     exec(TURN_LEFT,            TURN_LEFT_LEN);
     exec(TURN_LEFT,            TURN_LEFT_LEN);
     exec(TURN_LEFT,            TURN_RIGHT_LEN);
@@ -123,6 +130,12 @@ void test_movements() {
     exec(CREEP_L_TO_HOME,      CREEP_L_TO_HOME_LEN);
     exec(TURRET_V,             TURRET_V_LEN);
     exec(TURRET_H,             TURRET_H_LEN);
+    digitalWrite(6, HIGH);
+    delay(1000);
+    digitalWrite(6, LOW);
+    digitalWrite(7, HIGH);
+    delay(1000);
+    digitalWrite(7, LOW);
     exec(TURN_RIGHT,           TURN_RIGHT_LEN);
     exec(TURN_RIGHT,           TURN_RIGHT_LEN);
     exec(TURN_RIGHT,           TURN_RIGHT_LEN);
@@ -179,22 +192,22 @@ float points_right(float theta) {
 }
 
 void loop() {
-    if (INPUT_SIZE <= xbee.available()) {
-        int pos_x = xbee.read();
-        int pos_y = xbee.read();
-
-        int acc_x = xbee.read();
-        int acc_y = xbee.read();
-        int acc_z = xbee.read();
-
-        int z_dwn = xbee.read();
-        int c_dwn = xbee.read();
-
-        print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
-    }
+//    if (INPUT_SIZE <= xbee.available()) {
+//        int pos_x = xbee.read();
+//        int pos_y = xbee.read();
+//
+//        int acc_x = xbee.read();
+//        int acc_y = xbee.read();
+//        int acc_z = xbee.read();
+//
+//        int z_dwn = xbee.read();
+//        int c_dwn = xbee.read();
+//
+//        print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
+//    }
 }
 
-void old_loop() {
+void oldloop() {
     if (INPUT_SIZE <= xbee.available()) {
         int pos_x = xbee.read();
         int pos_y = xbee.read();
