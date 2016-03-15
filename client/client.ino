@@ -90,7 +90,7 @@ void setup() {
 
     // exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
 
-     test_movements();
+     //test_movements();
 }
 
 void test_movements() {
@@ -192,19 +192,23 @@ float points_right(float theta) {
 }
 
 void loop() {
-//    if (INPUT_SIZE <= xbee.available()) {
-//        int pos_x = xbee.read();
-//        int pos_y = xbee.read();
-//
-//        int acc_x = xbee.read();
-//        int acc_y = xbee.read();
-//        int acc_z = xbee.read();
-//
-//        int z_dwn = xbee.read();
-//        int c_dwn = xbee.read();
-//
-//        print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
-//    }
+   Serial.print("xbee.available() = ");
+  Serial.print(xbee.available());
+    Serial.print("\n");
+    if (INPUT_SIZE <= xbee.available()) {
+        int pos_x = xbee.read();
+        int pos_y = xbee.read();
+
+        int acc_x = xbee.read();
+        int acc_y = xbee.read();
+        int acc_z = xbee.read();
+
+        int z_dwn = xbee.read();
+        int c_dwn = xbee.read();
+
+        print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
+    }
+
 }
 
 void oldloop() {
