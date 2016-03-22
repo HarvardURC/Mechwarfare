@@ -9,9 +9,9 @@
 //: Global variable declarations
 SoftwareSerial maestro_serial(MAESTRO_RX, MAESTRO_TX);
 MiniMaestro maestro(maestro_serial);
+ // Serial1.begin(9600);  //XBee/UART1/pins 0 and 1
 
-SoftwareSerial xbee(XBEE_RX, XBEE_TX);
-
+//SoftwareSerial xbee(XBEE_RX, XBEE_TX);
 stance_t current_stance;
 
 void calibrate() {
@@ -79,7 +79,7 @@ void exec(event_t events[], int len) {
 void setup() {
     Serial.begin(BAUD_RATE_XBEE);
     maestro_serial.begin(BAUD_RATE_SERVO);
-    xbee.begin(BAUD_RATE_XBEE);
+    Serial1.begin(BAUD_RATE_XBEE);
     pinMode(7, OUTPUT);    
     pinMode(6, OUTPUT);
     digitalWrite(6, HIGH);
@@ -192,19 +192,19 @@ float points_right(float theta) {
 }
 
 void loop() {
-   Serial.print("xbee.available() = ");
-  Serial.print(xbee.available());
-    Serial.print("\n");
-    if (INPUT_SIZE <= xbee.available()) {
-        int pos_x = xbee.read();
-        int pos_y = xbee.read();
+   //Serial.print("xbee.available() = ");  
+   //Serial.print(Serial1.available());
+    //Serial.print("\n");
+   if (INPUT_SIZE <= Serial1.available()) {
+        int pos_x = Serial1.read();
+        int pos_y = Serial1.read();
 
-        int acc_x = xbee.read();
-        int acc_y = xbee.read();
-        int acc_z = xbee.read();
+        int acc_x = Serial1.read();
+        int acc_y = Serial1.read();
+        int acc_z = Serial1.read();
 
-        int z_dwn = xbee.read();
-        int c_dwn = xbee.read();
+        int z_dwn = Serial1.read();
+        int c_dwn = Serial1.read();
 
         print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
     }
@@ -212,19 +212,19 @@ void loop() {
 }
 
 void oldloop() {
-    if (INPUT_SIZE <= xbee.available()) {
-        int pos_x = xbee.read();
-        int pos_y = xbee.read();
+    if (INPUT_SIZE <= Serial1.available()) {
+        int pos_x = Serial1.read();
+        int pos_y = Serial1.read();
 
-        int acc_x = xbee.read();
-        int acc_y = xbee.read();
-        int acc_z = xbee.read();
+        int acc_x = Serial1.read();
+        int acc_y = Serial1.read();
+        int acc_z = Serial1.read();
 
-        int z_dwn = xbee.read();
-        int c_dwn = xbee.read();
+        int z_dwn = Serial1.read();
+        int c_dwn = Serial1.read();
 
-        // int shoot  = xbee.read();
-        // int reload = xbee.read();
+        // int shoot  = Serial1.read();
+        // int reload = Serial1.read();
 
         print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
 

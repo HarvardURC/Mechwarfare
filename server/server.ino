@@ -50,7 +50,7 @@ void transform_data() {
 }
 
 void transmit_data() {
-    Serial.print("POS_X: ");
+    /*Serial.print("POS_X: ");
     Serial.print(pos_x);
     Serial.print(" ");
 
@@ -78,15 +78,15 @@ void transmit_data() {
     Serial.print(c_dwn);
     Serial.print(" ");
 
-    Serial.println();
+    Serial.println();*/
 
-    xbee.print(pos_x);
-    xbee.print(pos_y);
-    xbee.print(acc_x);
-    xbee.print(acc_y);
-    xbee.print(acc_z);
-    xbee.print(z_dwn);
-    xbee.print(c_dwn);
+    Serial.write(pos_x);
+    Serial.write(pos_y);
+    Serial.write(acc_x);
+    Serial.write(acc_y);
+    Serial.write(acc_z);
+    Serial.write(z_dwn);
+    Serial.write(c_dwn);
 }
 
 //: Arduino functions
