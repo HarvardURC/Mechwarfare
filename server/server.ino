@@ -50,7 +50,8 @@ void transform_data() {
 }
 
 void transmit_data() {
-    /*Serial.print("POS_X: ");
+    /*
+    Serial.print("POS_X: ");
     Serial.print(pos_x);
     Serial.print(" ");
 
@@ -78,7 +79,8 @@ void transmit_data() {
     Serial.print(c_dwn);
     Serial.print(" ");
 
-    Serial.println();*/
+    Serial.println();
+    */
 
     Serial.write(pos_x);
     Serial.write(pos_y);

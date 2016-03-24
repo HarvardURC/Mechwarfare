@@ -4,14 +4,12 @@
 #include <PololuMaestro.h>
 
 //: Include Macro Definitions
-#include "clientv3.h"
+#include "client.h"
 
 //: Global variable declarations
 SoftwareSerial maestro_serial(MAESTRO_RX, MAESTRO_TX);
 MiniMaestro maestro(maestro_serial);
- // Serial1.begin(9600);  //XBee/UART1/pins 0 and 1
 
-//SoftwareSerial xbee(XBEE_RX, XBEE_TX);
 stance_t current_stance;
 
 void calibrate() {
@@ -80,17 +78,22 @@ void setup() {
     Serial.begin(BAUD_RATE_XBEE);
     maestro_serial.begin(BAUD_RATE_SERVO);
     Serial1.begin(BAUD_RATE_XBEE);
-    pinMode(7, OUTPUT);    
+
+    pinMode(7, OUTPUT);
     pinMode(6, OUTPUT);
+
     digitalWrite(6, HIGH);
     digitalWrite(7, HIGH);
+
     delay(3000);
+
     exec(HOME_STANCE, HOME_STANCE_LEN);
+
     delay(SETUP_DELAY_TIME);
 
     // exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
 
-     //test_movements();
+    //test_movements();
 }
 
 void test_movements() {
@@ -107,12 +110,16 @@ void test_movements() {
     exec(CREEP_R_TO_HOME,      CREEP_R_TO_HOME_LEN);
     exec(TURRET_V,             TURRET_V_LEN);
     exec(TURRET_H,             TURRET_H_LEN);
+
+    /*
     digitalWrite(6, LOW);
     delay(1000);
     digitalWrite(6, HIGH);
     digitalWrite(7, LOW);
     delay(1000);
     digitalWrite(7, HIGH);
+    */
+
     exec(TURN_LEFT,            TURN_LEFT_LEN);
     exec(TURN_LEFT,            TURN_LEFT_LEN);
     exec(TURN_LEFT,            TURN_RIGHT_LEN);
@@ -130,12 +137,16 @@ void test_movements() {
     exec(CREEP_L_TO_HOME,      CREEP_L_TO_HOME_LEN);
     exec(TURRET_V,             TURRET_V_LEN);
     exec(TURRET_H,             TURRET_H_LEN);
+
+    /*
     digitalWrite(6, HIGH);
     delay(1000);
     digitalWrite(6, LOW);
     digitalWrite(7, HIGH);
     delay(1000);
     digitalWrite(7, LOW);
+    */
+
     exec(TURN_RIGHT,           TURN_RIGHT_LEN);
     exec(TURN_RIGHT,           TURN_RIGHT_LEN);
     exec(TURN_RIGHT,           TURN_RIGHT_LEN);
@@ -192,10 +203,10 @@ float points_right(float theta) {
 }
 
 void loop() {
-   //Serial.print("xbee.available() = ");  
-   //Serial.print(Serial1.available());
-    //Serial.print("\n");
-   if (INPUT_SIZE <= Serial1.available()) {
+    Serial.print("Serial1.available() = ");
+    Serial.println(Serial1.available());
+
+    if (INPUT_SIZE <= Serial1.available()) {
         int pos_x = Serial1.read();
         int pos_y = Serial1.read();
 
@@ -208,7 +219,6 @@ void loop() {
 
         print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
     }
-
 }
 
 void oldloop() {
