@@ -203,21 +203,50 @@ float points_right(float theta) {
 }
 
 void loop() {
-    Serial.print("Serial1.available() = ");
-    Serial.println(Serial1.available());
+    Serial1.readStringUntil('[');
+
+    String str = Serial1.readStringUntil(']');
+
+    int start = 0;
+    int finish = str.indexOf(",");
 
     if (INPUT_SIZE <= Serial1.available()) {
-        int pos_x = Serial1.read();
-        int pos_y = Serial1.read();
+        String pos_x = str.substring(start, finish);
 
-        int acc_x = Serial1.read();
-        int acc_y = Serial1.read();
-        int acc_z = Serial1.read();
+        start = finish;
+        finish = str.indexOf(",");
 
-        int z_dwn = Serial1.read();
-        int c_dwn = Serial1.read();
+        String pos_y = str.substring(start, finish);
 
-        print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
+        start = finish;
+        finish = str.indexOf(",");
+
+        String acc_x = str.substring(start, finish);
+
+        start = finish;
+        finish = str.indexOf(",");
+
+        String acc_y = str.substring(start, finish);
+
+        start = finish;
+        finish = str.indexOf(",");
+
+        String acc_z = str.substring(start, finish);
+
+        start = finish;
+        finish = str.indexOf(",");
+
+        String z_dwn = str.substring(start, finish);
+
+        start = finish;
+        finish = str.indexOf(",");
+
+        String c_dwn = str.substring(start, finish);
+
+        print_data(
+            pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
+            acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
+        );
     }
 }
 
