@@ -12,6 +12,15 @@ MiniMaestro maestro(maestro_serial);
 
 stance_t current_stance;
 
+String str;
+String pos_x;
+String pos_y;
+String acc_x;
+String acc_y;
+String acc_z;
+String z_dwn;
+String c_dwn;
+
 void calibrate() {
     while (true) {
         Serial.println("Which servo?");
@@ -74,28 +83,6 @@ void exec(event_t events[], int len) {
     }
 }
 
-void setup() {
-    Serial.begin(BAUD_RATE_XBEE);
-    maestro_serial.begin(BAUD_RATE_SERVO);
-    Serial1.begin(BAUD_RATE_XBEE);
-
-    pinMode(7, OUTPUT);
-    pinMode(6, OUTPUT);
-
-    digitalWrite(6, HIGH);
-    digitalWrite(7, HIGH);
-
-    delay(3000);
-
-    exec(HOME_STANCE, HOME_STANCE_LEN);
-
-    delay(SETUP_DELAY_TIME);
-
-    // exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
-
-    //test_movements();
-}
-
 void test_movements() {
     exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
     exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
@@ -154,6 +141,28 @@ void test_movements() {
     exec(HOME_TO_CREEP_R,      HOME_TO_CREEP_R_LEN);
 }
 
+void setup() {
+    Serial.begin(BAUD_RATE_XBEE);
+    maestro_serial.begin(BAUD_RATE_SERVO);
+    Serial1.begin(BAUD_RATE_XBEE);
+
+    // pinMode(7, OUTPUT);
+    // pinMode(6, OUTPUT);
+
+    // digitalWrite(6, HIGH);
+    // digitalWrite(7, HIGH);
+
+    // delay(3000);
+
+    // exec(HOME_STANCE, HOME_STANCE_LEN);
+
+    // delay(SETUP_DELAY_TIME);
+
+    // exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
+
+    //test_movements();
+}
+
 void print_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn, int c_dwn) {
     Serial.print("POS_X: ");
     Serial.print(pos_x);
@@ -186,68 +195,100 @@ void print_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn
     Serial.println();
 }
 
-float points_up(float theta) {
+int points_up(float theta) {
     return M_PI/4 <= theta && theta < 3 * M_PI/4;
 }
 
-float points_down(float theta) {
+int points_down(float theta) {
     return -3 * M_PI/4 <= theta && theta < -M_PI/4;
 }
 
-float points_left(float theta) {
+int points_left(float theta) {
     return 3 * M_PI/4 <= theta || theta < -3 * M_PI/4;
 }
 
-float points_right(float theta) {
+int points_right(float theta) {
     return -M_PI/4 <= theta && theta < M_PI/4;
+}
+
+void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn, int c_dwn) {
+    print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
+
+    float radius = sqrt(pos_x * pos_x + pos_y * pos_y);
+    float theta = atan2(pos_y, pos_x);
+
+    Serial.print("points_up ");
+    Serial.println(points_up(theta));
+
+    Serial.print("points_left ");
+    Serial.println(points_left(theta));
+
+    Serial.print("points_right ");
+    Serial.println(points_right(theta));
+
+    Serial.print("points_down ");
+    Serial.println(points_down(theta));
+
+    if (MOVEMENT_THRESHOLD < radius) {
+        if (points_up(theta)) {
+            HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE; // should it be plus or minus, what should tilt angle be?
+        } else if (points_down(theta)) {
+            HOME_POS[TURRET_TILT] -= TURRET_TILT_ANGLE;
+        } else if (points_left(theta)) {
+            HOME_POS[TURRET_PAN] = TURRET_PAN_LEFT;
+            delay(TURRET_PAN_DELAY);
+            HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
+        } else {
+            HOME_POS[TURRET_PAN] = TURRET_PAN_RIGHT;
+            delay(TURRET_PAN_DELAY);
+            HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
+        }
+    }
+
+    exec(HOME_STANCE, HOME_STANCE_LEN);
 }
 
 void loop() {
     Serial1.readStringUntil('[');
 
-    String str = Serial1.readStringUntil(']');
+    str = Serial1.readStringUntil(']');
 
     int begin = 0;
     int end = str.indexOf(",");
 
-    if (INPUT_SIZE <= Serial1.available()) {
-        String pos_x = str.substring(begin, end);
+    pos_x = str.substring(begin, end);
 
-        begin = end;
-        end = str.indexOf(",");
+    begin = end + 1;
+    end = str.indexOf(",", begin);
 
-        String pos_y = str.substring(begin, end);
+    pos_y = str.substring(begin, end);
 
-        begin = end;
-        end = str.indexOf(",");
+    begin = end + 1;
+    end = str.indexOf(",", begin);
 
-        String acc_x = str.substring(begin, end);
+    acc_x = str.substring(begin, end);
 
-        begin = end;
-        end = str.indexOf(",");
+    begin = end + 1;
+    end = str.indexOf(",", begin);
 
-        String acc_y = str.substring(begin, end);
+    acc_y = str.substring(begin, end);
 
-        begin = end;
-        end = str.indexOf(",");
+    begin = end + 1;
+    end = str.indexOf(",", begin);
 
-        String acc_z = str.substring(begin, end);
+    acc_z = str.substring(begin, end);
 
-        begin = end;
-        end = str.indexOf(",");
+    begin = end + 1;
+    end = str.indexOf(",", begin);
 
-        String z_dwn = str.substring(begin, end);
+    z_dwn = str.substring(begin, end);
 
-        begin = end;
-        end = str.indexOf(",");
+    c_dwn = str.substring(end + 1);
 
-        String c_dwn = str.substring(begin, end);
-
-        print_data(
-            pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
-            acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
-        );
-    }
+    process_data(
+        pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
+        acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
+    );
 }
 
 void oldloop() {
