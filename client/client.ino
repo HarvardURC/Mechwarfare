@@ -207,41 +207,41 @@ void loop() {
 
     String str = Serial1.readStringUntil(']');
 
-    int start = 0;
-    int finish = str.indexOf(",");
+    int begin = 0;
+    int end = str.indexOf(",");
 
     if (INPUT_SIZE <= Serial1.available()) {
-        String pos_x = str.substring(start, finish);
+        String pos_x = str.substring(begin, end);
 
-        start = finish;
-        finish = str.indexOf(",");
+        begin = end;
+        end = str.indexOf(",");
 
-        String pos_y = str.substring(start, finish);
+        String pos_y = str.substring(begin, end);
 
-        start = finish;
-        finish = str.indexOf(",");
+        begin = end;
+        end = str.indexOf(",");
 
-        String acc_x = str.substring(start, finish);
+        String acc_x = str.substring(begin, end);
 
-        start = finish;
-        finish = str.indexOf(",");
+        begin = end;
+        end = str.indexOf(",");
 
-        String acc_y = str.substring(start, finish);
+        String acc_y = str.substring(begin, end);
 
-        start = finish;
-        finish = str.indexOf(",");
+        begin = end;
+        end = str.indexOf(",");
 
-        String acc_z = str.substring(start, finish);
+        String acc_z = str.substring(begin, end);
 
-        start = finish;
-        finish = str.indexOf(",");
+        begin = end;
+        end = str.indexOf(",");
 
-        String z_dwn = str.substring(start, finish);
+        String z_dwn = str.substring(begin, end);
 
-        start = finish;
-        finish = str.indexOf(",");
+        begin = end;
+        end = str.indexOf(",");
 
-        String c_dwn = str.substring(start, finish);
+        String c_dwn = str.substring(begin, end);
 
         print_data(
             pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
