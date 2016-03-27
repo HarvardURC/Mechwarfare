@@ -21,6 +21,10 @@ String acc_z;
 String z_dwn;
 String c_dwn;
 
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+// constants won't change :
+const long interval = 100;   
 void calibrate() {
     while (true) {
         Serial.println("Which servo?");
@@ -218,19 +222,21 @@ void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_d
     float radius = sqrt(pos_x * pos_x + pos_y * pos_y);
     float theta = atan2(pos_y, pos_x);
 
-//    Serial.print("points_up ");
-//    Serial.println(points_up(theta));
-//
-//    Serial.print("points_left ");
-//    Serial.println(points_left(theta));
-//
-//    Serial.print("points_right ");
-//    Serial.println(points_right(theta));
-//
-//    Serial.print("points_down ");
-//    Serial.println(points_down(theta));
+
 
     if (MOVEMENT_THRESHOLD < radius) {
+
+          if(points_left(theta)) 
+    {
+      maestro.setTarget(12,4000);
+      Serial.print("left");
+    }
+    else if (points_right(theta))
+    {
+      maestro.setTarget(12,8000);
+          Serial.print("right");
+    }
+        
         if (points_up(theta)) {
             HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE;
             // should it be plus or minus, what should tilt angle be?
@@ -246,13 +252,12 @@ void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_d
             HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
         }
     }
-//    Serial.print("HOME_POS[TURRET_TILT] = ");
-//    Serial.println(HOME_POS[TURRET_TILT]);
-//    
-//
-//    Serial.print("HOME_POS[TURRET_PAN] = ");
-//    Serial.println(HOME_POS[TURRET_PAN]);
-    
+    else if (MOVEMENT_THRESHOLD > radius) 
+    {
+      maestro.setTarget(12,6000);
+            Serial.print("off");
+    }
+   
     //exec(HOME_STANCE, HOME_STANCE_LEN);  // whoever did this is a nugget
 }
 
@@ -298,11 +303,31 @@ void loop() {
         pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
         acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
     );
+
+
 //        print_data(
 //            pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
 //            acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
 //        );
-    
+
+// unsigned long currentMillis = millis();
+//   if(z_dwn = 1)
+//   {
+//    if (currentMillis - previousMillis <= interval) {
+//      previousMillis = currentMillis;
+//      Serial.print
+//     digitalWrite(6, LOW);
+//    }
+//    else 
+//    {
+//     digitalWrite(6,HIGH);
+//    }
+//   }
+//   else
+//   {
+//    digitalWrite(6,HIGH);
+//   }
+   
 }
 
 void oldloop() {
