@@ -223,19 +223,24 @@ void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_d
     float theta = atan2(pos_y, pos_x);
 
 
-
     if (MOVEMENT_THRESHOLD < radius) {
+      
+          // CONTROL PAN
+          if (points_left(theta)) 
+          {
+            maestro.setTarget(12,5000);
+            Serial.print("left");
+          }
+          else if (points_right(theta))
+          {
+            maestro.setTarget(12,7000);
+            Serial.print("right");
+          }
 
-          if(points_left(theta)) 
-    {
-      maestro.setTarget(12,4000);
-      Serial.print("left");
-    }
-    else if (points_right(theta))
-    {
-      maestro.setTarget(12,8000);
-          Serial.print("right");
-    }
+          // CONTROL TILT
+          if (z_dwn){
+            maestro.setTarget(13,6000 - pos_y*20); // changing angle of tilt depending on joystick displacement
+          }
         
         if (points_up(theta)) {
             HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE;
@@ -252,85 +257,53 @@ void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_d
             HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
         }
     }
-    else if (MOVEMENT_THRESHOLD > radius) 
+    else if (MOVEMENT_THRESHOLD > radius) // if joystick does not deviate much from center
     {
       maestro.setTarget(12,6000);
-            Serial.print("off");
+      if (z_dwn)
+      {
+        maestro.setTarget(13,6000);
+      }
     }
    
-    //exec(HOME_STANCE, HOME_STANCE_LEN);  // whoever did this is a nugget
+    //exec(HOME_STANCE, HOME_STANCE_LEN);  // not sure why this was here
 }
 
 void loop() {
  // test_movements();
+
+    // Get data using the string method
     Serial1.readStringUntil('[');
-
     str = Serial1.readStringUntil(']');
-
     int begin = 0;
     int end = str.indexOf(",");
-
     pos_x = str.substring(begin, end);
-
     begin = end + 1;
     end = str.indexOf(",", begin);
-
     pos_y = str.substring(begin, end);
-
     begin = end + 1;
     end = str.indexOf(",", begin);
-
     acc_x = str.substring(begin, end);
-
     begin = end + 1;
     end = str.indexOf(",", begin);
-
     acc_y = str.substring(begin, end);
-
     begin = end + 1;
     end = str.indexOf(",", begin);
-
     acc_z = str.substring(begin, end);
-
     begin = end + 1;
     end = str.indexOf(",", begin);
-
     z_dwn = str.substring(begin, end);
-
     c_dwn = str.substring(end + 1);
 
-        process_data(
+    process_data(
         pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
         acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
     );
-
-
-//        print_data(
-//            pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
-//            acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
-//        );
-
-// unsigned long currentMillis = millis();
-//   if(z_dwn = 1)
-//   {
-//    if (currentMillis - previousMillis <= interval) {
-//      previousMillis = currentMillis;
-//      Serial.print
-//     digitalWrite(6, LOW);
-//    }
-//    else 
-//    {
-//     digitalWrite(6,HIGH);
-//    }
-//   }
-//   else
-//   {
-//    digitalWrite(6,HIGH);
-//   }
    
 }
 
-void oldloop() {
+// this is for the second nunchuck that controls movements. 
+void oldloop() {     
     if (INPUT_SIZE <= Serial1.available()) {
         int pos_x = Serial1.read();
         int pos_y = Serial1.read();
