@@ -146,21 +146,21 @@ void setup() {
     maestro_serial.begin(BAUD_RATE_SERVO);
     Serial1.begin(BAUD_RATE_XBEE);
 
-    // pinMode(7, OUTPUT);
-    // pinMode(6, OUTPUT);
+     pinMode(7, OUTPUT);
+     pinMode(6, OUTPUT);
 
-    // digitalWrite(6, HIGH);
-    // digitalWrite(7, HIGH);
+     digitalWrite(6, HIGH);
+     digitalWrite(7, HIGH);
 
-    // delay(3000);
+     delay(3000);
 
-    // exec(HOME_STANCE, HOME_STANCE_LEN);
+     exec(HOME_STANCE, HOME_STANCE_LEN);
 
-    // delay(SETUP_DELAY_TIME);
+     delay(SETUP_DELAY_TIME);
 
-    // exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
+     exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
 
-    //test_movements();
+    test_movements();
 }
 
 void print_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn, int c_dwn) {
@@ -231,7 +231,8 @@ void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_d
 
     if (MOVEMENT_THRESHOLD < radius) {
         if (points_up(theta)) {
-            HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE; // should it be plus or minus, what should tilt angle be?
+            HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE;
+            // should it be plus or minus, what should tilt angle be?
         } else if (points_down(theta)) {
             HOME_POS[TURRET_TILT] -= TURRET_TILT_ANGLE;
         } else if (points_left(theta)) {
@@ -244,51 +245,58 @@ void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_d
             HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
         }
     }
+    Serial.print("HOME_POS[TURRET_TILT] = ");
+    Serial.println(HOME_POS[TURRET_TILT]);
+    
 
+    Serial.print("HOME_POS[TURRET_PAN] = ");
+    Serial.println(HOME_POS[TURRET_PAN]);
+    
     exec(HOME_STANCE, HOME_STANCE_LEN);
 }
 
 void loop() {
-    Serial1.readStringUntil('[');
-
-    str = Serial1.readStringUntil(']');
-
-    int begin = 0;
-    int end = str.indexOf(",");
-
-    pos_x = str.substring(begin, end);
-
-    begin = end + 1;
-    end = str.indexOf(",", begin);
-
-    pos_y = str.substring(begin, end);
-
-    begin = end + 1;
-    end = str.indexOf(",", begin);
-
-    acc_x = str.substring(begin, end);
-
-    begin = end + 1;
-    end = str.indexOf(",", begin);
-
-    acc_y = str.substring(begin, end);
-
-    begin = end + 1;
-    end = str.indexOf(",", begin);
-
-    acc_z = str.substring(begin, end);
-
-    begin = end + 1;
-    end = str.indexOf(",", begin);
-
-    z_dwn = str.substring(begin, end);
-
-    c_dwn = str.substring(end + 1);
-
-    process_data(
-        pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
-        acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
-    );
+  test_movements();
+//    Serial1.readStringUntil('[');
+//
+//    str = Serial1.readStringUntil(']');
+//
+//    int begin = 0;
+//    int end = str.indexOf(",");
+//
+//    pos_x = str.substring(begin, end);
+//
+//    begin = end + 1;
+//    end = str.indexOf(",", begin);
+//
+//    pos_y = str.substring(begin, end);
+//
+//    begin = end + 1;
+//    end = str.indexOf(",", begin);
+//
+//    acc_x = str.substring(begin, end);
+//
+//    begin = end + 1;
+//    end = str.indexOf(",", begin);
+//
+//    acc_y = str.substring(begin, end);
+//
+//    begin = end + 1;
+//    end = str.indexOf(",", begin);
+//
+//    acc_z = str.substring(begin, end);
+//
+//    begin = end + 1;
+//    end = str.indexOf(",", begin);
+//
+//    z_dwn = str.substring(begin, end);
+//
+//    c_dwn = str.substring(end + 1);
+//
+//        process_data(
+//        pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
+//        acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
+//    );
 }
 
 void oldloop() {
