@@ -82,21 +82,21 @@ void transmit_data() {
     Serial.println();
     */
 
-    Serial.write("[");
-    Serial.write(pos_x);
-    Serial.write(",");
-    Serial.write(pos_y);
-    Serial.write(",");
-    Serial.write(acc_x);
-    Serial.write(",");
-    Serial.write(acc_y);
-    Serial.write(",");
-    Serial.write(acc_z);
-    Serial.write(",");
-    Serial.write(z_dwn);
-    Serial.write(",");
-    Serial.write(c_dwn);
-    Serial.write("]");
+    Serial.print("[");
+    Serial.print(pos_x);
+    Serial.print(",");
+    Serial.print(pos_y);
+    Serial.print(",");
+    Serial.print(acc_x);
+    Serial.print(",");
+    Serial.print(acc_y);
+    Serial.print(",");
+    Serial.print(acc_z);
+    Serial.print(",");
+    Serial.print(z_dwn);
+    Serial.print(",");
+    Serial.print(c_dwn);
+    Serial.print("]");
 }
 
 //: Arduino functions
