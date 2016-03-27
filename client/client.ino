@@ -154,13 +154,14 @@ void setup() {
 
      delay(3000);
 
-     exec(HOME_STANCE, HOME_STANCE_LEN);
+     //exec(HOME_STANCE, HOME_STANCE_LEN);
 
-     delay(SETUP_DELAY_TIME);
+     //delay(SETUP_DELAY_TIME);
 
-     exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
+     //exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
 
-    test_movements();
+   // test_movements();
+ 
 }
 
 void print_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn, int c_dwn) {
@@ -217,17 +218,17 @@ void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_d
     float radius = sqrt(pos_x * pos_x + pos_y * pos_y);
     float theta = atan2(pos_y, pos_x);
 
-    Serial.print("points_up ");
-    Serial.println(points_up(theta));
-
-    Serial.print("points_left ");
-    Serial.println(points_left(theta));
-
-    Serial.print("points_right ");
-    Serial.println(points_right(theta));
-
-    Serial.print("points_down ");
-    Serial.println(points_down(theta));
+//    Serial.print("points_up ");
+//    Serial.println(points_up(theta));
+//
+//    Serial.print("points_left ");
+//    Serial.println(points_left(theta));
+//
+//    Serial.print("points_right ");
+//    Serial.println(points_right(theta));
+//
+//    Serial.print("points_down ");
+//    Serial.println(points_down(theta));
 
     if (MOVEMENT_THRESHOLD < radius) {
         if (points_up(theta)) {
@@ -245,58 +246,63 @@ void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_d
             HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
         }
     }
-    Serial.print("HOME_POS[TURRET_TILT] = ");
-    Serial.println(HOME_POS[TURRET_TILT]);
+//    Serial.print("HOME_POS[TURRET_TILT] = ");
+//    Serial.println(HOME_POS[TURRET_TILT]);
+//    
+//
+//    Serial.print("HOME_POS[TURRET_PAN] = ");
+//    Serial.println(HOME_POS[TURRET_PAN]);
     
-
-    Serial.print("HOME_POS[TURRET_PAN] = ");
-    Serial.println(HOME_POS[TURRET_PAN]);
-    
-    exec(HOME_STANCE, HOME_STANCE_LEN);
+    //exec(HOME_STANCE, HOME_STANCE_LEN);  // whoever did this is a nugget
 }
 
 void loop() {
-  test_movements();
-//    Serial1.readStringUntil('[');
-//
-//    str = Serial1.readStringUntil(']');
-//
-//    int begin = 0;
-//    int end = str.indexOf(",");
-//
-//    pos_x = str.substring(begin, end);
-//
-//    begin = end + 1;
-//    end = str.indexOf(",", begin);
-//
-//    pos_y = str.substring(begin, end);
-//
-//    begin = end + 1;
-//    end = str.indexOf(",", begin);
-//
-//    acc_x = str.substring(begin, end);
-//
-//    begin = end + 1;
-//    end = str.indexOf(",", begin);
-//
-//    acc_y = str.substring(begin, end);
-//
-//    begin = end + 1;
-//    end = str.indexOf(",", begin);
-//
-//    acc_z = str.substring(begin, end);
-//
-//    begin = end + 1;
-//    end = str.indexOf(",", begin);
-//
-//    z_dwn = str.substring(begin, end);
-//
-//    c_dwn = str.substring(end + 1);
-//
-//        process_data(
-//        pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
-//        acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
-//    );
+ // test_movements();
+    Serial1.readStringUntil('[');
+
+    str = Serial1.readStringUntil(']');
+
+    int begin = 0;
+    int end = str.indexOf(",");
+
+    pos_x = str.substring(begin, end);
+
+    begin = end + 1;
+    end = str.indexOf(",", begin);
+
+    pos_y = str.substring(begin, end);
+
+    begin = end + 1;
+    end = str.indexOf(",", begin);
+
+    acc_x = str.substring(begin, end);
+
+    begin = end + 1;
+    end = str.indexOf(",", begin);
+
+    acc_y = str.substring(begin, end);
+
+    begin = end + 1;
+    end = str.indexOf(",", begin);
+
+    acc_z = str.substring(begin, end);
+
+    begin = end + 1;
+    end = str.indexOf(",", begin);
+
+    z_dwn = str.substring(begin, end);
+
+    c_dwn = str.substring(end + 1);
+
+        process_data(
+        pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
+        acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
+    );
+//        print_data(
+//            pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
+//            acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
+//        );
+    
 }
 
 void oldloop() {
