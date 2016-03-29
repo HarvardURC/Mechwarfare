@@ -13,13 +13,13 @@ MiniMaestro maestro(maestro_serial);
 stance_t current_stance;
 
 String str;
-String pos_x;
-String pos_y;
-String acc_x;
-String acc_y;
-String acc_z;
-String z_dwn;
-String c_dwn;
+int pos_x;
+int pos_y;
+int acc_x;
+int acc_y;
+int acc_z;
+int z_dwn;
+int c_dwn;
 
 unsigned long previousMillis = 0;        // will store last time LED was updated
 
@@ -150,17 +150,18 @@ void setup() {
     maestro_serial.begin(BAUD_RATE_SERVO);
     Serial1.begin(BAUD_RATE_XBEE);
 
-     pinMode(7, OUTPUT);
+     pinMode(5, OUTPUT);
      pinMode(6, OUTPUT);
 
      digitalWrite(6, HIGH);
-     digitalWrite(7, HIGH);
+     digitalWrite(5, HIGH);
 
      delay(3000);
 
-     //exec(HOME_STANCE, HOME_STANCE_LEN);
+     exec(HOME_STANCE, HOME_STANCE_LEN);
+     current_stance = HOME;
 
-     //delay(SETUP_DELAY_TIME);
+     delay(SETUP_DELAY_TIME);
 
      //exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
 
@@ -168,7 +169,7 @@ void setup() {
  
 }
 
-void print_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn, int c_dwn) {
+void print_data() {
     Serial.print("POS_X: ");
     Serial.print(pos_x);
     Serial.print(" ");
@@ -216,89 +217,301 @@ int points_right(float theta) {
     return -M_PI/4 <= theta && theta < M_PI/4;
 }
 
-void process_data(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn, int c_dwn) {
-    print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
+void process_data() {
+    print_data();
 
     float radius = sqrt(pos_x * pos_x + pos_y * pos_y);
     float theta = atan2(pos_y, pos_x);
+   
+      //GUN AND RELOAD
+//    if (z_dwn)
+//    {
+//      digitalWrite(6, LOW);
+//    }
+//    else
+//    {
+//      digitalWrite(6, HIGH);
+//    }
+//    if (c_dwn)
+//    {
+//      digitalWrite(5, LOW);
+//    }
+//    else
+//    {
+//      digitalWrite(5, HIGH);
+//    }
 
 
     if (MOVEMENT_THRESHOLD < radius) {
-      
-          // CONTROL PAN
-          if (points_left(theta)) 
-          {
-            maestro.setTarget(12,5000);
-            Serial.print("left");
-          }
-          else if (points_right(theta))
-          {
-            maestro.setTarget(12,7000);
-            Serial.print("right");
-          }
+          /*
+          There are three current movements. Creep, shuffle, and rotate. If
+            no buttons are pressed, default movement is creep and strafe. Meaning, joystick
+            turned forward moves robot forward (in creep mode), joystick to the right
+            makes robot strafe to the right. Joystick back strafes back, etc.
 
-          // CONTROL TILT
-          if (z_dwn){
-            maestro.setTarget(13,6000 - pos_y*20); // changing angle of tilt depending on joystick displacement
+            If z is pressed, then robots movements will be shuffle instead of creep.
+
+            If c is pressed, then joystick left or right rotates the robot clockwise
+            or counterclockwise respectively -- Robot WILL NOT strafe left or right.
+            Joystick forward or backward will shuffle robot forward and backward.
+
+            If c and z are pressed, joystick left or right still rotates the robot,
+            but joystick forward and backward will shuffle robot forward and backward.
+            */
+          if (z_dwn) {    
+            Serial.print("zdwn");
+            // CONTROL PAN
+            if (points_left(theta)) 
+            {
+              maestro.setTarget(12,5000);
+              Serial.print("left");
+            }
+            else if (points_right(theta))
+            {
+              maestro.setTarget(12,7000);
+              Serial.print("right");
+            }
+            // CONTROL TILT
+            HOME_POS[TURRET_TILT] -= pos_y; 
+            maestro.setTarget(13,HOME_POS[TURRET_TILT]); // changing angle of tilt depending on joystick displacement
           }
-        
-        if (points_up(theta)) {
-            HOME_POS[TURRET_TILT] += TURRET_TILT_ANGLE;
-            // should it be plus or minus, what should tilt angle be?
-        } else if (points_down(theta)) {
-            HOME_POS[TURRET_TILT] -= TURRET_TILT_ANGLE;
-        } else if (points_left(theta)) {
-            HOME_POS[TURRET_PAN] = TURRET_PAN_LEFT;
-            delay(TURRET_PAN_DELAY);
-            HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
+            else {
+                if (points_up(theta)) {
+                  Serial.print("up");
+                    switch (current_stance) {
+                        case FRONT:
+                            exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case BACK:
+                            exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case LEFT:
+                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case RIGHT:
+                            exec(CREEP_FORWARD_FROM_R, CREEP_FORWARD_FROM_R_LEN);
+
+                            current_stance = LEFT;
+                        break;
+                        case HOME:
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_FORWARD_FROM_L, CREEP_FORWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                    }
+                } else if (points_down(theta)) {
+                    switch (current_stance) {
+                        case FRONT:
+                            exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case BACK:
+                            exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case LEFT:
+                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                        case RIGHT:
+                            exec(CREEP_BACKWARD_FROM_R, CREEP_BACKWARD_FROM_R_LEN);
+
+                            current_stance = LEFT;
+                        break;
+                        case HOME:
+                            exec(HOME_TO_CREEP_L, HOME_TO_CREEP_L_LEN);
+                            exec(CREEP_BACKWARD_FROM_L, CREEP_BACKWARD_FROM_L_LEN);
+
+                            current_stance = RIGHT;
+                        break;
+                    }
+                } else if (points_left(theta)) {
+                    if (c_dwn) {
+                        switch (current_stance) {
+                            case FRONT:
+                                exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case BACK:
+                                exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case LEFT:
+                                exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case RIGHT:
+                                exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                        }
+                        exec(TURN_LEFT, TURN_LEFT_LEN);
+                    } else {
+                        switch (current_stance) {
+                            case FRONT:
+                                exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case BACK:
+                                exec(CREEP_LEFT_FROM_B, CREEP_LEFT_FROM_B_LEN);
+
+                                current_stance = FRONT;
+                            break;
+                            case LEFT:
+                                exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case RIGHT:
+                                exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case HOME:
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_LEFT_FROM_F, CREEP_LEFT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                        }
+                    }
+                } else {
+                    if (c_dwn) {
+                        switch (current_stance) {
+                            case FRONT:
+                                exec(CREEP_F_TO_HOME, CREEP_F_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case BACK:
+                                exec(CREEP_B_TO_HOME, CREEP_B_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case LEFT:
+                                exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                            case RIGHT:
+                                exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+
+                                current_stance = HOME;
+                            break;
+                        }
+
+                        exec(TURN_LEFT, TURN_LEFT_LEN);
+                    } else {
+                        switch (current_stance) {
+                            case FRONT:
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case BACK:
+                                exec(CREEP_RIGHT_FROM_B, CREEP_RIGHT_FROM_B_LEN);
+
+                                current_stance = FRONT;
+                            break;
+                            case LEFT:
+                                exec(CREEP_L_TO_HOME, CREEP_L_TO_HOME_LEN);
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case RIGHT:
+                                exec(CREEP_R_TO_HOME, CREEP_R_TO_HOME_LEN);
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                            case HOME:
+                                exec(HOME_TO_CREEP_F, HOME_TO_CREEP_F_LEN);
+                                exec(CREEP_RIGHT_FROM_F, CREEP_RIGHT_FROM_F_LEN);
+
+                                current_stance = BACK;
+                            break;
+                        }
+                    }
+                }
+            }
         } else {
-            HOME_POS[TURRET_PAN] = TURRET_PAN_RIGHT;
-            delay(TURRET_PAN_DELAY);
-            HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
+            maestro.setTarget(12,6000);
+            switch(current_stance) {
+              case FRONT:
+                  exec(FRONT_STANCE, FRONT_STANCE_LEN);
+              break;
+              case BACK:
+                  exec(BACK_STANCE, BACK_STANCE_LEN);
+              break;
+              case LEFT:
+                  exec(LEFT_STANCE, LEFT_STANCE_LEN);
+              break;
+              case RIGHT:
+                  exec(RIGHT_STANCE, RIGHT_STANCE_LEN);
+              break;
+              case HOME:
+                  exec(HOME_STANCE, HOME_STANCE_LEN);
+              break;
+            }
         }
-    }
-    else if (MOVEMENT_THRESHOLD > radius) // if joystick does not deviate much from center
-    {
-      maestro.setTarget(12,6000);
-      if (z_dwn)
-      {
-        maestro.setTarget(13,6000);
-      }
-    }
-   
-    //exec(HOME_STANCE, HOME_STANCE_LEN);  // not sure why this was here
 }
 
 void loop() {
- // test_movements();
 
     // Get data using the string method
     Serial1.readStringUntil('[');
     str = Serial1.readStringUntil(']');
     int begin = 0;
     int end = str.indexOf(",");
-    pos_x = str.substring(begin, end);
+    pos_x = str.substring(begin, end).toInt();
     begin = end + 1;
     end = str.indexOf(",", begin);
-    pos_y = str.substring(begin, end);
+    pos_y = str.substring(begin, end).toInt();
     begin = end + 1;
     end = str.indexOf(",", begin);
-    acc_x = str.substring(begin, end);
+    acc_x = str.substring(begin, end).toInt();
     begin = end + 1;
     end = str.indexOf(",", begin);
-    acc_y = str.substring(begin, end);
+    acc_y = str.substring(begin, end).toInt();
     begin = end + 1;
     end = str.indexOf(",", begin);
-    acc_z = str.substring(begin, end);
+    acc_z = str.substring(begin, end).toInt();
     begin = end + 1;
     end = str.indexOf(",", begin);
-    z_dwn = str.substring(begin, end);
-    c_dwn = str.substring(end + 1);
-
-    process_data(
-        pos_x.toInt(), pos_y.toInt(), acc_x.toInt(), acc_y.toInt(),
-        acc_z.toInt(), z_dwn.toInt(), c_dwn.toInt()
-    );
+    z_dwn = str.substring(begin, end).toInt();
+    c_dwn = str.substring(end + 1).toInt();
+    
+    process_data();
    
 }
 
@@ -318,7 +531,7 @@ void oldloop() {
         // int shoot  = Serial1.read();
         // int reload = Serial1.read();
 
-        print_data(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
+        print_data();
 
         float radius = sqrt(pos_x * pos_x + pos_y * pos_y);
 
@@ -347,11 +560,9 @@ void oldloop() {
                     HOME_POS[TURRET_TILT] -= TURRET_TILT_ANGLE;
                 } else if (points_left(theta)) {
                     HOME_POS[TURRET_PAN] = TURRET_PAN_LEFT;
-                    delay(TURRET_PAN_DELAY);
                     HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
                 } else {
                     HOME_POS[TURRET_PAN] = TURRET_PAN_RIGHT;
-                    delay(TURRET_PAN_DELAY);
                     HOME_POS[TURRET_PAN] = TURRET_PAN_HOME_POS;
                 }
             } else {

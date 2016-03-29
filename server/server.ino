@@ -97,6 +97,7 @@ void transmit_data() {
     Serial.print(",");
     Serial.print(c_dwn);
     Serial.print("]");
+    Serial.println();
 }
 
 //: Arduino functions
