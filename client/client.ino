@@ -46,7 +46,6 @@ void exec(event_t events[], int len) {
 void setup() {
     Serial.begin(BAUD_RATE_XBEE);
     maestro_serial.begin(BAUD_RATE_SERVO);
-    // Serial1.begin(BAUD_RATE_XBEE);
 
      pinMode(5, OUTPUT);
      pinMode(6, OUTPUT);
@@ -61,43 +60,7 @@ void setup() {
 
      delay(SETUP_DELAY_TIME);
 
-     //exec(HOME_TO_CREEP_R, HOME_TO_CREEP_R_LEN);
-
-   // test_movements();
-
 }
-
-// void print_data() {
-//     Serial.print("POS_X: ");
-//     Serial.print(pos_x);
-//     Serial.print(" ");
-//
-//     Serial.print("POS_Y: ");
-//     Serial.print(pos_y);
-//     Serial.print(" ");
-//
-//     Serial.print("ACC_X: ");
-//     Serial.print(acc_x);
-//     Serial.print(" ");
-//
-//     Serial.print("ACC_Y: ");
-//     Serial.print(acc_y);
-//     Serial.print(" ");
-//
-//     Serial.print("ACC_Z: ");
-//     Serial.print(acc_z);
-//     Serial.print(" ");
-//
-//     Serial.print("Z_DWN: ");
-//     Serial.print(z_dwn);
-//     Serial.print(" ");
-//
-//     Serial.print("C_DWN: ");
-//     Serial.print(c_dwn);
-//     Serial.print(" ");
-//
-//     Serial.println();
-// }
 
 int points_up(float theta) {
     return M_PI/4 <= theta && theta < 3 * M_PI/4;
@@ -121,7 +84,7 @@ void process_data() {
     float theta = atan2(pos_y, pos_x);
 
       //GUN AND RELOAD
-//    if (z_dwn)
+//    if (z_dwn )
 //    {
 //      digitalWrite(6, LOW);
 //    }
@@ -140,8 +103,25 @@ void process_data() {
 
 
     if (MOVEMENT_THRESHOLD < radius) {
-          
-          if (z_dwn)
+
+          // Shooting and RELOADING:
+          if (z_dwn && c_dwn)
+          {
+            if (points_up(theta))
+            {
+              digitalWrite(6, LOW);
+            }
+            else if (points_down(theta))
+            {
+              digitalWrite(5, LOW);
+            }
+            else
+            {
+              digitalWrite(5, HIGH);
+              digitalWrite(6, HIGH);
+            }
+          }
+          else if (z_dwn)
           {
             // CONTROL PAN
             if (points_left(theta))
@@ -159,9 +139,13 @@ void process_data() {
             // CONTROL TILT
             HOME_POS[TURRET_TILT] += pos_y/2;
             maestro.setTarget(13,HOME_POS[TURRET_TILT]); // changing angle of tilt depending on joystick displacement
+            digitalWrite(5, HIGH);
+            digitalWrite(6, HIGH);
           }
           else
           {
+            digitalWrite(5, HIGH);
+            digitalWrite(6, HIGH);
             if (points_up(theta)) {
                     switch (current_stance) {
                         case FRONT:
@@ -353,6 +337,8 @@ void process_data() {
       }
       else
       {
+        digitalWrite(5, HIGH);
+        digitalWrite(6, HIGH);
         maestro.setTarget(12,6000);
       }
 }
@@ -360,7 +346,7 @@ void process_data() {
 void loop() {
 
     // Get data using the string method
-    
+
     Serial.readStringUntil('[');
     str = Serial.readStringUntil(']');
     int begin = 0;
@@ -389,5 +375,3 @@ void loop() {
 
 
 }
-
-
