@@ -66,8 +66,8 @@
 #define CREEP_R_TO_HOME_LEN       16
 #define TURRET_V_LEN              6
 #define TURRET_H_LEN              8
-#define TURN_RIGHT_LEN            22
-#define TURN_LEFT_LEN             22
+#define TURN_R_LEN                22
+#define TURN_L_LEN                22
 
 enum stance_t {
     FRONT,
@@ -608,33 +608,33 @@ event_t TURRET_H[] = {
     {DELAY,        300}
 };
 
-event_t TURN_RIGHT[] = {
-    {FRONT_LEFT_KNEE,  TURNING_V_ANGLE},
-    {BACK_RIGHT_KNEE,  TURNING_V_ANGLE},
-    {DELAY,            EVENT_DELAY_TIME},
+event_t TURN_L[] = {
+    {FRONT_LEFT_KNEE, TURNING_V_ANGLE},
+    {BACK_RIGHT_KNEE, TURNING_V_ANGLE},
+    {DELAY,           EVENT_DELAY_TIME},
     {FRONT_LEFT_HIP,  -TURNING_H_ANGLE},
     {BACK_RIGHT_HIP,  -TURNING_H_ANGLE},
-    {DELAY,            EVENT_DELAY_TIME},
-    {FRONT_LEFT_KNEE,  ZERO_ANGLE},
-    {BACK_RIGHT_KNEE,  ZERO_ANGLE},
-    {DELAY,            EVENT_DELAY_TIME},
-    {FRONT_LEFT_HIP,   ZERO_ANGLE},
-    {BACK_RIGHT_HIP,   ZERO_ANGLE},
+    {DELAY,           EVENT_DELAY_TIME},
+    {FRONT_LEFT_KNEE, ZERO_ANGLE},
+    {BACK_RIGHT_KNEE, ZERO_ANGLE},
+    {DELAY,           EVENT_DELAY_TIME},
+    {FRONT_LEFT_HIP,  ZERO_ANGLE},
+    {BACK_RIGHT_HIP,  ZERO_ANGLE},
 
-    {FRONT_RIGHT_KNEE,  TURNING_V_ANGLE},
-    {BACK_LEFT_KNEE,    TURNING_V_ANGLE},
-    {DELAY,             EVENT_DELAY_TIME},
+    {FRONT_RIGHT_KNEE, TURNING_V_ANGLE},
+    {BACK_LEFT_KNEE,   TURNING_V_ANGLE},
+    {DELAY,            EVENT_DELAY_TIME},
     {FRONT_RIGHT_HIP,  -TURNING_H_ANGLE},
     {BACK_LEFT_HIP,    -TURNING_H_ANGLE},
-    {DELAY,             EVENT_DELAY_TIME},
-    {FRONT_RIGHT_KNEE,  ZERO_ANGLE},
-    {BACK_LEFT_KNEE,    ZERO_ANGLE},
-    {DELAY,             EVENT_DELAY_TIME},
-    {FRONT_RIGHT_HIP,   ZERO_ANGLE},
-    {BACK_LEFT_HIP,     ZERO_ANGLE},
+    {DELAY,            EVENT_DELAY_TIME},
+    {FRONT_RIGHT_KNEE, ZERO_ANGLE},
+    {BACK_LEFT_KNEE,   ZERO_ANGLE},
+    {DELAY,            EVENT_DELAY_TIME},
+    {FRONT_RIGHT_HIP,  ZERO_ANGLE},
+    {BACK_LEFT_HIP,    ZERO_ANGLE}
 };
 
-event_t TURN_LEFT[] = {
+event_t TURN_R[] = {
     {FRONT_LEFT_KNEE, TURNING_V_ANGLE},
     {BACK_RIGHT_KNEE, TURNING_V_ANGLE},
     {DELAY,           EVENT_DELAY_TIME},

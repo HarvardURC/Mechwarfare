@@ -237,7 +237,7 @@ void process_data() {
                             break;
                         }
 
-                        exec(TURN_LEFT, TURN_LEFT_LEN);
+                        exec(TURN_L, TURN_L_LEN);
                     } else {
                         switch (current_stance) {
                             case FRONT:
@@ -297,7 +297,7 @@ void process_data() {
                             break;
                         }
 
-                        exec(TURN_LEFT, TURN_LEFT_LEN);
+                        exec(TURN_R, TURN_R_LEN);
                     } else {
                         switch (current_stance) {
                             case FRONT:
