@@ -45,6 +45,9 @@ void setup() {
     pinMode(6, OUTPUT);
     pinMode(5, OUTPUT);
 
+    no_shoot();
+    no_reload();
+
     delay(3000);
 
     exec(HOME_STANCE, STANCE_LEN);

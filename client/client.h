@@ -1,41 +1,41 @@
-#define EVENT_DELAY_TIME  100
-#define HOME_DELAY_TIME   10
+const short EVENT_DELAY_TIME   = 100;
+const short HOME_DELAY_TIME    = 10;
 
-#define FRONT_LEFT_HIP_HOME_POS    6104
-#define FRONT_LEFT_KNEE_HOME_POS   5476
-#define FRONT_LEFT_ANKLE_HOME_POS  4350
-#define FRONT_RIGHT_HIP_HOME_POS   6244
-#define FRONT_RIGHT_KNEE_HOME_POS  5992
-#define FRONT_RIGHT_ANKLE_HOME_POS 5950
-#define BACK_RIGHT_HIP_HOME_POS    5322
-#define BACK_RIGHT_KNEE_HOME_POS   4674
-#define BACK_RIGHT_ANKLE_HOME_POS  3930
-#define BACK_LEFT_HIP_HOME_POS     6388
-#define BACK_LEFT_KNEE_HOME_POS    5634
-#define BACK_LEFT_ANKLE_HOME_POS   8272
-#define TURRET_PAN_HOME_POS        6000
-#define TURRET_TILT_HOME_POS       5850
+const short FRONT_LEFT_HIP_HOME_POS     = 6104;
+const short FRONT_LEFT_KNEE_HOME_POS    = 5476;
+const short FRONT_LEFT_ANKLE_HOME_POS   = 4350;
+const short FRONT_RIGHT_HIP_HOME_POS    = 6244;
+const short FRONT_RIGHT_KNEE_HOME_POS   = 5992;
+const short FRONT_RIGHT_ANKLE_HOME_POS  = 5950;
+const short BACK_RIGHT_HIP_HOME_POS     = 5322;
+const short BACK_RIGHT_KNEE_HOME_POS    = 4674;
+const short BACK_RIGHT_ANKLE_HOME_POS   = 3930;
+const short BACK_LEFT_HIP_HOME_POS      = 6388;
+const short BACK_LEFT_KNEE_HOME_POS     = 5634;
+const short BACK_LEFT_ANKLE_HOME_POS    = 8272;
+const short TURRET_PAN_HOME_POS         = 6000;
+const short TURRET_TILT_HOME_POS        = 5850;
 
-#define CREEP_ROTATE_ANGLE       2000
-#define CREEP_RAISE_KNEE_ANGLE   2000
-#define CREEP_RAISE_ANKLE_ANGLE  1200
-#define CREEP_PUSH_ANKLE_ANGLE   900
-#define CREEP_PUSH_KNEE_ANGLE   -200
-#define TURNING_V_ANGLE          800
-#define TURNING_H_ANGLE          1000
-#define TURRET_TILT_ANGLE        200
+const short CREEP_ROTATE_ANGLE        =  2000;
+const short CREEP_RAISE_KNEE_ANGLE    =  2000;
+const short CREEP_RAISE_ANKLE_ANGLE   =  1200;
+const short CREEP_PUSH_ANKLE_ANGLE    =  900;
+const short CREEP_PUSH_KNEE_ANGLE     = -200;
+const short TURNING_V_ANGLE           =  800;
+const short TURNING_H_ANGLE           =  1000;
+const short TURRET_TILT_ANGLE         =  200;
 
-#define TURRET_PAN_LEFT   5500
-#define TURRET_PAN_CENTER 6000
-#define TURRET_PAN_RIGHT  6500
+const short TURRET_PAN_LEFT    = 5500;
+const short TURRET_PAN_CENTER  = 6000;
+const short TURRET_PAN_RIGHT   = 6500;
 
-#define STANCE_LEN        15
-#define HOME_TO_CREEP_LEN 16
-#define CREEP_LEN         24
-#define CREEP_TO_HOME_LEN 16
-#define TURRET_V_LEN      6
-#define TURRET_H_LEN      8
-#define TURN_LEN          22
+const short STANCE_LEN         = 15;
+const short HOME_TO_CREEP_LEN  = 16;
+const short CREEP_LEN          = 24;
+const short CREEP_TO_HOME_LEN  = 16;
+const short TURRET_V_LEN       = 6;
+const short TURRET_H_LEN       = 8;
+const short TURN_LEN           = 22;
 
 enum stance_t {
     FRONT,
