@@ -48,13 +48,9 @@ void setup() {
     no_shoot();
     no_reload();
 
-    delay(3000);
-
     exec(HOME_STANCE, STANCE_LEN);
 
     current_stance = HOME;
-
-    delay(500);
 }
 
 bool in_range(float begin, float theta, float end) {

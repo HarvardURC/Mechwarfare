@@ -22,7 +22,7 @@ const short CREEP_RAISE_ANKLE_ANGLE   =  0;
 const short CREEP_PUSH_ANKLE_ANGLE    =  900;
 const short CREEP_PUSH_KNEE_ANGLE     = -200;
 const short TURNING_V_ANGLE           =  800;
-const short TURNING_H_ANGLE           =  1000;
+const short TURNING_H_ANGLE           =  500;
 const short TURRET_TILT_ANGLE         =  200;
 
 const short TURRET_PAN_LEFT    = 5500;
