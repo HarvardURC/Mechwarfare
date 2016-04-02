@@ -9,10 +9,10 @@ MiniMaestro maestro(maestro_serial);
 
 stance_t current_stance;
 
-void exec(event_t events[], int len) {
-    for (int idx = 0; idx < len; idx++) {
-        int servo = events[idx].servo;
-        int value = events[idx].value;
+void exec(event_t events[], short len) {
+    for (short idx = 0; idx < len; idx++) {
+        short servo = events[idx].servo;
+        short value = events[idx].value;
 
         if (servo == DELAY) {
             delay(value);
@@ -77,7 +77,7 @@ bool points_left(float theta) {
     return in_range(3 * M_PI/4, theta, M_PI) || in_range(-M_PI, theta, -3 * M_PI/4);
 }
 
-void process(int pos_x, int pos_y, int acc_x, int acc_y, int acc_z, int z_dwn, int c_dwn) {
+void process(short pos_x, short pos_y, short acc_x, short acc_y, short acc_z, short z_dwn, short c_dwn) {
     float radius = sqrt(pos_x * pos_x + pos_y * pos_y);
     float theta = atan2(pos_y, pos_x);
 
@@ -310,31 +310,31 @@ void loop() {
 
     String str = Serial.readStringUntil(']');
 
-    int begin = 0;
-    int end = str.indexOf(",");
-    int pos_x = str.substring(begin, end).toInt();
+    short begin = 0;
+    short end = str.indexOf(",");
+    short pos_x = str.substring(begin, end).toInt();
 
     begin = end + 1;
     end = str.indexOf(",", begin);
-    int pos_y = str.substring(begin, end).toInt();
+    short pos_y = str.substring(begin, end).toInt();
 
     begin = end + 1;
     end = str.indexOf(",", begin);
-    int acc_x = str.substring(begin, end).toInt();
+    short acc_x = str.substring(begin, end).toInt();
 
     begin = end + 1;
     end = str.indexOf(",", begin);
-    int acc_y = str.substring(begin, end).toInt();
+    short acc_y = str.substring(begin, end).toInt();
 
     begin = end + 1;
     end = str.indexOf(",", begin);
-    int acc_z = str.substring(begin, end).toInt();
+    short acc_z = str.substring(begin, end).toInt();
 
     begin = end + 1;
     end = str.indexOf(",", begin);
-    int z_dwn = str.substring(begin, end).toInt();
+    short z_dwn = str.substring(begin, end).toInt();
 
-    int c_dwn = str.substring(end + 1).toInt();
+    short c_dwn = str.substring(end + 1).toInt();
 
     process(pos_x, pos_y, acc_x, acc_y, acc_z, z_dwn, c_dwn);
 }

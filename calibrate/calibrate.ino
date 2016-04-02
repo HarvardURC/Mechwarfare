@@ -4,79 +4,61 @@
 #include <PololuMaestro.h>
 
 //: Include Macro Definitions
-#include "client.h"
+#include "calibrate.h"
 
 //: Global variable declarations
-SoftwareSerial maestro_serial(MAESTRO_RX, MAESTRO_TX);
+SoftwareSerial maestro_serial(8, 9);
 MiniMaestro maestro(maestro_serial);
 
-stance_t current_stance;
+void calibrate() {
+    while (true) {
+        Serial.println("Which servo?");
+        Serial.setTimeout(3000);
 
-String str;
-int pos_x;
-int pos_y;
-int acc_x;
-int acc_y;
-int acc_z;
-int z_dwn;
-int c_dwn;
+        int servo = Serial.parseInt();
 
-unsigned long previousMillis = 0;        // will store last time LED was updated
+        if (0 <= servo && servo < NUM_SERVOS) {
+            Serial.setTimeout(200);
 
-// constants won't change :
-const long interval = 100;
+            Serial.print("Tweaking servo: ");
+            Serial.println(servo);
 
+            while (true) {
+                maestro.setTarget(servo, HOME_POS[servo]);
 
- void calibrate() {
-     while (true) {
-         Serial.println("Which servo?");
-         Serial.setTimeout(3000);
+                int ctrl = Serial.parseInt();
 
-         int servo = Serial.parseInt();
+                if (ctrl == 2) {
+                    HOME_POS[servo] += 50;
+                } else if (ctrl == 1) {
+                   HOME_POS[servo] -= 50;
+                } else if (ctrl == 0) {
+                    continue;
+                } else {
+                    Serial.print("Final position: ");
+                    Serial.println(HOME_POS[servo]);
 
-         if (0 <= servo && servo < NUM_SERVOS) {
-             Serial.setTimeout(200);
-
-             Serial.print("Tweaking servo: ");
-             Serial.println(servo);
-
-             while (true) {
-                 maestro.setTarget(servo, HOME_POS[servo]);
-
-                 int ctrl = Serial.parseInt();
-
-                 if (ctrl == 2) {
-                     HOME_POS[servo] += 50;
-                 } else if (ctrl == 1) {
-                     HOME_POS[servo] -= 50;
-                 } else if (ctrl == 0) {
-                     continue;
-                 } else {
-                     Serial.print("Final position: ");
-                     Serial.println(HOME_POS[servo]);
-
-                     break;
-                 }
+                    break;
+                }
              }
          } else {
              break;
          }
      }
 
-     Serial.setTimeout(100);
+    Serial.setTimeout(100);
 
-     Serial.print("Final Positions: ");
+    Serial.print("Final Positions: ");
 
-     for (int servo = 0; servo < NUM_SERVOS; servo++) {
-         Serial.print(HOME_POS[servo]);
-         Serial.print(" ");
-     }
+    for (int servo = 0; servo < NUM_SERVOS; servo++) {
+        Serial.print(HOME_POS[servo]);
+        Serial.print(" ");
+    }
 
-     Serial.setTimeout(1000);
- }
+    Serial.setTimeout(1000);
+}
 
 void exec(event_t events[], int len) {
-
     for (int idx = 0; idx < len; idx++) {
         int servo = events[idx].servo;
         int value = events[idx].value;
@@ -91,16 +73,13 @@ void exec(event_t events[], int len) {
 
 
 void setup() {
-    Serial.begin(BAUD_RATE_XBEE);
-    maestro_serial.begin(BAUD_RATE_SERVO);
-   delay(SETUP_DELAY_TIME);
-     exec(HOME_STANCE, HOME_STANCE_LEN);
+    Serial.begin(9600);
+    maestro_serial.begin(9600);
 
+    delay(3000);
+    exec(HOME_STANCE, STANCE_LEN);
 }
 
 void loop() {
-
     calibrate();
-
-
 }
