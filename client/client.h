@@ -1,4 +1,4 @@
-const short EVENT_DELAY_TIME   = 100;
+const short EVENT_DELAY_TIME   = 40;
 const short HOME_DELAY_TIME    = 10;
 
 const short FRONT_LEFT_HIP_HOME_POS     = 6200;
@@ -9,7 +9,7 @@ const short FRONT_RIGHT_KNEE_HOME_POS   = 6050;
 const short FRONT_RIGHT_ANKLE_HOME_POS  = 6050;
 const short BACK_RIGHT_HIP_HOME_POS     = 5225;
 const short BACK_RIGHT_KNEE_HOME_POS    = 4675;
-const short BACK_RIGHT_ANKLE_HOME_POS   = 4200;
+const short BACK_RIGHT_ANKLE_HOME_POS   = 6700;
 const short BACK_LEFT_HIP_HOME_POS      = 6550;
 const short BACK_LEFT_KNEE_HOME_POS     = 5550;
 const short BACK_LEFT_ANKLE_HOME_POS    = 8375;
@@ -21,7 +21,7 @@ const short CREEP_RAISE_KNEE_ANGLE    =  2500;
 const short CREEP_RAISE_ANKLE_ANGLE   =  0;
 const short CREEP_PUSH_ANKLE_ANGLE    =  900;
 const short CREEP_PUSH_KNEE_ANGLE     = -200;
-const short TURNING_V_ANGLE           =  800;
+const short TURNING_V_ANGLE           =  1200;
 const short TURNING_H_ANGLE           =  500;
 const short TURRET_TILT_ANGLE         =  200;
 
