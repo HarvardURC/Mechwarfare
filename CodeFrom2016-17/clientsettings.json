@@ -1,0 +1,13 @@
+{
+    "logging": {
+        "client": false,
+        "debug": 2,
+        "errors": 2,
+        "folder": ".",
+        "logging": 1,
+        "warnings": 2
+    },
+    "server": {
+        "bcast_port": 8646
+    }
+}
