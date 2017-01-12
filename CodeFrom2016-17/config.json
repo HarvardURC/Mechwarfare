@@ -9,7 +9,7 @@ my_config['motorgroups']: {
         'leg2': ['m4', 'm5', 'm6'],
         'leg3': ['m7', 'm8', 'm9'],
         'leg4': ['m10', 'm11', 'm12'],
-        'turret': ['m13']
+        'turret': ['m13', 'm14']
     },
 my_config['leg1', 'leg2', 'leg3', 'leg4']['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9','m10', 'm11', 'm12'] = {
 	'orientation': 'indirect',
@@ -19,7 +19,7 @@ my_config['leg1', 'leg2', 'leg3', 'leg4']['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm
             'offset': 0.0
         },
 
-my_config['turret'] = {
+my_config['turret']['m13', 'm14'] = {
 	'orientation': 'indirect',
             'type': 'AX-12A',
             'id': 1,
