@@ -1,109 +1,28 @@
-robot_config = {
-    'controllers': {
-        'my_dxl_controller': {
-            'sync_read': False,
-            'attached_motors': ['leg1', 'leg2', 'leg3', 'leg4', 'turret'],
-            'port': 'auto'
-        }
-    },
-    'motorgroups': {
+my_config['controllers'] = {
+    'port': 'auto',
+    'sync_read': False,
+    'attached_motors': ['leg1', 'leg2', 'leg3', 'leg4', 'turret'],
+    'protocol': 1,
+},
+my_config['motorgroups']: {
         'leg1': ['m1', 'm2', 'm3'],
         'leg2': ['m4', 'm5', 'm6'],
         'leg3': ['m7', 'm8', 'm9'],
         'leg4': ['m10', 'm11', 'm12'],
         'turret': ['m13']
     },
-    'motors': {
-        'm1': {
-            'orientation': 'indirect',
+my_config['leg1', 'leg2', 'leg3', 'leg4']['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9','m10', 'm11', 'm12'] = {
+	'orientation': 'indirect',
             'type': 'AX-12A',
             'id': 1,
             'angle_limit': [-90.0, 90.0],
             'offset': 0.0
         },
-        'm2': {
-            'orientation': 'direct',
+
+my_config['turret'] = {
+	'orientation': 'indirect',
             'type': 'AX-12A',
-            'id': 2,
+            'id': 1,
             'angle_limit': [-90.0, 90.0],
             'offset': 0.0
-        },
-        'm3': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 3,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        },
-        'm4': {
-            'orientation': 'direct',
-            'type': 'AX-12A', 
-            'id': 4,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        },
-        'm5': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 5,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        },
-        'm6': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 6,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
-        'm7': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 7,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
-        'm8': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 8,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
-        'm9': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 9,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
-        'm10': {
-            'orientation': 'indirect',
-            'type': 'AX-12A'
-            'id': 10,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
-        'm11': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 11,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
-        'm12': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 12,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
-        'm13': {
-            'orientation': 'indirect',
-            'type': 'AX-12A',
-            'id': 13,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
-    }
-}
+        }	
