@@ -8,6 +8,8 @@
         "warnings": 2
     },
     "server": {
-        "bcast_port": 8646
+        "bcast_port": 8646,
+	"address": "10.251.212.107",
+	"port": 8642
     }
 }
