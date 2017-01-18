@@ -16,7 +16,7 @@ class Video(dict):
         
     def run(self):
         cmdline = CMDLINE.format(**self)
-        self.proc = call(cmdline, shell=True)
+        self.proc = Popen(cmdline, shell=True)
 
     def kill(self):
         if hasattr(self, "proc"):

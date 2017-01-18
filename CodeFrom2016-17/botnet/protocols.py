@@ -79,8 +79,8 @@ class ClientProtocol(BotProtocol):
 
     def connection_made(self, transport):
         super().connection_made(transport)
-        client.connected(self)
+        self.receiver.connected(self)
         debug("Connected to {}".format(transport.get_extra_info("peername")))
 
     def connection_lost(self, exc):
-        self.client.fatal("Lost Connection!")
+        self.receiver.fatal("Lost Connection!")

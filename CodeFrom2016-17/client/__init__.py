@@ -20,6 +20,6 @@ class Client:
         if hasattr(self, "proc"):
             self.proc.kill()
             self.proc.wait(1)
-        self.proc = Popen(cmdline.format(VIDEO_PORT), shell=True)
+        self.proc = Popen(CMDLINE.format(port=VIDEO_PORT), shell=True)
         self.protocol.send_message("VSTR", VIDEO_PORT, 0)
         
