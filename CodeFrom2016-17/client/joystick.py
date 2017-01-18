@@ -37,6 +37,8 @@ class Joystick:
     def check_buttons(self):
         for i, val in enumerate(self.buttons):
             new = self.__js.get_button(i)
+            if i == 8 and new:
+                self._protocol.receiver.video(True)
             if i == 9 and new:
                 self._protocol.receiver.fatal("START pressed.")
             if new != val:

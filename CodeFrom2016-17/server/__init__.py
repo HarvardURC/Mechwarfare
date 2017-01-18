@@ -1,13 +1,26 @@
 
+from botnet.logging import *
+
+from .video import Video
 
 class Bot:
-    def add_client(self, c):
-        pass
+    def __init__(self):
+        self.video = Video()
+    
+    def add_client(self, c, peer):
+        self.video["peer"] = peer
+        self.protocol = c
 
     def remove_client(self, c):
-        pass
+        self.video.kill()
 
+    def VSTR(self, port, bitrate=None, **kwargs):
+        self.video.kill()
+        self.video["port"] = port
+        if bitrate:
+            self.video["bitrate"] = bitrate * 1000000 # MBs
+        self.video.update(kwargs)
+        self.video.run()
+        
     def BUTN(self, id, val):
-        fd = open("/sys/class/gpio/gpio{}/value".format(id+14), "w")
-        print(id, val, fd.name)
-        fd.write(str(int(val))+"\n")
+        pass
