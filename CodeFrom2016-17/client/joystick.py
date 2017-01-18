@@ -39,9 +39,9 @@ class Joystick:
             new = self.__js.get_button(i)
             if i == 8 and new:
                 self._protocol.receiver.video(True)
-            if i == 9 and new:
+            elif i == 9 and new:
                 self._protocol.receiver.fatal("START pressed.")
-            if new != val:
+            elif new != val:
                 self.buttons[i] = new
                 self._protocol.send_message("BUTN", i, new)
                 

@@ -35,6 +35,8 @@ class BotProtocol(Protocol):
                 data = data[bytes_needed:]
             if len(self.data) == self.length:
                 try:
+                    if self.data:
+                        self.data = pickle.loads(self.data)
                     self.on_message(self.comm.decode(), self.cid, self.double, self.data)
                 except Exception as err:
                     last_exception()
@@ -45,6 +47,8 @@ class BotProtocol(Protocol):
     def send_message(self, comm, cid=0, double=0, data=b""):
         if len(comm) > 4:
             raise CommandError("Command too long!")
+        if data:
+            data = pickle.dumps(data)
         header = HEADER_STRUCT.pack(self.__version__, len(data), comm.encode(),cid, double)
         self.transport.write(header + data)
 
