@@ -1,4 +1,8 @@
 
+from botnet.logging import *
 
 class Client:
-    pass
+    def fatal(self, message):
+        log(message)
+        log("Quitting...")
+        exit()
