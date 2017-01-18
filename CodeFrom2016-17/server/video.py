@@ -1,4 +1,6 @@
 
+from botnet.logging import *
+
 from subprocess import Popen
 
 from threading import Thread
@@ -15,12 +17,15 @@ class Video(dict):
         self.update(kwargs)
         
     def run(self):
+        debug(self.kill())
         cmdline = CMDLINE.format(**self)
         self.proc = Popen(cmdline, shell=True)
 
     def kill(self):
         if hasattr(self, "proc"):
-            self.proc.kill()
+            debug(self.proc.pid)
+            if self.proc.poll() is None:
+                self.proc.kill()
             return self.proc.wait(1)
         return False
         
