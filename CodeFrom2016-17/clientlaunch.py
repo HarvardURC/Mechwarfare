@@ -28,7 +28,7 @@ if __name__ == "__main__":
     if "--search" in sys.argv or "-s" in sys.argv or not conf["server"].get("address"):
         autoconf(conf)
 
-    client = Client()
+    client = Client(conf["server"].get("address"))
         
     log("Connecting to {}:{}...".format(conf["server"].get("address"),
                                                 conf["server"].get("port")))

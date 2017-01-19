@@ -21,6 +21,12 @@ if conf.get("daemon") or settings.get("client"):
 else:
     DESCRIPTORS = [open(os.devnull, "w"), sys.stdout, sys.stderr]
 
+def get_log_fd(name):
+    fd = open(os.path.join(settings.get("folder", "."),
+                           "{}.log".format(name)), "a")
+    fd.write("\n---RESTART---\n")
+    return fd
+    
 def _log(level, *args):
     fd = DESCRIPTORS[settings[level]]
     ts = time.strftime("[%m/%d/%y %H:%M:%S]")
@@ -44,4 +50,4 @@ def error(*args):
 def last_exception():
     error(tb.format_exc())
 
-__all__ = ["log", "debug", "warn", "error", "last_exception"]
+__all__ = ["log", "debug", "warn", "error", "last_exception", "get_log_fd"]
