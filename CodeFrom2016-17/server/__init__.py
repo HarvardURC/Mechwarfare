@@ -20,6 +20,11 @@ class Bot:
         self.video.update(options)
         self.video.run()
         self.protocol.send_message("VSTR", port)
+
+    def QUIT(self, btn, val, msg):
+        log(msg)
+        log("Received QUIT from client. Quitting...")
+        exit()
         
     def BUTN(self, id, val):
         pass
