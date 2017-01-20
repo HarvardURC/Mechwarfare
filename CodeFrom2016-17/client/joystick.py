@@ -64,6 +64,7 @@ class Joystick:
                         self._protocol.receiver.video(True)
                 elif i == 9:
                     if new:
+                        self._protocol.send_message("QUIT", i, new, "START pressed.")
                         self._protocol.receiver.fatal("START pressed.")
                 else:
                     self._protocol.send_message("BUTN", i, new)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, os
+import sys, os, requests, re
 
 from botnet.settings import Configuration
 from botnet.auto import AutoClient
@@ -25,7 +25,15 @@ def autoconf(conf):
     conf.save()
 
 if __name__ == "__main__":
-    if "--search" in sys.argv or "-s" in sys.argv or not conf["server"].get("address"):
+    if "--datastore" in sys.argv or "-d" in sys.argv:
+        log("Retrieving ip from datastore...")
+        res = requests.get("http://datastore.aolkin.me/?{}".format(
+            conf["server"].get("hostname"))).text
+        ip = re.search("(\d{1,3}\.)+\d{1,3}", res).group(0)
+        log("Found: {}".format(ip))
+        conf["server"]["address"] = ip
+        conf.save()
+    elif "--search" in sys.argv or "-s" in sys.argv or not conf["server"].get("address"):
         autoconf(conf)
 
     client = Client(conf["server"].get("address"))
