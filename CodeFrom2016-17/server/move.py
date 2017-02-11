@@ -3,6 +3,8 @@ from threading import Thread, Lock, Event
 
 import time
 
+from botnet.logging import *
+
 from enum import Enum
 
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
@@ -18,15 +20,17 @@ class MotorController:
         pass
 
     def FORWARD(self, speed):
-        for i in range(5):
-            print("Walking Forward..." + str(i))
+        for i in range(3):
+            log("Walking Forward...", i)
             time.sleep(1)
 
     def BACKWARD(self, speed):
         pass
 
     def STRAFE_RIGHT(self, speed):
-        pass
+        for i in range(3):
+            log("Strafing Right...", i)
+            time.sleep(1)
 
     def STRAFE_LEFT(self, speed):
         pass
@@ -35,8 +39,8 @@ class MotorController:
         pass
 
     def TURN_LEFT(self, speed):
-        for i in range(3):
-            print("Rotating..." + str(i))
+        for i in range(2):
+            log("Rotating...", i)
             time.sleep(2)
 
 ZERO = (0, 0)
@@ -99,3 +103,5 @@ class MovementController(Thread):
         while not self.stop.is_set():
             if self._speed != 0:
                 getattr(self.motors, self._direction.name)(self._speed)
+            else:
+                time.sleep(0.1)

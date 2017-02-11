@@ -9,7 +9,7 @@
     "logging": {
 	"errors": 2,
 	"warnings": 2,
-	"debug": 2,
+	"debug": 0,
 	"logging": 1,
 	"folder": "."
     },

@@ -46,8 +46,8 @@ class Bot:
             self.move.left(val)
 
     def AXIS(self, id, val):
-        if id == 0: self.move.forward(val)
-        elif id == 1: self.move.strafe(val)
-        elif id == 2: pan(val)
-        elif id == 3: tilt(val)
+        if id == 0: self.move.strafe(val)
+        elif id == 1: self.move.forward(-val)
+        elif id == 3: pan(val)
+        elif id == 2: tilt(val)
             

@@ -1,6 +1,8 @@
 
 from threading import Thread, Lock, Event
 
+from botnet.logging import *
+
 import time
 
 class GunController(Thread):
@@ -9,11 +11,10 @@ class GunController(Thread):
         self.firing = False
 
     ### THIS IS THE FUNCTION
-    def fire():
+    def fire(self):
         """This function should fire one round from the turret."""
-        print("Shooting Turret")
-        return time.sleep(.2)
-        raise NotImplementedError()
+        log("Shooting Turret")
+        time.sleep(.2)
 
     def run(self):
         self.stop = Event()
@@ -23,6 +24,8 @@ class GunController(Thread):
                     self.fire()
                 except:
                     time.sleep(1) # Don't retry instantly on failure
+            else:
+                time.sleep(0.1)    
 
 ### Ignore below for now
 
