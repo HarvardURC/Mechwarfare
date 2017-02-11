@@ -13,7 +13,7 @@ class GunController(Thread):
         """This function should fire one round from the turret."""
         print("Shooting Turret")
         return time.sleep(.2)
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def run(self):
         self.stop = Event()
@@ -30,9 +30,9 @@ def pan(speed):
     """This function should turn on the pan motor at the specified speed,
        positive values are to the right, negative to the left. Zero is off.
        The input will range from -1 to +1. `pan` should return instantly."""
-    raise NotImplemented()
+    raise NotImplementedError()
 
 def tilt(speed):
     """This function should behave like the `pan` function, but for the tilt
        tilt motor. It should return instantly."""
-    raise NotImplemented()
+    raise NotImplementedError()
