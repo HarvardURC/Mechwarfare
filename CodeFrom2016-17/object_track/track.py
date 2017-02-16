@@ -57,10 +57,10 @@ while True:
 	blurred = cv2.GaussianBlur(frame, (11, 11), 0)
 	hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
  
-	# construct a mask for the color "green", then perform
+	# construct a mask for the color given, then perform
 	# a series of dilations and erosions to remove any small
 	# blobs left in the mask
-	mask = cv2.inRange(hsv, redLower, redUpper)
+	mask = cv2.inRange(hsv, greenLower, greenUpper)
 	mask = cv2.erode(mask, None, iterations=2)
 	mask = cv2.dilate(mask, None, iterations=2)
  
@@ -69,6 +69,8 @@ while True:
 	cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
 		cv2.CHAIN_APPROX_SIMPLE)[-2]
 	center = None
+
+	# CENTER IS (300, 166.5)
 
 	# only proceed if at least one contour was found
 	if len(cnts) > 0:
@@ -88,6 +90,7 @@ while True:
 				(0, 255, 255), 2)
 			cv2.circle(frame, center, 5, (0, 0, 255), -1)
 			pts.appendleft(center)
+			print center
 
 	# loop over the set of tracked points
 	for i in np.arange(1, len(pts)):
