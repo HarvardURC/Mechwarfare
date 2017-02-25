@@ -11,6 +11,7 @@ my_config = {
     },
     'motorgroups': {
         'leg3': ['hip3', 'knee3', 'ankle3'],
+        'turret': ['pan']
     },
     'motors': {
         'hip3': {
@@ -31,6 +32,13 @@ my_config = {
             'orientation': 'direct',
             'type': 'AX-12',
             'id': 7,
+            'angle_limit': [-150.0, 150.0],
+            'offset': 0.0
+        },
+        'pan': {
+            'orientation': 'direct',
+            'type': 'AX-12',
+            'id': 13,
             'angle_limit': [-150.0, 150.0],
             'offset': 0.0
         },
@@ -324,6 +332,8 @@ def rotate(degree, direction):
 
         moveAndDragMultFeet([1, 3, 2, 4], [HOMEPOS["1"], HOMEPOS["3"], HOMEPOS["2"], HOMEPOS["4"]], [0,0,0,0])
 
+def moveTurret(x)
+    getattr(robot,"pan").goal_position = x
 
 import time
 import numpy
@@ -341,11 +351,12 @@ print ""
 #moveServos(3, 180, -45, -45)
 
 #moveFoot(3,[-4.5,-2,-2])
-
+'''
 for i in range(3):
     moveAndDragMultFeet([3], [[-4.5, 0.0,-2]], [1])
 
     moveAndDragMultFeet([3], [[-4.5, -3,-2]], [0])
+'''
 
 print ""
 print("finalangles: ", getCurrentAngles(3))
