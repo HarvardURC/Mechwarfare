@@ -1,73 +1,111 @@
-import numpy
+import math
 
 # Config code
 my_config = {
     'controllers': {
         'my_dxl_controller': {
             'sync_read': False,
-            'attached_motors': ['leg1'],
+            'attached_motors': ['leg3'],
             'port': '/dev/ttyACM0'
         }
     },
     'motorgroups': {
-        'leg1': ['hip3', 'knee3', 'ankle3'],
+        'leg3': ['hip3', 'knee3', 'ankle3'],
     },
     'motors': {
         'hip3': {
             'orientation': 'indirect',
             'type': 'AX-12',
             'id': 9,
-            'angle_limit': [-90.0, 90.0],
+            'angle_limit': [-150.0, 150.0],
             'offset': 0.0
         },
         'knee3': {
             'orientation': 'indirect',
             'type': 'AX-12',
             'id': 8,
-            'angle_limit': [-90.0, 90.0],
+            'angle_limit': [-150.0, 150.0],
             'offset': 0.0
         },
         'ankle3': {
-            'orientation': 'indirect',
+            'orientation': 'direct',
             'type': 'AX-12',
             'id': 7,
-            'angle_limit': [-90.0, 90.0],
+            'angle_limit': [-150.0, 150.0],
             'offset': 0.0
         },
     }
 }
 
+# CHANGE THIS to the positions of the servos when all knee/ankle servos are flat and hip servos are symmetric
+HOME_LEG_POSITIONS = [[30, 60, 90],[30, 60, 90],[44.13,  37.1, 56.74],[133.58, 3.08, 11.0]]
+
+#
+IDEAL_SERVO_POSITIONS = [[45.0,0.0,0.0],[135.0, 0.0, 0.0],[225, 0.0, 0.0],[315, 0.0, 0.0]]
+
 # constants
-HOMEPOS_FOOTHEIGHT = -2
-HOMEPOS = {"1": [2,2,HOMEPOS_FOOTHEIGHT],
-           "2": [-2,2, HOMEPOS_FOOTHEIGHT],
-           "3": [-2,-2,HOMEPOS_FOOTHEIGHT],
-           "4": [2,-2,HOMEPOS_FOOTHEIGHT]}
+HOMEPOS_FOOTHEIGHT = -2.5
+HOMEPOS = {"1": [3.2,3.2,HOMEPOS_FOOTHEIGHT],
+           "2": [-3.2,3.2, HOMEPOS_FOOTHEIGHT],
+           "3": [-3.2,-3.2,HOMEPOS_FOOTHEIGHT],
+           "4": [3.2,-3.2,HOMEPOS_FOOTHEIGHT]}
 
 
 # static lengths from robot model
 L1_LENGTH = 1.5
-L2_LENGTH = 2.5
-HIPHORIZ_LENGTH = 2.5
-HIPVERTUP_LENGTH = 1.25
-BASE_WIDTH = 5
-#BASE_LENGTH = 
+L2_LENGTH = 3.5
+HIPHORIZ_LENGTH = 3.0
+HIPVERTUP_LENGTH = 1.75
+BASE_WIDTH = 6
+#BASE_LENGTH =
 
 # variables for robot walk gait
 DRAG_INTERVALS = 5
-LIFTFOOTHEIGHT = 1
+LIFTFOOTHEIGHT = .6
 
-STEP_DELAY = .5
+STEP_DELAY = .2
+
+def normalize(angle):
+    if angle > 200:
+        return (angle - 360.0)
+    elif angle < -200:
+        return (360 + angle)
+    else:
+        return angle
+
+# takes in angles that servos should move, and moves them according to positions they should be in
+def moveServos(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle):
+
+    servoHipAngle = normalize(idealHipAngle - IDEAL_SERVO_POSITIONS[legNum - 1][0] + HOME_LEG_POSITIONS[legNum - 1][0])
+    servoKneeAngle = normalize(idealKneeAngle - IDEAL_SERVO_POSITIONS[legNum - 1][1] + HOME_LEG_POSITIONS[legNum - 1][1])
+    servoAnkleAngle = normalize(idealAnkleAngle - IDEAL_SERVO_POSITIONS[legNum - 1][2] + HOME_LEG_POSITIONS[legNum - 1][2])
+
+    print "ideals: ", (idealHipAngle, idealKneeAngle, idealAnkleAngle)
+    print "actuals: ", (servoHipAngle, servoKneeAngle, servoAnkleAngle)
+
+    getattr(robot,"hip" + str(legNum)).goal_position = servoHipAngle
+    getattr(robot,"knee" + str(legNum)).goal_position = servoKneeAngle
+    getattr(robot,"ankle" + str(legNum)).goal_position = servoAnkleAngle
+
+# takes in legnum and returns the servo positions in the ideal frame
+def getCurrentAngles(legNum):
+
+    servoHipAngle = getattr(robot,"hip" + str(legNum)).present_position
+    servoKneeAngle = getattr(robot,"knee" + str(legNum)).present_position
+    servoAnkleAngle = getattr(robot,"ankle" + str(legNum)).present_position
+
+    idealHipAngle = normalize(servoHipAngle + IDEAL_SERVO_POSITIONS[legNum - 1][0] - HOME_LEG_POSITIONS[legNum - 1][0])
+    idealKneeAngle = normalize(servoKneeAngle + IDEAL_SERVO_POSITIONS[legNum - 1][1] - HOME_LEG_POSITIONS[legNum - 1][1])
+    idealAnkleAngle = normalize(servoAnkleAngle + IDEAL_SERVO_POSITIONS[legNum - 1][2] - HOME_LEG_POSITIONS[legNum - 1][2])
+
+    return (idealHipAngle, idealKneeAngle, idealAnkleAngle)
+
 
 
 def makeRadian(angles):
     return [math.radians(angles[0]),math.radians(angles[1]), math.radians(angles[2])]
 
-def getCurrentAngles(legNum):
-    return [getattr(robot,"hip" + str(legNum)).present_position, getattr(robot,"knee" + str(legNum)).present_position, getattr(robot,"ankle" + str(legNum)).present_position]
-
-
-# takes in the x, y, and z displacement from 
+# takes in the x, y, and z displacement from
 def getIKAnglesFromDisplacement(legNum, x,y,z):
 
     # these define the new x and new z values used for the 2DOF IK calculation
@@ -95,18 +133,18 @@ def getDisplacementFromAngles(legNum, currentAngles):
 # moves foot by lifting it
 def moveFoot(legNum, newDispVector):
     currentAngles = getCurrentAngles(legNum)
-    
+
     currentDispVector = getDisplacementFromAngles(legNum, currentAngles)
+    print("currentDispVector: ", currentDispVector)
 
     [x,y,z] = currentDispVector + .5 * numpy.subtract(newDispVector, currentDispVector)
 
     z = z + LIFTFOOTHEIGHT
 
+    print ("halfxyz:", x,y,z)
     newAngles = getIKAnglesFromDisplacement(legNum, x, y, z)
 
-    getattr(robot,"hip" + str(legNum)).goal_position = newAngles[0]
-    getattr(robot,"knee" + str(legNum)).goal_position = newAngles[1]
-    getattr(robot,"ankle" + str(legNum)).goal_position = newAngles[2]
+    moveServos(legNum, newAngles[0], newAngles[1], newAngles[2])
 
     time.sleep(STEP_DELAY)
 
@@ -114,9 +152,7 @@ def moveFoot(legNum, newDispVector):
 
     newAngles = getIKAnglesFromDisplacement(legNum, x, y, z)
 
-    getattr(robot,"hip" + str(legNum)).goal_position = newAngles[0]
-    getattr(robot,"knee" + str(legNum)).goal_position = newAngles[1]
-    getattr(robot,"ankle" + str(legNum)).goal_position = newAngles[2]
+    moveServos(legNum, newAngles[0], newAngles[1], newAngles[2])
 
     time.sleep(STEP_DELAY)
 
@@ -144,9 +180,7 @@ def moveMultFeet(legNums, newDispVectors):
 
         newAngles = getIKAnglesFromDisplacement(legNum, x, y, z)
 
-        getattr(robot,"hip" + str(legNum)).goal_position = newAngles[0]
-        getattr(robot,"knee" + str(legNum)).goal_position = newAngles[1]
-        getattr(robot,"ankle" + str(legNum)).goal_position = newAngles[2]
+        moveServos(legNum, newAngles[0], newAngles[1], newAngles[2])
 
     time.sleep(STEP_DELAY)
 
@@ -157,9 +191,7 @@ def moveMultFeet(legNums, newDispVectors):
 
         newAngles = getIKAnglesFromDisplacement(legNum, x, y, z)
 
-        getattr(robot,"hip" + str(legNum)).goal_position = newAngles[0]
-        getattr(robot,"knee" + str(legNum)).goal_position = newAngles[1]
-        getattr(robot,"ankle" + str(legNum)).goal_position = newAngles[2]
+        moveServos(legNum, newAngles[0], newAngles[1], newAngles[2])
 
     time.sleep(STEP_DELAY)
 
@@ -179,14 +211,12 @@ def dragFoot(legNum, newDispVector):
 
         newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
 
-        getattr(robot,"hip" + str(legNum)).goal_position = newAngles[0]
-        getattr(robot,"knee" + str(legNum)).goal_position = newAngles[1]
-        getattr(robot,"ankle" + str(legNum)).goal_position = newAngles[2]
+        moveServos(legNum, newAngles[0], newAngles[1], newAngles[2])
 
         time.sleep(.5)
 
 def dragMultFeet(legNums, newDispVectors):
-        
+
         # find current displacement vectors at beginning
         currentDispVectors = []
         for l in range(len(legNums)):
@@ -209,9 +239,7 @@ def dragMultFeet(legNums, newDispVectors):
 
                 newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
 
-                getattr(robot,"hip" + str(legNum)).goal_position = newAngles[0]
-                getattr(robot,"knee" + str(legNum)).goal_position = newAngles[1]
-                getattr(robot,"ankle" + str(legNum)).goal_position = newAngles[2]
+                moveServos(legNum, newAngles[0], newAngles[1], newAngles[2])
 
             time.sleep(.5)
 
@@ -242,10 +270,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
             [x,y,z] = currentDispVector + .5 * numpy.subtract(newDispVector, currentDispVector)
 
         newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
-
-        getattr(robot,"hip" + str(legNum)).goal_position = newAngles[0]
-        getattr(robot,"knee" + str(legNum)).goal_position = newAngles[1]
-        getattr(robot,"ankle" + str(legNum)).goal_position = newAngles[2]
+        moveServos(legNum, newAngles[0], newAngles[1], newAngles[2])
 
     time.sleep(STEP_DELAY)
 
@@ -259,12 +284,10 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
         else:
             [x,y,z] = newDispVector
 
-        
+
         newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
 
-        getattr(robot,"hip" + str(legNum)).goal_position = newAngles[0]
-        getattr(robot,"knee" + str(legNum)).goal_position = newAngles[1]
-        getattr(robot,"ankle" + str(legNum)).goal_position = newAngles[2]   
+        moveServos(legNum, newAngles[0], newAngles[1], newAngles[2])
 
     time.sleep(STEP_DELAY)
 
@@ -302,8 +325,6 @@ def rotate(degree, direction):
         moveAndDragMultFeet([1, 3, 2, 4], [HOMEPOS["1"], HOMEPOS["3"], HOMEPOS["2"], HOMEPOS["4"]], [0,0,0,0])
 
 
-
-
 import time
 import numpy
 import pypot.robot
@@ -311,12 +332,25 @@ import pypot.robot
 robot = pypot.robot.from_config(my_config)
 
 for m in robot.motors:
+    m.moving_speed = 80
     m.compliant = False
     print(m.name, m.present_position)
 
-print getattr(robot,"ankle" + str(3)).present_position
-print(getCurrentAngles(3))
+print("currentangles: ", getCurrentAngles(3))
+print ""
+#moveServos(3, 180, -45, -45)
 
+#moveFoot(3,[-4.5,-2,-2])
+
+for i in range(3):
+    moveAndDragMultFeet([3], [[-4.5, 0.0,-2]], [1])
+
+    moveAndDragMultFeet([3], [[-4.5, -3,-2]], [0])
+
+print ""
+print("finalangles: ", getCurrentAngles(3))
+
+time.sleep(1)
 
 robot.close()
 
