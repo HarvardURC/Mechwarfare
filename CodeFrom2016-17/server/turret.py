@@ -3,7 +3,10 @@ from threading import Thread, Lock, Event
 
 from botnet.logging import *
 
-import time
+import time, sys
+import traceback as tb
+
+from TESTGAITS.py3.realGaitsLeg3 import *
 
 class GunController(Thread):
     def __init__(self, *args, **kwargs):
@@ -13,8 +16,8 @@ class GunController(Thread):
     ### THIS IS THE FUNCTION
     def fire(self):
         """This function should fire one round from the turret."""
-        log("Shooting Turret")
-        time.sleep(.2)
+        moveTurret(__import__("random").randint(0,150))
+        time.sleep(0.5)
 
     def run(self):
         self.stop = Event()
@@ -22,7 +25,8 @@ class GunController(Thread):
             if self.firing:
                 try:
                     self.fire()
-                except:
+                except Exception:
+                    tb.print_exc(file=sys.stdout)
                     time.sleep(1) # Don't retry instantly on failure
             else:
                 time.sleep(0.1)    

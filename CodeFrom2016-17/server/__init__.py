@@ -16,8 +16,8 @@ class Bot:
         try:
             self.move.start()
             self.gun.start()
-        except RuntimeError:
-            pass
+        except RuntimeError as e:
+            debug(e)
 
     def remove_client(self, c):
         self.video.kill()

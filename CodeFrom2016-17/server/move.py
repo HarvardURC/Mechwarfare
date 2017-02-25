@@ -7,6 +7,8 @@ from botnet.logging import *
 
 from enum import Enum
 
+from TESTGAITS.py3.realGaitsLeg3 import *
+
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
 
 class MotorController:
@@ -20,17 +22,15 @@ class MotorController:
         pass
 
     def FORWARD(self, speed):
-        for i in range(3):
-            log("Walking Forward...", i)
-            time.sleep(1)
+        moveAndDragMultFeet([3], [[-4.5, -2, -2]], [0])
 
     def BACKWARD(self, speed):
-        pass
+        moveAndDragMultFeet([3], [[-4.5, 0, -2]], [0])
 
     def STRAFE_RIGHT(self, speed):
         for i in range(3):
             log("Strafing Right...", i)
-            time.sleep(1)
+            time.sleep(0.1)
 
     def STRAFE_LEFT(self, speed):
         pass
@@ -41,7 +41,7 @@ class MotorController:
     def TURN_LEFT(self, speed):
         for i in range(2):
             log("Rotating...", i)
-            time.sleep(2)
+            time.sleep(0.1)
 
 ZERO = (0, 0)
 def nonzero(x):
