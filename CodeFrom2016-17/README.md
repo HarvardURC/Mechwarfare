@@ -8,5 +8,6 @@ Code for running the controller and robot of the HURC Mechwarfare 2016-2017 robo
 - Pygame
 - Traditional Netcat
 - mplayer
+- Python "requests" package
 
 Homebrew is highly reccomended for installing that software and dependencies on OSX.
