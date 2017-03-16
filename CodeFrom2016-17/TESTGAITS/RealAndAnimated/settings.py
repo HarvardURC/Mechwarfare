@@ -3,6 +3,8 @@
 # REAL MOVEMENT SETTINGS
 HOME_LEG_POSITIONS = [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]]
 
+TURRET_HOME_POSITIONS = [0,0]
+
 
 IDEAL_SERVO_POSITIONS = [[45.0,0.0,0.0],[135.0, 0.0, 0.0],[225, 0.0, 0.0],[315, 0.0, 0.0]]
 
@@ -30,17 +32,60 @@ FOOT_RADIUS = .74
 LIFTFOOTHEIGHT = .8
 DRAG_INTERVALS = 5
 
-STEP_DELAY = .3
+STEP_DELAY = .15
 
 
 
 # ANIMATION SETTINGS
+
+# is animation tells walking.py whether to use animation functions or real functions. running animation.py sets this to True
+global isAnimation
+isAnimation = False
+
+BASE_THICKNESS = 1.0
+PANBOX_LENGTH = BASE_LENGTH/3.0
+PANBOX_WIDTH = BASE_WIDTH/3.0
+PANBOX_HEIGHT = BASE_THICKNESS*2.0
+BARREL_LENGTH = 5.0
+
+
+
+# degrees per second
+ANIMATED_LEG_SERVO_SPEED = 200.0
+
+# pan speed then tilt speed
+ANIMATED_TURRET_SERVO_SPEED = [100.0,100.0]
+SERVO_UPDATE_DELAY = .01
+
 global ServoPos 
 ServoPos = [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]]
+
+global servoGoalPos
+servoGoalPos = [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]]
+
+# turret servo current pos and goal pos
+global TurretPos
+TurretPos = [0.0, 0.0]
+global turretServoGoalPos
+turretServoGoalPos = [0.0, 0.0]
+
+global draggingLegs
+draggingLegs = [False,False,False,False]
+
+# made for individual legs so that we could average them together
+global legBasePos 
+legBasePos = [[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS],[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS],[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS],[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS]]
+
+global BasePos 
+BasePos = [0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS]
+
+
+global BaseOrientationAngle
+BaseOrientationAngle = 0.0
+
 
 global t
 
 global t_per_second 
 t_per_second = 30
 
-BASE_THICKNESS = 1.0

@@ -2,6 +2,7 @@ import numpy
 import math
 import time
 from threading import Thread
+import threading
 import settings as s
 
 
@@ -10,15 +11,17 @@ my_config = {
     'controllers': {
         'my_dxl_controller': {
             'sync_read': False,
-            'attached_motors': ['leg1', 'leg2', 'leg3', 'leg4'],
+            'attached_motors': ['leg1', 'leg2', 'leg3', 'leg4', 'turret'],
             'port': '/dev/ttyACM0'
         }
     },
     'motorgroups': {
-        'leg4': ['hip4', 'knee4', 'ankle4'],
-        'leg3': ['hip3', 'knee3', 'ankle3'],
         'leg1': ['hip1', 'knee1', 'ankle1'],
-        'leg2': ['hip2', 'knee2', 'ankle2']
+        'leg2': ['hip2', 'knee2', 'ankle2'],
+        'leg3': ['hip3', 'knee3', 'ankle3'],
+        'leg4': ['hip4', 'knee4', 'ankle4'],
+        'turret': ['pan', 'tilt']
+        
     },
     'motors': {
         'hip4': {
@@ -104,7 +107,22 @@ my_config = {
             'id': 3,
             'angle_limit': [-150.0, 150.0],
             'offset': 0.0
-        }
+        },
+        'pan': {
+            'orientation': 'direct',
+            'type': 'AX-18',
+            'id': 17,
+            'angle_limit': [-150.0, 150.0],
+            'offset': 0.0
+        },
+        'tilt': {
+            'orientation': 'direct',
+            'type': 'AX-18',
+            'id': 18,
+            'angle_limit': [-150.0, 150.0],
+            'offset': 0.0
+        },
+
     }
 }
 
@@ -148,34 +166,8 @@ def getServoAnglesFromIdeals(legNum, idealHipAngle, idealKneeAngle, idealAnkleAn
     return servoAngles
 
 
-def moveServosAnimation(legNum,Speed,newPos, isMove):
-    oldPos = s.ServoPos[legNum - 1] 
-    currentPos = [oldPos[0], oldPos[1], oldPos[2]]
-
-    StartT = s.t
-
-    displacement = numpy.subtract(newPos,oldPos)
-    
-    EndT = StartT + (max(numpy.absolute(displacement))/Speed)*s.t_per_second
-
-    hipEndT = StartT + (abs(displacement[0])/Speed)*s.t_per_second
-    kneeEndT = StartT + (abs(displacement[1])/Speed)*s.t_per_second
-    ankleEndT = StartT + (abs(displacement[2])/Speed)*s.t_per_second
 
 
-    while s.t < EndT:
-        time.sleep(.01)
-        currentT = s.t
-
-        currentPos = [s.ServoPos[legNum - 1][0], s.ServoPos[legNum - 1][1], s.ServoPos[legNum - 1][2]]
-        if currentT <= hipEndT:
-            currentPos[0] = oldPos[0] + Speed*((float(currentT - StartT))/s.t_per_second) * numpy.sign(displacement[0])
-        if currentT <= kneeEndT:
-            currentPos[1] = oldPos[1] + Speed*((float(currentT - StartT))/s.t_per_second) * numpy.sign(displacement[1])
-        if currentT <= ankleEndT:
-            currentPos[2] = oldPos[2] + Speed*((float(currentT - StartT))/s.t_per_second) * numpy.sign(displacement[2])
-
-        s.ServoPos[legNum - 1] = currentPos
 
 
 # takes in angles that servos should move, and moves them according to positions they should be in
@@ -185,34 +177,27 @@ def moveServos(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle, isMoving)
 
     checkServoBounds(legNum, servoAngles)
 
-    '''
-    print "ideals: ", (idealHipAngle, idealKneeAngle, idealAnkleAngle)
-    print "actuals: ", (servoAngles[0], servoAngles[1], servoAngles[2])
+    if s.isAnimation:
+        s.draggingLegs[legNum - 1] = (not isMoving)
+        s.servoGoalPos[legNum - 1] = servoAngles
+    else:
+        #print "ideals: ", (idealHipAngle, idealKneeAngle, idealAnkleAngle)
+        #print "actuals: ", (servoAngles[0], servoAngles[1], servoAngles[2])
 
-    
-    checkServoBounds(legNum, servoAngles)
-
-    getattr(robot,"hip" + str(legNum)).goal_position = servoAngles[0]
-    getattr(robot,"knee" + str(legNum)).goal_position = servoAngles[1]
-    getattr(robot,"ankle" + str(legNum)).goal_position = servoAngles[2]
-    '''
-
-    # uncomment for animation
-    legThread = Thread(target=moveServosAnimation, args=(legNum,100.0,servoAngles,isMoving))
-    legThread.start()
+        getattr(robot,"hip" + str(legNum)).goal_position = servoAngles[0]
+        getattr(robot,"knee" + str(legNum)).goal_position = servoAngles[1]
+        getattr(robot,"ankle" + str(legNum)).goal_position = servoAngles[2]
+        
 
 # takes in legnum and returns the servo positions in the ideal frame
 def getCurrentAngles(legNum):
 
-    '''
-    servoHipAngle = getattr(robot,"hip" + str(legNum)).present_position
-    servoKneeAngle = getattr(robot,"knee" + str(legNum)).present_position
-    servoAnkleAngle = getattr(robot,"ankle" + str(legNum)).present_position
-    '''
-
-    # uncomment for animation
-    [servoHipAngle, servoKneeAngle, servoAnkleAngle] = [s.ServoPos[legNum - 1][0], s.ServoPos[legNum - 1][1], s.ServoPos[legNum - 1][2]] 
-
+    if s.isAnimation:
+        [servoHipAngle, servoKneeAngle, servoAnkleAngle] = [s.ServoPos[legNum - 1][0], s.ServoPos[legNum - 1][1], s.ServoPos[legNum - 1][2]] 
+    else:
+        servoHipAngle = getattr(robot,"hip" + str(legNum)).present_position
+        servoKneeAngle = getattr(robot,"knee" + str(legNum)).present_position
+        servoAnkleAngle = getattr(robot,"ankle" + str(legNum)).present_position
 
     idealHipAngle = servoHipAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][0] - s.HOME_LEG_POSITIONS[legNum - 1][0]
     idealKneeAngle = servoKneeAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][1] - s.HOME_LEG_POSITIONS[legNum - 1][1]
@@ -332,6 +317,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
             [x,y,z] = currentDispVector + .5 * numpy.subtract(newDispVector, currentDispVector)
 
         newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
+
         moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
 
     time.sleep(s.STEP_DELAY)
@@ -353,21 +339,43 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
 
     time.sleep(s.STEP_DELAY)
 
+# moves two legs at a time to get back from home position. Should work without problem as long as robot
+# is reasonably balanced when this is called
 def goToHomeFromAnyPosition():
     moveAndDragMultFeet([1, 3],  [s.HOMEPOS["1"], s.HOMEPOS["3"]],[1,1])
     moveAndDragMultFeet([2, 4],  [s.HOMEPOS["2"], s.HOMEPOS["4"]], [1,1])
 
-def changeServoSpeeds(Speed):
-    for m in robot.motors:
-        m.moving_speed = Speed
+
+# if no motors are specified then changes all leg motors. Else it changes the motors in the list given.
+# takes a list of strings like ["pan", "tilt"] as second argument
+def changeServoSpeeds(speed, motors = None):
+    # in the animated version you could either change all leg servos at same time or pan or tilt servo
+    if (s.isAnimation):
+        if (motors == None):
+            s.ANIMATED_LEG_SERVO_SPEED = speed
+        else:
+            for name in motors:
+                if name == 'pan':
+                    s.ANIMATED_TURRET_SERVO_SPEED[0] = speed
+                elif name == 'tilt':
+                    s.ANIMATED_TURRET_SERVO_SPEED[1] = speed
+    # real version has more options because you could input any motors for the motors parameter
+    else:
+        if (motors == None):
+            for m in robot.motors:
+                # only change leg motor speed
+                if ((m.name != 'tilt') and (m.name != 'pan')):
+                    m.moving_speed = speed
+        else:
+            for m in motors:
+                getattr(robot,m).moving_speed = speed
+
 
 
 # direction must be either F, B, L, or R. numSteps is the number of steps, obvs.
-def walkingForward(direction, numSteps, stepSize, Speed):
-    goToHomeFromAnyPosition()
-    time.sleep(2)
-
-    #changeServoSpeeds(Speed)
+def walkingForward(direction, numSteps, stepSize, speed = None):
+    if (speed != None):
+        changeServoSpeeds(speed)
 
     if (direction == 'F'):
         y = -stepSize
@@ -393,47 +401,187 @@ def walkingForward(direction, numSteps, stepSize, Speed):
 
     goToHomeFromAnyPosition()
 
-def rotate(degree, direction):
-    goToHomeFromAnyPosition()
+def relHomPos(legNum, displacement):
+    return numpy.add(s.HOMEPOS[str(legNum)], displacement)
 
+def creep(direction, numSteps, stepSize, speed = None):
+    if (speed != None):
+        changeServoSpeeds(speed)
+
+    if (direction == 'F'):
+        feetOrder = [1, 2, 3, 4]
+        y = -stepSize
+        x = 0
+    elif (direction == 'B'):
+        feetOrder = [3,4,1,2]
+        y = stepSize
+        x = 0
+    elif (direction == 'L'):
+        feetOrder = [2,3,4,1]
+        y = 0
+        x = stepSize
+    elif (direction == 'R'):
+        feetOrder = [4,1,2,3]
+        y = 0
+        x = -stepSize
+    else:
+        print "You must choose either F, B, L, or R"
+
+    newDispVectors = [relHomPos(feetOrder[0],[x,y,0]), relHomPos(feetOrder[3],[-x,-y,0])]
+    moveAndDragMultFeet([feetOrder[0], feetOrder[3]], newDispVectors, [1,1])
+
+    
+    for iterations in range(numSteps):
+        
+        moveAndDragMultFeet([feetOrder[0]], [relHomPos(feetOrder[0],[-x,-y,0])], [1])
+        newDispVectors = [relHomPos(feetOrder[0],[0,0,0]), relHomPos(feetOrder[1],[x,y,0]), relHomPos(feetOrder[2],[x,y,0]), relHomPos(feetOrder[3],[0,0,0])]
+        moveAndDragMultFeet([feetOrder[0], feetOrder[1], feetOrder[2], feetOrder[3]], newDispVectors, [0,0,0,0])
+        moveAndDragMultFeet([feetOrder[2]], [relHomPos(feetOrder[2],[-x,-y,0])], [1])
+
+        
+        moveAndDragMultFeet([feetOrder[1]], [relHomPos(feetOrder[1],[-x,-y,0])], [1])
+        newDispVectors = [relHomPos(feetOrder[0],[x,y,0]), relHomPos(feetOrder[1],[0,0,0]), relHomPos(feetOrder[2],[0,0,0]), relHomPos(feetOrder[3],[x,y,0])]
+        moveAndDragMultFeet([feetOrder[0], feetOrder[1], feetOrder[2], feetOrder[3]], newDispVectors, [0,0,0,0])
+        moveAndDragMultFeet([feetOrder[3]], [relHomPos(feetOrder[3],[-x,-y,0])], [1])
+        
+
+
+def rotate(degree, isClockwise, speed = None):
+    if (speed != None):
+        changeServoSpeeds(speed)
+
+    direction = 1
+    if isClockwise:
+        direction = -1 
+        
     legRadius = (s.HOMEPOS["1"][0] **2.0 + s.HOMEPOS["1"][1] **2.0)**.5
     circleRadius = ((s.BASE_WIDTH/2.0)**2.0 + (s.BASE_LENGTH/2.0)**2.0)**.5 + legRadius
-    x = circleRadius * math.cos(math.radians(45.0 + degree)) - (s.BASE_WIDTH/2.0) - s.HOMEPOS["1"][0]
-    y = circleRadius * math.sin(math.radians(45.0 + degree)) - (s.BASE_WIDTH/2.0) - s.HOMEPOS["1"][1]
+    x = circleRadius * math.cos(math.radians(45.0 + direction * degree)) - (s.BASE_WIDTH/2.0) - s.HOMEPOS["1"][0]
+    y = circleRadius * math.sin(math.radians(45.0 + direction * degree)) - (s.BASE_WIDTH/2.0) - s.HOMEPOS["1"][1]
 
-    for iterations in range(5):
-        moveAndDragMultFeet([1, 3], [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0])], [1,1])
-        moveAndDragMultFeet([2, 4], [numpy.add(s.HOMEPOS["2"], [-y,x,0]), numpy.add(s.HOMEPOS["4"], [y,-x,0])], [1,1])
+    moveAndDragMultFeet([1, 3], [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0])], [1,1])
+    moveAndDragMultFeet([2, 4], [numpy.add(s.HOMEPOS["2"], [-y,x,0]), numpy.add(s.HOMEPOS["4"], [y,-x,0])], [1,1])
 
-        moveAndDragMultFeet([1, 3, 2, 4], [s.HOMEPOS["1"], s.HOMEPOS["3"], s.HOMEPOS["2"], s.HOMEPOS["4"]], [0,0,0,0])
-
-
-def moveTurret(x):
-    getattr(robot,"pan").goal_position = x
+    moveAndDragMultFeet([1, 3, 2, 4], [s.HOMEPOS["1"], s.HOMEPOS["3"], s.HOMEPOS["2"], s.HOMEPOS["4"]], [0,0,0,0])
 
 
+def movePan(x):
+    if s.isAnimation:
+        s.turretServoGoalPos[0] = x
+    else:
+        if (x > my_config['motors']['pan']['angle_limit'][1]):
+            raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + my_config['motors']['pan']['angle_limit'][1] + ' - Baby Mech has declared')
+        elif (x < my_config['motors']['pan']['angle_limit'][0]):
+            raise ValueError('Pan servo out of range. Requested position was ' + x + ' but min is ' + my_config['motors']['pan']['angle_limit'][0] + ' - Baby Mech has declared')
+        else:
+            getattr(robot,"pan").goal_position = x
 
-'''
-import pypot.robot
+def moveTilt(x):
+    if s.isAnimation:
+        s.turretServoGoalPos[1] = x
+    else:
+        if (x > my_config['motors']['tilt']['angle_limit'][1]):
+            raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + my_config['motors']['tilt']['angle_limit'][1] + ' - Baby Mech has declared')
+        elif (x < my_config['motors']['tilt']['angle_limit'][0]):
+            raise ValueError('Pan servo out of range. Requested position was ' + x + ' but min is ' + my_config['motors']['tilt']['angle_limit'][0] + ' - Baby Mech has declared')
+        else:
+            getattr(robot,"tilt").goal_position = x
 
-robot = pypot.robot.from_config(my_config)
+# 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change
+def rotatePan(degrees, isClockwise, speed = None):
+    if (speed != None):
+        changeServoSpeeds(speed, ["pan"])
 
-for m in robot.motors:
-    m.moving_speed = 130
-    m.compliant = False
-    print(m.name, m.present_position)
+    direction = 1
+    if isClockwise:
+        direction = -1
 
-for i in range(4):
-    print(i + 1, "currentangles: ", getCurrentAngles(i+1), "displacement: ", getDisplacementFromAngles(i+1,getCurrentAngles(i+1)))
+    if s.isAnimation:
+        currentPanAngle = s.TurretPos[0]
+    else:
+        currentPanAngle = getattr(robot,"pan").present_position
+
+    movePan(currentPanAngle + direction*degrees)
+
+def rotateTilt(degrees, isClockwise, speed = None):
+    if (speed != None):
+        changeServoSpeeds(speed, ["tilt"])
+
+    direction = 1
+    if isClockwise:
+        direction = -1
+
+    if s.isAnimation:
+        currentTiltAngle = s.TurretPos[1]
+    else:
+        currentTiltAngle = getattr(robot,"tilt").present_position
+
+    moveTilt(currentTiltAngle + direction * degrees)
 
 
-walkingForward()
-rotate(10,1)
+def legControl():
+    w.goToHomeFromAnyPosition()
+    rot_degrees = 10
+    num_walking_steps = 3
 
-time.sleep(1)
+    while True:
+        string = raw_input("Move Robot")
+        if (string == 'F') or (string == 'B') or (string == 'L') or (string == 'R'):
+            string2 = raw_input("   which algorithm?")
+            if string2 == 'c':
+                w.creep(string,num_walking_steps,1.5)
+            else:
+                w.walkingForward(string,num_walking_steps,1)
+        elif (string == 'h'):
+            num_walking_steps += 1
+        elif (string == 'g'):
+            num_walking_steps -= 1
+        elif (string == 'c'):
+            w.rotate(rot_degrees, True)
+        elif (string == 'x'):
+            w.rotate(rot_degrees, False)
+        elif (string == 'd'):
+            rot_degrees += 5
+        elif (string == 's'):
+            rot_degrees -= 5
+        elif (string == 'p'):
+            string2 = raw_input(" what speed?")
+            w.changeServoSpeeds(int(string2))
+        elif (string == '.'):
+            w.rotatePan(5, True)
+        elif (string == ','):
+            w.rotatePan(5, False)
+        elif (string == 'o'):
+            w.rotateTilt(5, False)
+        elif (string == 'l'):
+            w.rotateTilt(5, True)
+        elif string == 'w':
+            w.creep('F',num_walking_steps,1)
 
-robot.close()
-'''
+        elif (string == 'q'):
+            break
+
+# initialize robot config if not animation
+if (not s.isAnimation):
+    import pypot.robot
+
+    robot = pypot.robot.from_config(my_config)
+
+    for m in robot.motors:
+        m.moving_speed = 130
+        m.compliant = False
+        print(m.name, m.present_position)
+
+    for i in range(4):
+        print(i + 1, "currentangles: ", getCurrentAngles(i+1), "displacement: ", getDisplacementFromAngles(i+1,getCurrentAngles(i+1)))
+
+
+    legControl()
+
+    time.sleep(1)
+
+    robot.close()
+
 
 
 
