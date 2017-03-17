@@ -42,6 +42,9 @@ STEP_DELAY = .15
 global isAnimation
 isAnimation = False
 
+global t_per_second 
+t_per_second = 30
+
 BASE_THICKNESS = 1.0
 PANBOX_LENGTH = BASE_LENGTH/3.0
 PANBOX_WIDTH = BASE_WIDTH/3.0
@@ -79,13 +82,9 @@ legBasePos = [[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS],[0,0,
 global BasePos 
 BasePos = [0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS]
 
-
 global BaseOrientationAngle
 BaseOrientationAngle = 0.0
 
 
-global t
 
-global t_per_second 
-t_per_second = 30
 

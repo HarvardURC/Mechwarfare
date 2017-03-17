@@ -7,7 +7,7 @@ from botnet.logging import *
 
 from enum import Enum
 
-from TESTGAITS.py3.realGaitsLeg3 import *
+from TESTGAITS.RealAndAnimated.walking import *
 
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
 
@@ -19,29 +19,35 @@ class MotorController:
         pass
 
     def STOP(self, speed):
-        pass
+        print ("GO TO HOME POS AT SPEED: ",  speed)
+        goToHomeFromAnyPosition()
 
     def FORWARD(self, speed):
-        moveAndDragMultFeet([3], [[-4.5, -2, -2]], [0])
+        print ("walk forward at speed: ",  speed)
+        walkingForward('F', 1, 1, speed)
 
     def BACKWARD(self, speed):
-        moveAndDragMultFeet([3], [[-4.5, 0, -2]], [0])
+        print ("walk backwards at speed: ",  speed)
+        walkingForward('B', 1, 1, speed)
 
     def STRAFE_RIGHT(self, speed):
-        for i in range(3):
-            log("Strafing Right...", i)
-            time.sleep(0.1)
+        print ("walk right at speed: ",  speed)
+        walkingForward('R', 1, 1, speed)
 
     def STRAFE_LEFT(self, speed):
-        pass
+        print ("walk left at speed: ",  speed)
+        walkingForward('L', 1, 1, speed)
 
     def TURN_RIGHT(self, speed):
-        pass
+        # 10 degrees rotation for now
+        # True implies clockwise
+        print ("turn right at speed: ",  speed)
+        rotate(10, True, speed)
 
     def TURN_LEFT(self, speed):
-        for i in range(2):
-            log("Rotating...", i)
-            time.sleep(0.1)
+        # 10 degrees rotation for now
+        print ("turn left at speed: ", speed)
+        rotate(10, False, speed)
 
 ZERO = (0, 0)
 def nonzero(x):
@@ -49,7 +55,7 @@ def nonzero(x):
     
 class MovementController(Thread):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(MovementController,self).__init__(*args, **kwargs)
         self.daemon = True # There may be a better way
         self._directions = dict(zip(Direction,[ZERO for i in Direction]))
         self._directions[Direction.STOP] = (1, 0)

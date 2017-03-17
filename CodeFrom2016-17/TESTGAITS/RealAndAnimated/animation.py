@@ -8,9 +8,7 @@ import math
 from threading import Thread
 import threading
 import numpy
-
-import animationFunction as aF
-import walking as w
+import json
 import random
 
 
@@ -64,14 +62,29 @@ legs = {
     }
 }
 
+def makeRadian(angles):
+    return [math.radians(angles[0]),math.radians(angles[1]), math.radians(angles[2])]
+
+def getCurrentAngles(legNum):
+
+    with open('SharedVariables.json', 'r') as f:
+        data = json.load(f)
+    [servoHipAngle, servoKneeAngle, servoAnkleAngle] = [data["ServoPos"][legNum - 1][0], data["ServoPos"][legNum - 1][1], data["ServoPos"][legNum - 1][2]] 
+
+    idealHipAngle = servoHipAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][0] - s.HOME_LEG_POSITIONS[legNum - 1][0]
+    idealKneeAngle = servoKneeAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][1] - s.HOME_LEG_POSITIONS[legNum - 1][1]
+    idealAnkleAngle = servoAnkleAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][2] - s.HOME_LEG_POSITIONS[legNum - 1][2]
+    
+    return (idealHipAngle % 360, idealKneeAngle % 360, idealAnkleAngle % 360)
+
 def updateLegsAndBase():
 
     # get ideal angles in radian for the visual arrows to update
-    ServoPosRadian = [w.makeRadian(w.getCurrentAngles(1)),w.makeRadian(w.getCurrentAngles(2)),w.makeRadian(w.getCurrentAngles(3)),w.makeRadian(w.getCurrentAngles(4))]
+    ServoPosRadian = [makeRadian(getCurrentAngles(2)),makeRadian(getCurrentAngles(2)),makeRadian(getCurrentAngles(3)),makeRadian(getCurrentAngles(4))]
     # loop through all legs
     for i in range(1,5):
         x_neg = (-1) ** ((i - 1)%3 > 0 )
-        y_neg = (-1)** (i/3)
+        y_neg = (-1)** math.floor(i/3)
         leg = str(i)
 
         legs['leg'+leg]['vert'].pos = vectorAdd(base.pos,revForV(aF.rotateVector((x_neg * s.BASE_LENGTH/2.0,y_neg * s.BASE_WIDTH/2.0,-s.BASE_THICKNESS/2.0), s.BaseOrientationAngle)))
@@ -87,105 +100,41 @@ def updateLegsAndBase():
 
 
 
-        base.pos = revForV(s.BasePos)
-        base.axis =revForV((math.cos(s.BaseOrientationAngle),math.sin(s.BaseOrientationAngle),0))
+
+        with open('SharedVariables.json', 'r') as f:
+            data = json.load(f)
+
+        base.pos = revForV(data["BasePos"])
+        base.axis =revForV((math.cos(data["BaseOrientationAngle"]),math.sin(data["BaseOrientationAngle"]),0))
         base.length = s.BASE_LENGTH
 
-        TurretPosRadians = [math.radians(s.TurretPos[0]), math.radians(s.TurretPos[1])]
-        panBox.axis = revForV((math.cos(s.BaseOrientationAngle + TurretPosRadians[0]),math.sin(s.BaseOrientationAngle + TurretPosRadians[0]),0))
+        TurretPosRadians = [math.radians(data["TurretPos"][0]), math.radians(data["TurretPos"][1])]
+        panBox.axis = revForV((math.cos(data["BaseOrientationAngle"] + TurretPosRadians[0]),math.sin(data["BaseOrientationAngle"] + TurretPosRadians[0]),0))
         panBox.pos = numpy.add(base.pos, revForV([0,0,s.PANBOX_HEIGHT/2.0]))
         panBox.length = s.PANBOX_LENGTH
 
 
         barrel.pos = numpy.add(panBox.pos, revForV([0,0,s.PANBOX_HEIGHT/2.0]))
-        barrel.axis = revForV((math.cos(TurretPosRadians[1]) * math.cos(s.BaseOrientationAngle + TurretPosRadians[0]),math.cos(TurretPosRadians[1]) * math.sin(s.BaseOrientationAngle + TurretPosRadians[0]), math.sin(TurretPosRadians[1])))
+        barrel.axis = revForV((math.cos(TurretPosRadians[1]) * math.cos(data["BaseOrientationAngle"] + TurretPosRadians[0]),math.cos(TurretPosRadians[1]) * math.sin(data["BaseOrientationAngle"] + TurretPosRadians[0]), math.sin(TurretPosRadians[1])))
         barrel.length = s.BARREL_LENGTH
         
 
 
         
-# initialize time variable
-s.t = 0
+
 updateLegsAndBase()
 
 
-
-# put here whatever function you want to call
-def movementFun():
-    #w.walkingForward('F',6,1)
-    #w.walkingForward('R',3,1)
-    w.goToHomeFromAnyPosition()
-    #w.moveAndDragMultFeet([1,3],[numpy.add(s.HOMEPOS["1"],[0,-1.5,0]), numpy.add(s.HOMEPOS["3"],[0,-1.5,0])],[0,0])
-    #w.moveAndDragMultFeet([1,2,3,4], [numpy.add(s.HOMEPOS["1"],[0,1.5,0]), numpy.add(s.HOMEPOS["2"],[0,1.5,0]),numpy.add(s.HOMEPOS["3"],[0,-1.5,0]),numpy.add(s.HOMEPOS["4"],[0,-1.5,0])], [0,0,0,0])
-    #w.moveAndDragMultFeet([1,2,3,4], [numpy.add(s.HOMEPOS["1"],[0,-1.5,0]), numpy.add(s.HOMEPOS["2"],[0,-1.5,0]),numpy.add(s.HOMEPOS["3"],[0,-1.5,0]),numpy.add(s.HOMEPOS["4"],[0,-1.5,0])], [0,0,0,0])
-    #w.moveAndDragMultFeet([1,2,3,4], [numpy.add(s.HOMEPOS["1"],[0,1.5,0]), numpy.add(s.HOMEPOS["2"],[0,1.5,0]),numpy.add(s.HOMEPOS["3"],[0,1.5,0]),numpy.add(s.HOMEPOS["4"],[0,1.5,0])], [0,0,0,0])
-    w.rotate(10, False)
-    w.rotate(10, False)
-    w.rotate(15, True)
-    w.rotate(15, True)
-    w.walkingForward('F',6,1)
-
-def legControl():
-    w.goToHomeFromAnyPosition()
-    rot_degrees = 10
-    num_walking_steps = 3
-
-    while True:
-        string = raw_input("Move Robot")
-        if (string == 'F') or (string == 'B') or (string == 'L') or (string == 'R'):
-            string2 = raw_input("   which algorithm?")
-            if string2 == 'c':
-                w.creep(string,num_walking_steps,1.5)
-            else:
-                w.walkingForward(string,num_walking_steps,1)
-        elif (string == 'h'):
-            num_walking_steps += 1
-        elif (string == 'g'):
-            num_walking_steps -= 1
-        elif (string == 'c'):
-            w.rotate(rot_degrees, True)
-        elif (string == 'x'):
-            w.rotate(rot_degrees, False)
-        elif (string == 'd'):
-            rot_degrees += 5
-        elif (string == 's'):
-            rot_degrees -= 5
-        elif (string == 'p'):
-            r = random.random()*200
-            print r
-            w.changeServoSpeeds(r)
-        elif (string == '.'):
-            w.rotatePan(10, True)
-        elif (string == ','):
-            w.rotatePan(10, False)
-        elif (string == 'o'):
-            w.rotateTilt(10, False)
-        elif (string == 'l'):
-            w.rotateTilt(10, True)
-        elif string == 'w':
-            w.creep('F',num_walking_steps,1)
-
-        elif (string == 'q'):
-            break
-
-def turretControl():
-    while True:
-        string = raw_input("Move Robot")
-       
-
+    
 
 servoThread = Thread(target=aF.updateServosAndBase, args=())
 servoThread.start()
 
 
+'''
 # control needs separate thread because of Vpython loop
 controlLegsThread = Thread(target=legControl, args=())
 controlLegsThread.start()
-
-'''
-# control turret in separate thread, like our real robot
-controlTurretThread = Thread(target=turretControl, args=())
-controlTurretThread.start()
 '''
 
 
@@ -197,7 +146,7 @@ scene2 = display(title='Examples of Tetrahedrons',
 
 
 
-
+#legControl()
 
 
 # I copied this code that allows the visualizer to be rotated and zoomed in, using a mouse.
@@ -210,6 +159,8 @@ rangemax = 40
 
 zoom = False
 spin = False
+
+
 while True:
     rate(s.t_per_second)
 
@@ -261,9 +212,6 @@ while True:
 
 
 # -------------------------------------------
-
-    # increment time
-    s.t += 1
 
     #base.pos = revForV(0,0,0)
 

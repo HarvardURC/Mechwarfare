@@ -1,4 +1,4 @@
-from asyncio import Protocol
+from trollius import Protocol
 
 import pickle
 

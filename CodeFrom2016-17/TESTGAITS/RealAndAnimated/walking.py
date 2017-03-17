@@ -3,7 +3,11 @@ import math
 import time
 from threading import Thread
 import threading
-import settings as s
+import TESTGAITS.RealAndAnimated.animationFunction as aF
+import TESTGAITS.RealAndAnimated.settings as s
+import json
+
+s.isAnimation = True
 
 
 # Config code
@@ -126,6 +130,23 @@ my_config = {
     }
 }
 
+AnimatedConfig = {
+"ANIMATED_LEG_SERVO_SPEED": 200.0,
+"ANIMATED_TURRET_SERVO_SPEED": [100.0,100.0],
+"SERVO_UPDATE_DELAY": 0.01,
+"ServoPos": [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]],
+"servoGoalPos": [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]],
+"TurretPos": [0.0, 0.0],
+"turretServoGoalPos": [0.0, 0.0],
+"draggingLegs": [0,0,0,0],
+"legBasePos": [[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS]],
+"BasePos": [0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],
+"BaseOrientationAngle": 0.0
+}
+
+# initialize animated config file
+with open('SharedVariables.json', 'w') as f:
+    json.dump(AnimatedConfig, f)
 
 def checkServoBounds(legNum, servoAngles):
     names = ["Hip", "Knee", "Ankle"]
@@ -168,8 +189,6 @@ def getServoAnglesFromIdeals(legNum, idealHipAngle, idealKneeAngle, idealAnkleAn
 
 
 
-
-
 # takes in angles that servos should move, and moves them according to positions they should be in
 def moveServos(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle, isMoving):
 
@@ -178,8 +197,14 @@ def moveServos(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle, isMoving)
     checkServoBounds(legNum, servoAngles)
 
     if s.isAnimation:
-        s.draggingLegs[legNum - 1] = (not isMoving)
-        s.servoGoalPos[legNum - 1] = servoAngles
+        with open('SharedVariables.json', 'r') as f:
+            data = json.load(f)
+        # made int of boolean because json files use false instead of False, so we're using 0 and 1 for booleans
+        data["draggingLegs"][legNum - 1] = int(not isMoving)
+        data["servoGoalPos"][legNum - 1] = servoAngles
+
+        with open('SharedVariables.json', 'w') as f:
+            json.dump(data, f)
     else:
         #print "ideals: ", (idealHipAngle, idealKneeAngle, idealAnkleAngle)
         #print "actuals: ", (servoAngles[0], servoAngles[1], servoAngles[2])
@@ -193,7 +218,9 @@ def moveServos(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle, isMoving)
 def getCurrentAngles(legNum):
 
     if s.isAnimation:
-        [servoHipAngle, servoKneeAngle, servoAnkleAngle] = [s.ServoPos[legNum - 1][0], s.ServoPos[legNum - 1][1], s.ServoPos[legNum - 1][2]] 
+        with open('SharedVariables.json', 'r') as f:
+            data = json.load(f)
+        [servoHipAngle, servoKneeAngle, servoAnkleAngle] = [data["ServoPos"][legNum - 1][0], data["ServoPos"][legNum - 1][1], data["ServoPos"][legNum - 1][2]] 
     else:
         servoHipAngle = getattr(robot,"hip" + str(legNum)).present_position
         servoKneeAngle = getattr(robot,"knee" + str(legNum)).present_position
@@ -291,7 +318,7 @@ def dragFoot(legNum, newDispVector):
 # this one is a generalized version of the others. Dragging is discretized only into two
 # because it matches with the two discretizations of the move foot
 def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
-    print "moving to: ", newDispVectors, "..."
+    print ("moving to: ", newDispVectors, "...")
 
     # find current displacement vectors at beginning
     currentDispVectors = []
@@ -351,14 +378,19 @@ def goToHomeFromAnyPosition():
 def changeServoSpeeds(speed, motors = None):
     # in the animated version you could either change all leg servos at same time or pan or tilt servo
     if (s.isAnimation):
+        with open('SharedVariables.json', 'r') as f:
+            data = json.load(f)
         if (motors == None):
-            s.ANIMATED_LEG_SERVO_SPEED = speed
+            data["ANIMATED_LEG_SERVO_SPEED"] = speed
         else:
             for name in motors:
                 if name == 'pan':
-                    s.ANIMATED_TURRET_SERVO_SPEED[0] = speed
+                    data["ANIMATED_TURRET_SERVO_SPEED"][0] = speed
                 elif name == 'tilt':
-                    s.ANIMATED_TURRET_SERVO_SPEED[1] = speed
+                    data["ANIMATED_TURRET_SERVO_SPEED"][1] = speed
+
+        with open('SharedVariables.json', 'w') as f:
+            json.dump(data, f)
     # real version has more options because you could input any motors for the motors parameter
     else:
         if (motors == None):
@@ -390,7 +422,7 @@ def walkingForward(direction, numSteps, stepSize, speed = None):
         y = 0
         x = -stepSize
     else:
-        print "You must choose either F, B, L, or R"
+        print ("You must choose either F, B, L, or R")
 
     for iterations in range(numSteps):
         newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [x,y,0]), numpy.add(s.HOMEPOS["2"], [-x,-y,0]), numpy.add(s.HOMEPOS["4"], [-x,-y,0])]
@@ -425,7 +457,7 @@ def creep(direction, numSteps, stepSize, speed = None):
         y = 0
         x = -stepSize
     else:
-        print "You must choose either F, B, L, or R"
+        print ("You must choose either F, B, L, or R")
 
     newDispVectors = [relHomPos(feetOrder[0],[x,y,0]), relHomPos(feetOrder[3],[-x,-y,0])]
     moveAndDragMultFeet([feetOrder[0], feetOrder[3]], newDispVectors, [1,1])
@@ -467,7 +499,12 @@ def rotate(degree, isClockwise, speed = None):
 
 def movePan(x):
     if s.isAnimation:
-        s.turretServoGoalPos[0] = x
+        with open('SharedVariables.json', 'r') as f:
+            data = json.load(f)
+        data["turretServoGoalPos"][0] = x
+
+        with open('SharedVariables.json', 'w') as f:
+            json.dump(data, f)
     else:
         if (x > my_config['motors']['pan']['angle_limit'][1]):
             raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + my_config['motors']['pan']['angle_limit'][1] + ' - Baby Mech has declared')
@@ -478,7 +515,12 @@ def movePan(x):
 
 def moveTilt(x):
     if s.isAnimation:
-        s.turretServoGoalPos[1] = x
+        with open('SharedVariables.json', 'r') as f:
+            data = json.load(f)
+        data["turretServoGoalPos"][1] = x
+
+        with open('SharedVariables.json', 'w') as f:
+            json.dump(data, f)
     else:
         if (x > my_config['motors']['tilt']['angle_limit'][1]):
             raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + my_config['motors']['tilt']['angle_limit'][1] + ' - Baby Mech has declared')
@@ -497,7 +539,9 @@ def rotatePan(degrees, isClockwise, speed = None):
         direction = -1
 
     if s.isAnimation:
-        currentPanAngle = s.TurretPos[0]
+        with open('SharedVariables.json', 'r') as f:
+            data = json.load(f)
+        currentPanAngle = data["TurretPos"][0]
     else:
         currentPanAngle = getattr(robot,"pan").present_position
 
@@ -512,7 +556,9 @@ def rotateTilt(degrees, isClockwise, speed = None):
         direction = -1
 
     if s.isAnimation:
-        currentTiltAngle = s.TurretPos[1]
+        with open('SharedVariables.json', 'r') as f:
+            data = json.load(f)
+        currentTiltAngle = data["TurretPos"][1]
     else:
         currentTiltAngle = getattr(robot,"tilt").present_position
 
@@ -562,7 +608,12 @@ def legControl():
             break
 
 # initialize robot config if not animation
-if (not s.isAnimation):
+if s.isAnimation:
+    # if we're in animation mode, then call the while loop in af that updates servo positions and other dependent variables
+    servoThread = Thread(target=aF.updateServosAndBase, args=())
+    servoThread.start()
+
+else:
     import pypot.robot
 
     robot = pypot.robot.from_config(my_config)
@@ -575,8 +626,6 @@ if (not s.isAnimation):
     for i in range(4):
         print(i + 1, "currentangles: ", getCurrentAngles(i+1), "displacement: ", getDisplacementFromAngles(i+1,getCurrentAngles(i+1)))
 
-
-    legControl()
 
     time.sleep(1)
 

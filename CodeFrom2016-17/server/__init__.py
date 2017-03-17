@@ -2,7 +2,7 @@
 from botnet.logging import *
 
 from .video import Video
-from .turret import GunController, pan, tilt
+from .turret import GunController
 from .move import MovementController
 
 class Bot:
@@ -38,16 +38,25 @@ class Bot:
         exit()
         
     def BUTN(self, id, val):
+        print ("id: ", id, "val: ", val)
         if id == 1:
             self.gun.firing = val
         elif id == 6:
-            self.move.right(val)
-        elif id == 7:
             self.move.left(val)
+        elif id == 7:
+            self.move.right(val)
+        elif id == 10:
+            self.gun.panHome(val)
+        elif id == 11:
+            self.gun.tiltHome(val)
+        
+
 
     def AXIS(self, id, val):
+        print ("id: ", id, "val: ", val)
+
         if id == 0: self.move.strafe(val)
         elif id == 1: self.move.forward(-val)
-        elif id == 3: pan(val)
-        elif id == 2: tilt(val)
+        elif id == 3: self.gun.tilt(-val)
+        elif id == 2: self.gun.pan(val)
             

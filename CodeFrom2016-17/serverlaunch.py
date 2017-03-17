@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 import sys
 
-import asyncio
+import trollius as asyncio
 
 from botnet import settings, protocols
 from botnet.logging import *

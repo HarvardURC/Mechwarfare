@@ -5,7 +5,11 @@ from socket import *
 
 from collections import defaultdict
 
-import asyncio, json
+import trollius as asyncio
+
+import json
+
+
 
 class BroadcastServer:
     def init_broadcast(self):
@@ -23,7 +27,9 @@ class BroadcastServer:
     def _bcast_info(self):
         server = conf["server"].copy()
         if not server["address"]:
-            server["address"] = gethostbyname(gethostname())
+            #server["address"] = gethostbyname(gethostname())
+            # change this back to whats commented above. I hardcoded ip address
+            server["address"] = gethostbyname("10.251.215.134")
         return json.dumps(server)
 
 class AutoClient:

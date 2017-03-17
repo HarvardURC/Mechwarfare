@@ -26,4 +26,6 @@ if os.environ.get("SETTINGS"):
 elif os.path.exists(default_fn):
     conf.load()
 else:
-    print("Warning: configuration not found!", file=sys.stderr)
+    #print("Warning: configuration not found!", file=sys.stderr)
+    print("Warning: configuration not found!", sys.stderr)
+    
