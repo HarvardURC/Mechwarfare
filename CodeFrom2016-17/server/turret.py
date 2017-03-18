@@ -8,12 +8,11 @@ import traceback as tb
 
 from TESTGAITS.RealAndAnimated.walking import *
 
-# include this for raspberry pi
-'''
 import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-'''
+
+GPIO.setmode(GPIO.BCM)  
+GPIO.setup(16, GPIO.OUT)
+
 
 class GunController(Thread):
     def __init__(self, *args, **kwargs):
@@ -24,11 +23,10 @@ class GunController(Thread):
     def fire(self, isOn):
         if isOn:
             print ("FIRING GUN POW POW")
-            #GPIO.setup(18,GPIO.OUT)
-            #GPIO.output(18,GPIO.HIGH)
+            GPIO.output(16,True)
         else:
             print ("Stopped firing")
-            #GPIO.output(18,GPIO.LOW)
+            GPIO.output(16,False)
 
     def run(self):
         self.stop = Event()

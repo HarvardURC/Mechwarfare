@@ -5,6 +5,8 @@ from .video import Video
 from .turret import GunController
 from .move import MovementController
 
+DEADZONE = 0.1
+
 class Bot:
     def __init__(self):
         self.video = Video()
@@ -52,11 +54,15 @@ class Bot:
         
 
 
-    def AXIS(self, id, val):
-        print ("id: ", id, "val: ", val)
+    def AXIS(self, id, val, enable_deadzone=True):
+        #print ("id: ", id, "val: ", val)
 
+        # make sure val is above a certain axis threshold
+        if(abs(val) < DEADZONE):
+            val = 0.0
         if id == 0: self.move.strafe(val)
         elif id == 1: self.move.forward(-val)
         elif id == 3: self.gun.tilt(-val)
         elif id == 2: self.gun.pan(val)
+
             

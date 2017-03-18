@@ -27,9 +27,9 @@ class BroadcastServer:
     def _bcast_info(self):
         server = conf["server"].copy()
         if not server["address"]:
-            #server["address"] = gethostbyname(gethostname())
-            # change this back to whats commented above. I hardcoded ip address
-            server["address"] = gethostbyname("10.251.33.221")
+            server["address"] = gethostbyname(gethostname())
+            # change this to your ip address if your ip is not what it says in the terminal prompt
+            #server["address"] = gethostbyname("10.251.215.134")
         return json.dumps(server)
 
 class AutoClient:

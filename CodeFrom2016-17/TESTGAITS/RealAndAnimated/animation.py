@@ -1,7 +1,4 @@
 import settings2 as s
-
-s.isAnimation = True
-
 from visual import *
 import time
 import math
@@ -12,7 +9,6 @@ import json
 import random
 
 import os
-
 
 
 # helper functions
@@ -137,18 +133,23 @@ def readPipe():
         rp = open(rfPath, 'r')
         response = rp.read()
         rp.close()
+        
+        
 
         arr = response.split(';')
+        
+        #print ("received", arr)
 
-        for leg in range(4):
-            for servo in range(3):
-                s.ServoPos[leg][servo] = float(arr[leg*3 + servo])
-        for i in range(3):
-            s.BasePos[i] = float(arr[12 + i])
+        if len(arr) > 17:
+            for leg in range(4):
+                for servo in range(3):
+                    s.ServoPos[leg][servo] = float(arr[leg*3 + servo])
+            for i in range(3):
+                s.BasePos[i] = float(arr[12 + i])
 
-        s.BaseOrientationAngle = float(arr[15])
-        s.TurretPos[0] = float(arr[16])
-        s.TurretPos[1] = float(arr[17])
+            s.BaseOrientationAngle = float(arr[15])
+            s.TurretPos[0] = float(arr[16])
+            s.TurretPos[1] = float(arr[17])
         
 
 readPipeThread = Thread(target=readPipe, args=())

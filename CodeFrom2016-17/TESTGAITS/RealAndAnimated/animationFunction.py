@@ -14,13 +14,6 @@ import settings as s
 
 wfPath = "TESTGAITS/RealAndAnimated/p1"
 
-'''
-if not os.path.exists("pipeData"):
-    os.mkfifo("pipeData")  
-
-pipeout = os.open("pipeData", os.O_WRONLY)
-'''
-
 x_negs = [(-1) ** ((leg)%3 > 0) for leg in range(4)]
 y_negs = [(-1)** math.floor(leg/2) for leg in range(4)]
 

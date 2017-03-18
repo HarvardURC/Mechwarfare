@@ -4,15 +4,14 @@ import time
 from threading import Thread
 import threading
 
+
 import TESTGAITS.RealAndAnimated.animationFunction as aF
 import TESTGAITS.RealAndAnimated.settings as s
 '''
 import animationFunction as aF
 import settings as s
 '''
-import json
 
-s.isAnimation = True
 
 
 # Config code
@@ -134,21 +133,6 @@ my_config = {
 
     }
 }
-
-AnimatedConfig = {
-"ANIMATED_LEG_SERVO_SPEED": 200.0,
-"ANIMATED_TURRET_SERVO_SPEED": [100.0,100.0],
-"SERVO_UPDATE_DELAY": 0.01,
-"ServoPos": [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]],
-"servoGoalPos": [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]],
-"TurretPos": [0.0, 0.0],
-"turretServoGoalPos": [0.0, 0.0],
-"draggingLegs": [0,0,0,0],
-"legBasePos": [[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS]],
-"BasePos": [0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],
-"BaseOrientationAngle": 0.0
-}
-
 
 
 def checkServoBounds(legNum, servoAngles):
@@ -489,26 +473,25 @@ def rotate(degree, isClockwise, speed = None):
 
 
 def movePan(x):
-    if s.isAnimation:
-        s.turretServoGoalPos[0] = x
-
+    if (x > s.TURRET_SERVO_BOUNDS[0][1]):
+        raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + TURRET_SERVO_BOUNDS[0][1] + ' - Baby Mech has declared')
+    elif (x < s.TURRET_SERVO_BOUNDS[0][0]):
+        raise ValueError('Pan servo out of range. Requested position was ' + x + ' but min is ' + TURRET_SERVO_BOUNDS[0][0] + ' - Baby Mech has declared')
     else:
-        if (x > my_config['motors']['pan']['angle_limit'][1]):
-            raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + my_config['motors']['pan']['angle_limit'][1] + ' - Baby Mech has declared')
-        elif (x < my_config['motors']['pan']['angle_limit'][0]):
-            raise ValueError('Pan servo out of range. Requested position was ' + x + ' but min is ' + my_config['motors']['pan']['angle_limit'][0] + ' - Baby Mech has declared')
+        if s.isAnimation:
+            s.turretServoGoalPos[0] = x
         else:
             getattr(robot,"pan").goal_position = x
+    
 
 def moveTilt(x):
-    if s.isAnimation:
-        s.turretServoGoalPos[1] = x
-
+    if (x > s.TURRET_SERVO_BOUNDS[1][1]):
+        raise ValueError('Tilt servo out of range. Requested position was ' + x + ' but max is ' + TURRET_SERVO_BOUNDS[1][1] + ' - Baby Mech has declared')
+    elif (x < s.TURRET_SERVO_BOUNDS[1][0]):
+        raise ValueError('Tilt servo out of range. Requested position was ' + x + ' but min is ' + TURRET_SERVO_BOUNDS[1][0] + ' - Baby Mech has declared')
     else:
-        if (x > my_config['motors']['tilt']['angle_limit'][1]):
-            raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + my_config['motors']['tilt']['angle_limit'][1] + ' - Baby Mech has declared')
-        elif (x < my_config['motors']['tilt']['angle_limit'][0]):
-            raise ValueError('Pan servo out of range. Requested position was ' + x + ' but min is ' + my_config['motors']['tilt']['angle_limit'][0] + ' - Baby Mech has declared')
+        if s.isAnimation:
+            s.turretServoGoalPos[1] = x
         else:
             getattr(robot,"tilt").goal_position = x
 
@@ -544,59 +527,12 @@ def rotateTilt(degrees, isClockwise, speed = None):
     moveTilt(currentTiltAngle + direction * degrees)
 
 
-def legControl():
-    #goToHomeFromAnyPosition()
-    rot_degrees = 10
-    num_walking_steps = 3
-
-    while True:
-        string = input("Move Robot")
-        if (string == 'F') or (string == 'B') or (string == 'L') or (string == 'R'):
-            string2 = input("   which algorithm?")
-            if string2 == 'c':
-                creep(string,num_walking_steps,1.5)
-            else:
-                walkingForward(string,num_walking_steps,1)
-        elif (string == 'h'):
-            num_walking_steps += 1
-        elif (string == 'g'):
-            num_walking_steps -= 1
-        elif (string == 'c'):
-            rotate(rot_degrees, True)
-        elif (string == 'x'):
-            rotate(rot_degrees, False)
-        elif (string == 'd'):
-            rot_degrees += 5
-        elif (string == 's'):
-            rot_degrees -= 5
-        elif (string == 'p'):
-            string2 = input(" what speed?")
-            changeServoSpeeds(int(string2))
-        elif (string == '.'):
-            rotatePan(5, True)
-        elif (string == ','):
-            rotatePan(5, False)
-        elif (string == 'o'):
-            rotateTilt(5, False)
-        elif (string == 'l'):
-            rotateTilt(5, True)
-        elif string == 'w':
-            creep('F',num_walking_steps,1)
-
-        elif (string == 'q'):
-            break
-
 # initialize robot config if not animation
 
 if s.isAnimation:
     # if we're in animation mode, then call the while loop in af that updates servo positions and other dependent variables
     servoThread = Thread(target=aF.updateServosAndBase, args=())
     servoThread.start()
-
-    
-    controlThread = Thread(target=legControl, args=())
-    controlThread.start()
-    
 
 else:
     import pypot.robot
@@ -612,9 +548,7 @@ else:
         print(i + 1, "currentangles: ", getCurrentAngles(i+1), "displacement: ", getDisplacementFromAngles(i+1,getCurrentAngles(i+1)))
 
 
-    time.sleep(1)
-
-    robot.close()
+    #robot.close()
 
 
 
