@@ -19,35 +19,35 @@ class MotorController:
         pass
 
     def STOP(self, speed):
-        print ("GO TO HOME POS AT SPEED: ",  speed*200)
+        print ("GO TO HOME POS AT SPEED: ",  speed)
         goToHomeFromAnyPosition()
 
     def FORWARD(self, speed):
-        print ("walk forward at speed: ",  speed*200)
-        walkingForward('F', 1, 1.5, speed*200)
+        print ("walk forward at speed: ",  speed)
+        walkingForward('F', 1, 1.0, speed)
 
     def BACKWARD(self, speed):
-        print ("walk backwards at speed: ",  speed*200)
-        walkingForward('B', 1, 1.5, speed*200)
+        print ("walk backwards at speed: ",  speed)
+        walkingForward('B', 1, 1.0, speed)
 
     def STRAFE_RIGHT(self, speed):
-        print ("walk right at speed: ",  speed*200)
-        walkingForward('R', 1, 1.5, speed*200)
+        print ("walk right at speed: ",  speed)
+        walkingForward('R', 1, 1.0, speed)
 
     def STRAFE_LEFT(self, speed):
-        print ("walk left at speed: ",  speed*200)
-        walkingForward('L', 1, 1.5, speed*200)
+        print ("walk left at speed: ",  speed)
+        walkingForward('L', 1, 1.0, speed)
 
     def TURN_RIGHT(self, speed):
         # 10 degrees rotation for now
         # True implies clockwise
         print ("turn right at speed: ",  speed*200)
-        rotate(10, True, speed*200)
+        rotate(20, True, speed*200)
 
     def TURN_LEFT(self, speed):
         # 10 degrees rotation for now
-        print ("turn left at speed: ", speed*200)
-        rotate(10, False, speed*200)
+        print ("turn left at speed: ", speed)
+        rotate(20, False, speed*200)
 
 ZERO = (0, 0)
 def nonzero(x):

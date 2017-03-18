@@ -42,7 +42,7 @@ STEP_DELAY = .2
 
 # is animation tells walking.py whether to use animation functions or real functions. running animation.py sets this to True
 global isAnimation
-isAnimation = False
+isAnimation = True
 
 global t_per_second 
 t_per_second = 30

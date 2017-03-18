@@ -34,7 +34,8 @@ if __name__ == "__main__":
         conf["server"]["address"] = ip
         conf.save()
     elif "--search" in sys.argv or "-s" in sys.argv or not conf["server"].get("address"):
-        autoconf(conf)
+        conf["server"]["address"] = "10.251.41.180"
+	#autoconf(conf)
 
     client = Client(conf["server"].get("address"))
         

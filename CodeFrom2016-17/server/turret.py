@@ -7,11 +7,12 @@ import time, sys
 import traceback as tb
 
 from TESTGAITS.RealAndAnimated.walking import *
+import TESTGAITS.RealAndAnimated.settings as s
 
-import RPi.GPIO as GPIO
-
-GPIO.setmode(GPIO.BCM)  
-GPIO.setup(16, GPIO.OUT)
+if not s.isAnimation:
+    import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.BCM)  
+    GPIO.setup(16, GPIO.OUT)
 
 
 class GunController(Thread):
@@ -23,24 +24,17 @@ class GunController(Thread):
     def fire(self, isOn):
         if isOn:
             print ("FIRING GUN POW POW")
-            GPIO.output(16,True)
+            if not s.isAnimation:
+                GPIO.output(16,True)
         else:
             print ("Stopped firing")
-            GPIO.output(16,False)
+            if not s.isAnimation:
+                GPIO.output(16,False)
 
     def run(self):
         self.stop = Event()
         while not self.stop.is_set():
             # why did Aaron put this here? We want the gun to fire on automatic
-            '''
-            if self.firing:
-                try:
-                    self.fire()
-                except Exception:
-                    tb.print_exc(file=sys.stdout)
-                    time.sleep(1) # Don't retry instantly on failure
-            else:
-            '''
             time.sleep(0.05)    
 
     ### Ignore below for now
@@ -51,35 +45,42 @@ class GunController(Thread):
            positive values are to the right, negative to the left. Zero is off.
            The input will range from -1 to +1. `pan` should return instantly."""
 
-        print ("rotate pan at speed: ",  speed*200)
-
-        if speed*200 > 5.0:
-            rotatePan(5, True, speed*200)
-        elif speed*200 < -5.0:
-            rotatePan(5, False, -speed*200)
+        print ("rotate pan at speed: ",  speed)
+        if speed == 0.0:
+            moveTurretServo(0, getTurretServoAngle(0))
+        elif speed < 0.0:
+            changeServoSpeeds(-speed, ["tilt"])
+            moveTurretServo(0, getTurretBound(0,1))
+        elif speed > 0.0:
+            changeServoSpeeds(speed, ["tilt"])
+            moveTurretServo(0, getTurretBound(0,0))
 
     def tilt(self, speed):
         """This function should behave like the `pan` function, but for the tilt
         tilt motor. It should return instantly."""
 
-        print ("rotate tilt at speed: ", speed*200)
-        if speed*200 > 5.0:
-            rotateTilt(5, False, speed*200)
-        elif speed*200 < -5.0:
-            rotateTilt(5, True, -speed*200)
+        print ("rotate tilt at speed: ", speed)
+        if speed == 0.0:
+            moveTurretServo(1,getTurretServoAngle(1))
+        elif speed < 0.0:
+            changeServoSpeeds(-speed, ["tilt"])
+            moveTurretServo(1,getTurretBound(1,1))
+        elif speed > 0.0:
+            changeServoSpeeds(speed, ["tilt"])
+            moveTurretServo(1, getTurretBound(1,0))
 
     # is on deals with the fact that when you release the button, the value changes. 
     # This should probably be handled on the client side though
     def tiltHome(self, isOn):
         if isOn:
             print ("go to tilt home")
-            changeServoSpeeds(100.0, ['tilt'])
-            moveTilt(0.0)
+            changeServoSpeeds(200.0, ['tilt'])
+            moveTurretServo(1,0.0)
 
     def panHome(self, isOn):
         if isOn:
             print ("go to pan home")
-            changeServoSpeeds(100.0, ['pan'])
-            movePan(0.0)
+            changeServoSpeeds(200.0, ['pan'])
+            moveTurretServo(0,0.0)
 
 

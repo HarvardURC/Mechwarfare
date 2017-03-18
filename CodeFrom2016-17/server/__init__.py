@@ -41,8 +41,8 @@ class Bot:
         
     def BUTN(self, id, val):
         print ("id: ", id, "val: ", val)
-        if id == 1:
-            self.gun.firing(val)
+        if id == 5:
+            self.gun.fire(val)
         elif id == 6:
             self.move.left(val)
         elif id == 7:
@@ -60,9 +60,9 @@ class Bot:
         # make sure val is above a certain axis threshold
         if(abs(val) < DEADZONE):
             val = 0.0
-        if id == 0: self.move.strafe(val)
-        elif id == 1: self.move.forward(-val)
-        elif id == 3: self.gun.tilt(-val)
-        elif id == 2: self.gun.pan(val)
+        if id == 0: self.move.strafe(val*200)
+        elif id == 1: self.move.forward(-val*200)
+        elif id == 3: self.gun.tilt(val*200)
+        elif id == 2: self.gun.pan(val*200)
 
             
