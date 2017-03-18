@@ -3,7 +3,16 @@ import math
 import time
 from threading import Thread
 import threading
+
+import TESTGAITS.RealAndAnimated.animationFunction as aF
+import TESTGAITS.RealAndAnimated.settings as s
+'''
+import animationFunction as aF
 import settings as s
+'''
+import json
+
+s.isAnimation = True
 
 
 # Config code
@@ -126,6 +135,21 @@ my_config = {
     }
 }
 
+AnimatedConfig = {
+"ANIMATED_LEG_SERVO_SPEED": 200.0,
+"ANIMATED_TURRET_SERVO_SPEED": [100.0,100.0],
+"SERVO_UPDATE_DELAY": 0.01,
+"ServoPos": [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]],
+"servoGoalPos": [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]],
+"TurretPos": [0.0, 0.0],
+"turretServoGoalPos": [0.0, 0.0],
+"draggingLegs": [0,0,0,0],
+"legBasePos": [[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],[0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS]],
+"BasePos": [0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS],
+"BaseOrientationAngle": 0.0
+}
+
+
 
 def checkServoBounds(legNum, servoAngles):
     names = ["Hip", "Knee", "Ankle"]
@@ -168,8 +192,6 @@ def getServoAnglesFromIdeals(legNum, idealHipAngle, idealKneeAngle, idealAnkleAn
 
 
 
-
-
 # takes in angles that servos should move, and moves them according to positions they should be in
 def moveServos(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle, isMoving):
 
@@ -178,8 +200,10 @@ def moveServos(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle, isMoving)
     checkServoBounds(legNum, servoAngles)
 
     if s.isAnimation:
-        s.draggingLegs[legNum - 1] = (not isMoving)
+        # made int of boolean because json files use false instead of False, so we're using 0 and 1 for booleans
+        s.draggingLegs[legNum - 1] = int(not isMoving)
         s.servoGoalPos[legNum - 1] = servoAngles
+
     else:
         #print "ideals: ", (idealHipAngle, idealKneeAngle, idealAnkleAngle)
         #print "actuals: ", (servoAngles[0], servoAngles[1], servoAngles[2])
@@ -204,8 +228,6 @@ def getCurrentAngles(legNum):
     idealAnkleAngle = servoAnkleAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][2] - s.HOME_LEG_POSITIONS[legNum - 1][2]
     
     return (idealHipAngle % 360, idealKneeAngle % 360, idealAnkleAngle % 360)
-
-    
 
     
 
@@ -291,7 +313,7 @@ def dragFoot(legNum, newDispVector):
 # this one is a generalized version of the others. Dragging is discretized only into two
 # because it matches with the two discretizations of the move foot
 def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
-    print "moving to: ", newDispVectors, "..."
+    print ("moving to: ", newDispVectors, "...")
 
     # find current displacement vectors at beginning
     currentDispVectors = []
@@ -359,6 +381,7 @@ def changeServoSpeeds(speed, motors = None):
                     s.ANIMATED_TURRET_SERVO_SPEED[0] = speed
                 elif name == 'tilt':
                     s.ANIMATED_TURRET_SERVO_SPEED[1] = speed
+
     # real version has more options because you could input any motors for the motors parameter
     else:
         if (motors == None):
@@ -390,7 +413,7 @@ def walkingForward(direction, numSteps, stepSize, speed = None):
         y = 0
         x = -stepSize
     else:
-        print "You must choose either F, B, L, or R"
+        print ("You must choose either F, B, L, or R")
 
     for iterations in range(numSteps):
         newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [x,y,0]), numpy.add(s.HOMEPOS["2"], [-x,-y,0]), numpy.add(s.HOMEPOS["4"], [-x,-y,0])]
@@ -399,7 +422,7 @@ def walkingForward(direction, numSteps, stepSize, speed = None):
         newDispVectors = [numpy.add(s.HOMEPOS["1"], [-x,-y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), numpy.add(s.HOMEPOS["2"], [x,y,0]), numpy.add(s.HOMEPOS["4"], [x,y,0])]
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
 
-    goToHomeFromAnyPosition()
+    #goToHomeFromAnyPosition()
 
 def relHomPos(legNum, displacement):
     return numpy.add(s.HOMEPOS[str(legNum)], displacement)
@@ -425,7 +448,7 @@ def creep(direction, numSteps, stepSize, speed = None):
         y = 0
         x = -stepSize
     else:
-        print "You must choose either F, B, L, or R"
+        print ("You must choose either F, B, L, or R")
 
     newDispVectors = [relHomPos(feetOrder[0],[x,y,0]), relHomPos(feetOrder[3],[-x,-y,0])]
     moveAndDragMultFeet([feetOrder[0], feetOrder[3]], newDispVectors, [1,1])
@@ -468,6 +491,7 @@ def rotate(degree, isClockwise, speed = None):
 def movePan(x):
     if s.isAnimation:
         s.turretServoGoalPos[0] = x
+
     else:
         if (x > my_config['motors']['pan']['angle_limit'][1]):
             raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + my_config['motors']['pan']['angle_limit'][1] + ' - Baby Mech has declared')
@@ -479,6 +503,7 @@ def movePan(x):
 def moveTilt(x):
     if s.isAnimation:
         s.turretServoGoalPos[1] = x
+
     else:
         if (x > my_config['motors']['tilt']['angle_limit'][1]):
             raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + my_config['motors']['tilt']['angle_limit'][1] + ' - Baby Mech has declared')
@@ -520,49 +545,60 @@ def rotateTilt(degrees, isClockwise, speed = None):
 
 
 def legControl():
-    w.goToHomeFromAnyPosition()
+    #goToHomeFromAnyPosition()
     rot_degrees = 10
     num_walking_steps = 3
 
     while True:
-        string = raw_input("Move Robot")
+        string = input("Move Robot")
         if (string == 'F') or (string == 'B') or (string == 'L') or (string == 'R'):
-            string2 = raw_input("   which algorithm?")
+            string2 = input("   which algorithm?")
             if string2 == 'c':
-                w.creep(string,num_walking_steps,1.5)
+                creep(string,num_walking_steps,1.5)
             else:
-                w.walkingForward(string,num_walking_steps,1)
+                walkingForward(string,num_walking_steps,1)
         elif (string == 'h'):
             num_walking_steps += 1
         elif (string == 'g'):
             num_walking_steps -= 1
         elif (string == 'c'):
-            w.rotate(rot_degrees, True)
+            rotate(rot_degrees, True)
         elif (string == 'x'):
-            w.rotate(rot_degrees, False)
+            rotate(rot_degrees, False)
         elif (string == 'd'):
             rot_degrees += 5
         elif (string == 's'):
             rot_degrees -= 5
         elif (string == 'p'):
-            string2 = raw_input(" what speed?")
-            w.changeServoSpeeds(int(string2))
+            string2 = input(" what speed?")
+            changeServoSpeeds(int(string2))
         elif (string == '.'):
-            w.rotatePan(5, True)
+            rotatePan(5, True)
         elif (string == ','):
-            w.rotatePan(5, False)
+            rotatePan(5, False)
         elif (string == 'o'):
-            w.rotateTilt(5, False)
+            rotateTilt(5, False)
         elif (string == 'l'):
-            w.rotateTilt(5, True)
+            rotateTilt(5, True)
         elif string == 'w':
-            w.creep('F',num_walking_steps,1)
+            creep('F',num_walking_steps,1)
 
         elif (string == 'q'):
             break
 
 # initialize robot config if not animation
-if (not s.isAnimation):
+
+if s.isAnimation:
+    # if we're in animation mode, then call the while loop in af that updates servo positions and other dependent variables
+    servoThread = Thread(target=aF.updateServosAndBase, args=())
+    servoThread.start()
+
+    
+    controlThread = Thread(target=legControl, args=())
+    controlThread.start()
+    
+
+else:
     import pypot.robot
 
     robot = pypot.robot.from_config(my_config)
@@ -575,8 +611,6 @@ if (not s.isAnimation):
     for i in range(4):
         print(i + 1, "currentangles: ", getCurrentAngles(i+1), "displacement: ", getDisplacementFromAngles(i+1,getCurrentAngles(i+1)))
 
-
-    legControl()
 
     time.sleep(1)
 

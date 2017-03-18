@@ -8,9 +8,9 @@
         "warnings": 2
     },
     "server": {
-        "address": "10.251.219.174",
+        "address": "10.251.33.221",
         "bcast_port": 8646,
-        "hostname": "babymech",
+        "friendly_name": "Baby Mech",
         "port": 8642
     }
 }

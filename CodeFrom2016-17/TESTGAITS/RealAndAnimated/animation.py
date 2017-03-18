@@ -1,4 +1,4 @@
-import settings as s
+import settings2 as s
 
 s.isAnimation = True
 
@@ -8,10 +8,10 @@ import math
 from threading import Thread
 import threading
 import numpy
-
-import animationFunction as aF
-import walking as w
+import json
 import random
+
+import os
 
 
 
@@ -64,27 +64,47 @@ legs = {
     }
 }
 
+def makeRadian(angles):
+    return [math.radians(angles[0]),math.radians(angles[1]), math.radians(angles[2])]
+
+def getCurrentAngles(legNum):
+    [servoHipAngle, servoKneeAngle, servoAnkleAngle] = [s.ServoPos[legNum - 1][0], s.ServoPos[legNum - 1][1], s.ServoPos[legNum - 1][2]] 
+
+    idealHipAngle = servoHipAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][0] - s.HOME_LEG_POSITIONS[legNum - 1][0]
+    idealKneeAngle = servoKneeAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][1] - s.HOME_LEG_POSITIONS[legNum - 1][1]
+    idealAnkleAngle = servoAnkleAngle + s.IDEAL_SERVO_POSITIONS[legNum - 1][2] - s.HOME_LEG_POSITIONS[legNum - 1][2]
+    
+    return (idealHipAngle % 360, idealKneeAngle % 360, idealAnkleAngle % 360)
+
+def rotateVector(vector, theta):
+    a = vector[0]
+    b = vector[1]
+    L = (a**2.0 + b ** 2.0) ** 0.5
+    alpha = math.atan2(b,a)
+
+    return [L * math.cos(alpha + theta), L * math.sin(alpha + theta), vector[2]]
+
 def updateLegsAndBase():
 
     # get ideal angles in radian for the visual arrows to update
-    ServoPosRadian = [w.makeRadian(w.getCurrentAngles(1)),w.makeRadian(w.getCurrentAngles(2)),w.makeRadian(w.getCurrentAngles(3)),w.makeRadian(w.getCurrentAngles(4))]
+    ServoPosRadian = [makeRadian(getCurrentAngles(1)),makeRadian(getCurrentAngles(2)),makeRadian(getCurrentAngles(3)),makeRadian(getCurrentAngles(4))]
     # loop through all legs
     for i in range(1,5):
-        x_neg = (-1) ** ((i - 1)%3 > 0 )
-        y_neg = (-1)** (i/3)
+        x_neg = (-1) ** ((i - 1)%3 > 0)
+        y_neg = (-1)** math.floor(i/3)
+
         leg = str(i)
 
-        legs['leg'+leg]['vert'].pos = vectorAdd(base.pos,revForV(aF.rotateVector((x_neg * s.BASE_LENGTH/2.0,y_neg * s.BASE_WIDTH/2.0,-s.BASE_THICKNESS/2.0), s.BaseOrientationAngle)))
+        legs['leg'+leg]['vert'].pos = vectorAdd(base.pos,revForV(rotateVector((x_neg * s.BASE_LENGTH/2.0,y_neg * s.BASE_WIDTH/2.0,-s.BASE_THICKNESS/2.0), s.BaseOrientationAngle)))
         legs['leg'+leg]['vert'].axis = revForV((0,0,s.HIPVERTUP_LENGTH))
         legs['leg'+leg]['horiz'].pos = vectorAdd(legs['leg'+leg]['vert'].pos,legs['leg'+leg]['vert'].axis)
-        legs['leg'+leg]['horiz'].axis = revForV(aF.rotateVector((s.HIPHORIZ_LENGTH*cos(ServoPosRadian[i - 1][0]),s.HIPHORIZ_LENGTH*sin(ServoPosRadian[i - 1][0]),0), s.BaseOrientationAngle))
+        legs['leg'+leg]['horiz'].axis = revForV(rotateVector((s.HIPHORIZ_LENGTH*cos(ServoPosRadian[i - 1][0]),s.HIPHORIZ_LENGTH*sin(ServoPosRadian[i - 1][0]),0), s.BaseOrientationAngle))
         legs['leg'+leg]['knee2ankle'].pos = vectorAdd(legs['leg'+leg]['horiz'].pos,legs['leg'+leg]['horiz'].axis)
-        legs['leg'+leg]['knee2ankle'].axis = revForV(aF.rotateVector((s.L1_LENGTH*cos(ServoPosRadian[i - 1][1])*cos(ServoPosRadian[i - 1][0]),s.L1_LENGTH*cos(ServoPosRadian[i - 1][1])*sin(ServoPosRadian[i - 1][0]),s.L1_LENGTH*sin(ServoPosRadian[i - 1][1])), s.BaseOrientationAngle))
+        legs['leg'+leg]['knee2ankle'].axis = revForV(rotateVector((s.L1_LENGTH*cos(ServoPosRadian[i - 1][1])*cos(ServoPosRadian[i - 1][0]),s.L1_LENGTH*cos(ServoPosRadian[i - 1][1])*sin(ServoPosRadian[i - 1][0]),s.L1_LENGTH*sin(ServoPosRadian[i - 1][1])), s.BaseOrientationAngle))
         legs['leg'+leg]['ankle2foot'].pos = vectorAdd(legs['leg'+leg]['knee2ankle'].pos,legs['leg'+leg]['knee2ankle'].axis)
-        legs['leg'+leg]['ankle2foot'].axis = revForV(aF.rotateVector((s.L2_LENGTH*cos(ServoPosRadian[i - 1][2])*cos(ServoPosRadian[i - 1][0]),s.L2_LENGTH*cos(ServoPosRadian[i - 1][2])*sin(ServoPosRadian[i - 1][0]),s.L2_LENGTH*sin(ServoPosRadian[i - 1][2])), s.BaseOrientationAngle))
+        legs['leg'+leg]['ankle2foot'].axis = revForV(rotateVector((s.L2_LENGTH*cos(ServoPosRadian[i - 1][2])*cos(ServoPosRadian[i - 1][0]),s.L2_LENGTH*cos(ServoPosRadian[i - 1][2])*sin(ServoPosRadian[i - 1][0]),s.L2_LENGTH*sin(ServoPosRadian[i - 1][2])), s.BaseOrientationAngle))
 
         legs['leg'+leg]['foot'].pos = vectorAdd(legs['leg'+leg]['ankle2foot'].pos,legs['leg'+leg]['ankle2foot'].axis)
-
 
 
         base.pos = revForV(s.BasePos)
@@ -103,89 +123,43 @@ def updateLegsAndBase():
         
 
 
+#updateLegsAndBase()
+
+
+
+def readPipe():
+    rfPath = "./p1"
+    try:
+        os.mkfifo(rfPath)
+    except OSError:
+        pass
+    while True:
+        rp = open(rfPath, 'r')
+        response = rp.read()
+        rp.close()
+
+        arr = response.split(';')
+
+        for leg in range(4):
+            for servo in range(3):
+                s.ServoPos[leg][servo] = float(arr[leg*3 + servo])
+        for i in range(3):
+            s.BasePos[i] = float(arr[12 + i])
+
+        s.BaseOrientationAngle = float(arr[15])
+        s.TurretPos[0] = float(arr[16])
+        s.TurretPos[1] = float(arr[17])
         
-# initialize time variable
-s.t = 0
-updateLegsAndBase()
+
+readPipeThread = Thread(target=readPipe, args=())
+readPipeThread.start()
 
 
 
-# put here whatever function you want to call
-def movementFun():
-    #w.walkingForward('F',6,1)
-    #w.walkingForward('R',3,1)
-    w.goToHomeFromAnyPosition()
-    #w.moveAndDragMultFeet([1,3],[numpy.add(s.HOMEPOS["1"],[0,-1.5,0]), numpy.add(s.HOMEPOS["3"],[0,-1.5,0])],[0,0])
-    #w.moveAndDragMultFeet([1,2,3,4], [numpy.add(s.HOMEPOS["1"],[0,1.5,0]), numpy.add(s.HOMEPOS["2"],[0,1.5,0]),numpy.add(s.HOMEPOS["3"],[0,-1.5,0]),numpy.add(s.HOMEPOS["4"],[0,-1.5,0])], [0,0,0,0])
-    #w.moveAndDragMultFeet([1,2,3,4], [numpy.add(s.HOMEPOS["1"],[0,-1.5,0]), numpy.add(s.HOMEPOS["2"],[0,-1.5,0]),numpy.add(s.HOMEPOS["3"],[0,-1.5,0]),numpy.add(s.HOMEPOS["4"],[0,-1.5,0])], [0,0,0,0])
-    #w.moveAndDragMultFeet([1,2,3,4], [numpy.add(s.HOMEPOS["1"],[0,1.5,0]), numpy.add(s.HOMEPOS["2"],[0,1.5,0]),numpy.add(s.HOMEPOS["3"],[0,1.5,0]),numpy.add(s.HOMEPOS["4"],[0,1.5,0])], [0,0,0,0])
-    w.rotate(10, False)
-    w.rotate(10, False)
-    w.rotate(15, True)
-    w.rotate(15, True)
-    w.walkingForward('F',6,1)
-
-def legControl():
-    w.goToHomeFromAnyPosition()
-    rot_degrees = 10
-    num_walking_steps = 3
-
-    while True:
-        string = raw_input("Move Robot")
-        if (string == 'F') or (string == 'B') or (string == 'L') or (string == 'R'):
-            string2 = raw_input("   which algorithm?")
-            if string2 == 'c':
-                w.creep(string,num_walking_steps,1.5)
-            else:
-                w.walkingForward(string,num_walking_steps,1)
-        elif (string == 'h'):
-            num_walking_steps += 1
-        elif (string == 'g'):
-            num_walking_steps -= 1
-        elif (string == 'c'):
-            w.rotate(rot_degrees, True)
-        elif (string == 'x'):
-            w.rotate(rot_degrees, False)
-        elif (string == 'd'):
-            rot_degrees += 5
-        elif (string == 's'):
-            rot_degrees -= 5
-        elif (string == 'p'):
-            r = random.random()*200
-            print r
-            w.changeServoSpeeds(r)
-        elif (string == '.'):
-            w.rotatePan(10, True)
-        elif (string == ','):
-            w.rotatePan(10, False)
-        elif (string == 'o'):
-            w.rotateTilt(10, False)
-        elif (string == 'l'):
-            w.rotateTilt(10, True)
-        elif string == 'w':
-            w.creep('F',num_walking_steps,1)
-
-        elif (string == 'q'):
-            break
-
-def turretControl():
-    while True:
-        string = raw_input("Move Robot")
-       
-
-
-servoThread = Thread(target=aF.updateServosAndBase, args=())
-servoThread.start()
-
-
+'''
 # control needs separate thread because of Vpython loop
 controlLegsThread = Thread(target=legControl, args=())
 controlLegsThread.start()
-
-'''
-# control turret in separate thread, like our real robot
-controlTurretThread = Thread(target=turretControl, args=())
-controlTurretThread.start()
 '''
 
 
@@ -194,10 +168,6 @@ scene2 = display(title='Examples of Tetrahedrons',
      x=20, y=0, width=600, height=800,
      center=(5,0,0), background=(0,1,1))
 '''
-
-
-
-
 
 
 # I copied this code that allows the visualizer to be rotated and zoomed in, using a mouse.
@@ -210,6 +180,9 @@ rangemax = 40
 
 zoom = False
 spin = False
+
+
+
 while True:
     rate(s.t_per_second)
 
@@ -261,9 +234,6 @@ while True:
 
 
 # -------------------------------------------
-
-    # increment time
-    s.t += 1
 
     #base.pos = revForV(0,0,0)
 

@@ -7,7 +7,7 @@ from botnet.logging import *
 
 from enum import Enum
 
-from TESTGAITS.py3.realGaitsLeg3 import *
+from TESTGAITS.RealAndAnimated.walking import *
 
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
 
@@ -19,29 +19,35 @@ class MotorController:
         pass
 
     def STOP(self, speed):
-        pass
+        print ("GO TO HOME POS AT SPEED: ",  speed*200)
+        goToHomeFromAnyPosition()
 
     def FORWARD(self, speed):
-        moveAndDragMultFeet([3], [[-4.5, -2, -2]], [0])
+        print ("walk forward at speed: ",  speed*200)
+        walkingForward('F', 1, 1.5, speed*200)
 
     def BACKWARD(self, speed):
-        moveAndDragMultFeet([3], [[-4.5, 0, -2]], [0])
+        print ("walk backwards at speed: ",  speed*200)
+        walkingForward('B', 1, 1.5, speed*200)
 
     def STRAFE_RIGHT(self, speed):
-        for i in range(3):
-            log("Strafing Right...", i)
-            time.sleep(0.1)
+        print ("walk right at speed: ",  speed*200)
+        walkingForward('R', 1, 1.5, speed*200)
 
     def STRAFE_LEFT(self, speed):
-        pass
+        print ("walk left at speed: ",  speed*200)
+        walkingForward('L', 1, 1.5, speed*200)
 
     def TURN_RIGHT(self, speed):
-        pass
+        # 10 degrees rotation for now
+        # True implies clockwise
+        print ("turn right at speed: ",  speed*200)
+        rotate(10, True, speed*200)
 
     def TURN_LEFT(self, speed):
-        for i in range(2):
-            log("Rotating...", i)
-            time.sleep(0.1)
+        # 10 degrees rotation for now
+        print ("turn left at speed: ", speed*200)
+        rotate(10, False, speed*200)
 
 ZERO = (0, 0)
 def nonzero(x):
