@@ -3,7 +3,8 @@
 	"address": "",
 	"port": 8642,
 	"bcast_port": 8646,
-	"friendly_name": "Baby Mech"
+	"friendly_name": "Baby Mech",
+	"hostname": ""
     }
     ,
     "logging": {
