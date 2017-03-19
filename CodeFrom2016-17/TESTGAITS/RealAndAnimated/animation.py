@@ -25,7 +25,7 @@ floor = box (pos=revForV((0,0,0)), length=50, height=0.1, width=100, color=color
 base = box (pos=revForV((0,0,-s.HOMEPOS_FOOTHEIGHT + s.BASE_THICKNESS/2.0 + s.FOOT_RADIUS)), length=s.BASE_LENGTH, height= s.BASE_THICKNESS, width=s.BASE_WIDTH, color=color.red, axis=revForV((1,0,0)))
 
 panBox = box (pos = numpy.add(base.pos, revForV([0,0, s.PANBOX_HEIGHT/2.0])), length=s.PANBOX_LENGTH, width=s.PANBOX_WIDTH, height= s.PANBOX_HEIGHT, color=color.green, axis=revForV((1,0,0)))
-barrel = cylinder(pos=numpy.add(panBox.pos, revForV([0,0, s.PANBOX_HEIGHT/2.0])),  axis=(1,0,0), length = s.BARREL_LENGTH, radius=.1)
+barrel = cylinder(pos=numpy.add(panBox.pos, revForV([0,0, s.PANBOX_HEIGHT/2.0])),  axis=(1,0,0), length = s.BARREL_LENGTH, radius=.1, color= color.white)
 directionArrow = arrow(pos=(0,0,1.0), axis=revForV((0,0,2.0)), shaftwidth=.3, color=color.black)
 
 
@@ -103,8 +103,8 @@ def updateLegsAndBase():
 
         legs['leg'+leg]['foot'].pos = vectorAdd(legs['leg'+leg]['ankle2foot'].pos,legs['leg'+leg]['ankle2foot'].axis)
 
-        if i == 1:
-            print (legs['leg'+leg]['foot'].pos)
+        #if i == 1:
+           # print (legs['leg'+leg]['foot'].pos)
 
     base.pos = revForV(s.BasePos)
     base.axis =revForV((math.cos(s.BaseOrientationAngle),math.sin(s.BaseOrientationAngle),0))
@@ -120,7 +120,10 @@ def updateLegsAndBase():
     tiltAngle = TurretPosRadians[1]/s.TURRET_GEAR_RATIO
     barrel.axis = revForV((math.cos(tiltAngle) * math.cos(s.BaseOrientationAngle + TurretPosRadians[0] + math.pi/2.0),math.cos(tiltAngle) * math.sin(s.BaseOrientationAngle + TurretPosRadians[0] + + math.pi/2.0), math.sin(tiltAngle)))
     barrel.length = s.BARREL_LENGTH
-
+    if s.isFiring:
+        barrel.color = color.red
+    else:
+        barrel.color = color.white
 
     directionArrow.pos = [base.pos[0], base.pos[1], base.pos[2] + s.BASE_THICKNESS]
     directionArrow.axis = revForV((math.cos(s.BaseOrientationAngle + math.pi/2.0),math.sin(s.BaseOrientationAngle + math.pi/2.0),0))
@@ -149,7 +152,7 @@ def readPipe():
         
         #print ("received", arr)
 
-        if len(arr) > 17:
+        if len(arr) > 18:
             for leg in range(4):
                 for servo in range(3):
                     s.ServoPos[leg][servo] = float(arr[leg*3 + servo])
@@ -159,6 +162,7 @@ def readPipe():
             s.BaseOrientationAngle = float(arr[15])
             s.TurretPos[0] = float(arr[16])
             s.TurretPos[1] = float(arr[17])
+            s.isFiring = float(arr[18])
         
 
 readPipeThread = Thread(target=readPipe, args=())
@@ -192,6 +196,8 @@ zoom = False
 spin = False
 
 
+    
+scene.forward = revForV([-0.0,1.0,-1.0])
 
 while True:
     rate(s.t_per_second)
@@ -240,6 +246,7 @@ while True:
             newforward = rotate(newforward, angle=angley, axis=right)
             newray = rotate(newray, angle=angley, axis=right)
         scene.forward = newforward
+        print scene.forward
         lastray = newray
 
 

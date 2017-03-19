@@ -54,7 +54,7 @@ class Bot:
         
     def BUTN(self, id, val):
         print ("id: ", id, "val: ", val)
-        if id == 5:
+        if id == 1:
             self.gun.fire(val)
         elif id == 6:
             self.move.left(val)
@@ -74,8 +74,8 @@ class Bot:
         if(abs(val) < DEADZONE):
             val = 0.0
         if id == 0: self.move.strafe(val*s.STEP_SIZE)
-        elif id == 1: self.move.forward(-val*STEP_SIZE)
-        elif id == 3: self.gun.tilt(-1* sign(val) * pow(val,2.0) * 200)
-        elif id == 2: self.gun.pan(sign(val) * pow(val,2.0) * 200)
+        elif id == 1: self.move.forward(-val*s.STEP_SIZE)
+        elif id == 3: self.gun.tilt(-1* sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED)
+        elif id == 2: self.gun.pan(sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED)
 
             

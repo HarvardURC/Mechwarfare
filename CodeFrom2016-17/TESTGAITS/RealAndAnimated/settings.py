@@ -65,6 +65,9 @@ BARREL_LENGTH = 5.0
 # degrees per second
 ANIMATED_LEG_SERVO_SPEED = 200.0
 
+global isFiring 
+isFiring = False
+
 # pan speed then tilt speed
 ANIMATED_TURRET_SERVO_SPEED = [100.0,100.0]
 SERVO_UPDATE_DELAY = .01

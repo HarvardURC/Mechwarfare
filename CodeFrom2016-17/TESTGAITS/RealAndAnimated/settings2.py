@@ -12,6 +12,8 @@ IDEAL_SERVO_POSITIONS = [[45.0,0.0,0.0],[135.0, 0.0, 0.0],[225, 0.0, 0.0],[315, 
 
 SERVO_BOUNDS = [(-75.0,75.0),(-80.0,80.0),(-125.0,125.0)]
 
+GUN_PIN = 18
+
 # constants
 HOMEPOS_FOOTHEIGHT = -2.25
 HOMEPOS = {"1": [3.0,3.0,HOMEPOS_FOOTHEIGHT],
@@ -39,6 +41,7 @@ global STEP_DELAY
 STEP_DELAY = .2
 
 STEP_SIZE = 1.5
+MAX_SERVO_SPEED = 200.0
 
 
 
@@ -61,6 +64,9 @@ BARREL_LENGTH = 5.0
 
 # degrees per second
 ANIMATED_LEG_SERVO_SPEED = 200.0
+
+global isFiring 
+isFiring = False
 
 # pan speed then tilt speed
 ANIMATED_TURRET_SERVO_SPEED = [100.0,100.0]

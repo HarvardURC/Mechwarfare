@@ -18,18 +18,25 @@ if not s.isAnimation:
 class GunController(Thread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        #self.firing = False
+        self.firing = False
 
     ### THIS IS THE FUNCTION
     def fire(self, isOn):
         if isOn:
             print ("FIRING GUN POW POW")
             if not s.isAnimation:
+                self.firing = True
                 GPIO.output(s.GUN_PIN,True)
+            else:
+                s.isFiring = True
         else:
             print ("Stopped firing")
             if not s.isAnimation:
                 GPIO.output(s.GUN_PIN,False)
+                self.firing = False
+            else:
+                s.isFiring = False
+                
 
     def run(self):
         self.stop = Event()
