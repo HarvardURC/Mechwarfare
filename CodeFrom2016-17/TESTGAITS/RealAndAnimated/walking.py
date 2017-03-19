@@ -501,7 +501,7 @@ def getTurretServoAngle(m):
 def getTurretBound(m,b):
     return s.TURRET_SERVO_BOUNDS[m][b]
 
-def moveAgitator(x):
+def moveAgitatorServo(x):
     getattr(robot,"agitator").goal_position = x
             
 # 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change
