@@ -130,10 +130,9 @@ my_config = {
             'orientation': 'direct',
             'type': 'AX-12',
             'id': 19,
-            'angle_limit': [-150.0, 150.0],
+            'angle_limit': [-90.0, 90.0],
             'offset': 0.0
-        },
-
+        }
     }
 }
 
@@ -531,7 +530,7 @@ else:
     robot = pypot.robot.from_config(my_config)
 
     for m in robot.motors:
-        m.moving_speed = 130
+        m.moving_speed = 150
         m.compliant = False
         print(m.name, m.present_position)
 
