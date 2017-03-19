@@ -28,24 +28,27 @@ class GunController(Thread):
                 self.firing = True
                 GPIO.output(s.GUN_PIN,True)
             else:
-                self.isFiring = True
+                self.firing = True
         else:
             debug("Stopped firing")
             if not s.isAnimation:
                 GPIO.output(s.GUN_PIN,False)
                 self.firing = False
             else:
-                self.isFiring = False
+                self.firing = False
                 
 
     def run(self):
         self.stop = Event()
         while not self.stop.is_set():
-            if self.isFiring:
-                moveAgitatorServo(10)
-                time.sleep(.5) 
-                moveAgitatorServo(0)
-                time.sleep(.5) 
+            if not isAnimation:
+                if self.firing:
+                    moveAgitatorServo(10)
+                    time.sleep(.5) 
+                    moveAgitatorServo(0)
+                    time.sleep(.5) 
+                else:
+                    time.sleep(.05)
             else:
                 time.sleep(.05)
 
