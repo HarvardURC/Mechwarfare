@@ -5,7 +5,7 @@ from .video import Video
 from .turret import GunController
 from .move import MovementController
 
-import TESTGAITS.RealAndAnimated.settings as s
+import gaits.settings as s
 import math 
 
 DEADZONE = 0.1

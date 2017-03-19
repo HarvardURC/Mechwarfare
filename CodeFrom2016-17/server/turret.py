@@ -6,8 +6,8 @@ from botnet.logging import *
 import time, sys
 import traceback as tb
 
-from TESTGAITS.RealAndAnimated.walking import *
-import TESTGAITS.RealAndAnimated.settings as s
+from gaits.walking import *
+import gaits.settings as s
 
 if not s.isAnimation:
     import RPi.GPIO as GPIO
