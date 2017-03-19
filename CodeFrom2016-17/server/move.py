@@ -108,12 +108,12 @@ class MovementController(Thread):
         
     def run(self):
         self.stop = Event()
-        self._last_direction = None
+        self._last_direction = Direction.STOP
         while not self.stop.is_set():
-            if self._last_direction != self._direction.name:
+            if self._last_direction != self._direction:
                 if self._last_direction != Direction.STOP:
                     goToHomeFromAnyPosition()
-                self._last_direction = self._direction.name
+                self._last_direction = self._direction
             if self._speed != 0:
                 getattr(self.motors, self._direction.name)(self._speed)
             else:
