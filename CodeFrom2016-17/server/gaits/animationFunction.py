@@ -7,9 +7,9 @@ import json
 import os
 
 
-import .settings as s
+from . import settings as s
 
-wfPath = "TESTGAITS/RealAndAnimated/p1"
+wfPath = "./server/gaits/p1"
 
 x_negs = [(-1) ** ((leg)%3 > 0) for leg in range(4)]
 y_negs = [(-1)** math.floor(leg/2) for leg in range(4)]

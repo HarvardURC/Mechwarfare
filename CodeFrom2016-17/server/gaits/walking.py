@@ -5,8 +5,8 @@ from threading import Thread
 import threading
 
 
-import .animationFunction as aF
-import .settings as s
+from . import animationFunction as aF
+from . import settings as s
 
 
 
