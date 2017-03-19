@@ -7,8 +7,8 @@ from botnet.logging import *
 
 from enum import Enum
 
-from TESTGAITS.RealAndAnimated.walking import *
-import TESTGAITS.RealAndAnimated.settings as s
+from gaits.walking import *
+import gaits.settings as s
 import math
 
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
