@@ -2,3 +2,6 @@ __pycache__
 .DS_Store
 
 *.log
+
+clientsettings.json
+serversetting.json
