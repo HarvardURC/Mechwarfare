@@ -43,9 +43,9 @@ class GunController(Thread):
         while not self.stop.is_set():
             if not s.isAnimation:
                 if self.firing:
-                    moveAgitatorServo(10)
-                    time.sleep(.5) 
                     moveAgitatorServo(0)
+                    time.sleep(.5) 
+                    moveAgitatorServo(90)
                     time.sleep(.5) 
                 else:
                     time.sleep(.05)

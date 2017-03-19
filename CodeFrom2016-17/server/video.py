@@ -7,7 +7,7 @@ from threading import Thread
 
 import shlex, atexit
 
-CMD1 = "raspivid --flush --profile baseline -w {width} -h {height} -t 0 --bitrate {bitrate} -n -o -"
+CMD1 = "raspivid --flush -hf -vf --profile baseline -w {width} -h {height} -t 0 --bitrate {bitrate} -n -o -"
 CMD2 = ("nc.traditional", "-l", "-p")
 
 class Video(dict):
