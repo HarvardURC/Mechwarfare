@@ -7,10 +7,6 @@ import threading
 
 import TESTGAITS.RealAndAnimated.animationFunction as aF
 import TESTGAITS.RealAndAnimated.settings as s
-'''
-import animationFunction as aF
-import settings as s
-'''
 
 
 
