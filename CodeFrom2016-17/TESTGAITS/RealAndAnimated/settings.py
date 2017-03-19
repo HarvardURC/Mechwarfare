@@ -48,8 +48,10 @@ MAX_SERVO_SPEED = 200.0
 # ANIMATION SETTINGS
 
 # is animation tells walking.py whether to use animation functions or real functions. running animation.py sets this to True
+import os
+
 global isAnimation
-isAnimation = True
+isAnimation = True if os.environ.get("IS_ANIMATION", False) else False
 
 global t_per_second 
 t_per_second = 30
