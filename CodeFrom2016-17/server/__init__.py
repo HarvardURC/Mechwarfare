@@ -42,7 +42,7 @@ class Bot:
     def BUTN(self, id, val):
         print ("id: ", id, "val: ", val)
         if id == 1:
-            self.gun.firing(val)
+            self.gun.fire(val)
         elif id == 6:
             self.move.left(val)
         elif id == 7:
