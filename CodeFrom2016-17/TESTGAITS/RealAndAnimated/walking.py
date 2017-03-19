@@ -355,6 +355,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
 # moves two legs at a time to get back from home position. Should work without problem as long as robot
 # is reasonably balanced when this is called
 def goToHomeFromAnyPosition():
+    changeServoSpeeds(s.MAX_SERVO_SPEED)
     moveAndDragMultFeet([1, 3],  [s.HOMEPOS["1"], s.HOMEPOS["3"]],[1,1])
     moveAndDragMultFeet([2, 4],  [s.HOMEPOS["2"], s.HOMEPOS["4"]], [1,1])
 

@@ -8,9 +8,6 @@ import os
 
 
 import TESTGAITS.RealAndAnimated.settings as s
-'''
-import settings as s
-'''
 
 wfPath = "TESTGAITS/RealAndAnimated/p1"
 

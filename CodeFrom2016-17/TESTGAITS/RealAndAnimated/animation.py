@@ -5,11 +5,9 @@ import math
 from threading import Thread
 import threading
 import numpy
-import json
 import random
 import math
 
-import os
 
 
 # helper functions
