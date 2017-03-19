@@ -12,7 +12,7 @@ import server.gaits.settings as s
 if not s.isAnimation:
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)  
-    GPIO.setup(s.GUN_PIN, GPIO.OUT)
+    GPIO.setup(s.GUN_PIN, GPIO.OUT, initial=GPIO.LOW)
 
 
 class GunController(Thread):
