@@ -9,7 +9,7 @@ import asyncio
 
 import json
 
-
+import netifaces
 
 class BroadcastServer:
     def init_broadcast(self):
@@ -27,7 +27,10 @@ class BroadcastServer:
     def _bcast_info(self):
         server = conf["server"].copy()
         if not server["address"]:
-            server["address"] = gethostbyname(gethostname())
+            iface = [i for i in netifaces.interfaces() if
+                     i.startswith("e") or i.startswith("w")][0]
+            ip = netifaces.ifaddresses(iface)[netifaces.AF_INET][0]["addr"]
+            server["address"] = ip
         if not server["hostname"]:
             server["hostname"] = gethostname()
         return json.dumps(server)
