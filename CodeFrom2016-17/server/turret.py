@@ -41,7 +41,7 @@ class GunController(Thread):
     def run(self):
         self.stop = Event()
         while not self.stop.is_set():
-            if not isAnimation:
+            if not s.isAnimation:
                 if self.firing:
                     moveAgitatorServo(10)
                     time.sleep(.5) 
