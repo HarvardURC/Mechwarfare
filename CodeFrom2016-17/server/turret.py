@@ -25,17 +25,17 @@ class GunController(Thread):
         if isOn:
             debug("FIRING GUN POW POW")
             if not s.isAnimation:
-                self.firing = True
                 GPIO.output(s.GUN_PIN,True)
             else:
-                self.firing = True
+                s.isFiring = True
+            self.firing = True
         else:
             debug("Stopped firing")
             if not s.isAnimation:
                 GPIO.output(s.GUN_PIN,False)
-                self.firing = False
             else:
-                self.firing = False
+                s.isFiring = False
+            self.firing = False
                 
 
     def run(self):
