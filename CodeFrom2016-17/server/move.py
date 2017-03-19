@@ -8,6 +8,8 @@ from botnet.logging import *
 from enum import Enum
 
 from TESTGAITS.RealAndAnimated.walking import *
+import TESTGAITS.RealAndAnimated.settings as s
+import math
 
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
 
@@ -19,35 +21,35 @@ class MotorController:
         pass
 
     def STOP(self, speed):
-        print ("GO TO HOME POS AT SPEED: ",  speed*200)
+        print ("GO TO HOME POS: ",  stepsize)
         goToHomeFromAnyPosition()
 
-    def FORWARD(self, speed):
-        print ("walk forward at speed: ",  speed*200)
-        walkingForward('F', 1, 1.5, speed*200)
+    def FORWARD(self, stepsize):
+        print ("walk forward at stepsize: ",  stepsize)
+        walkingForward('F', 1, stepsize)
 
-    def BACKWARD(self, speed):
-        print ("walk backwards at speed: ",  speed*200)
-        walkingForward('B', 1, 1.5, speed*200)
+    def BACKWARD(self, stepsize):
+        print ("walk backwards at stepsize: ",  stepsize)
+        walkingForward('B', 1, stepsize)
 
-    def STRAFE_RIGHT(self, speed):
-        print ("walk right at speed: ",  speed*200)
-        walkingForward('R', 1, 1.5, speed*200)
+    def STRAFE_RIGHT(self, stepsize):
+        print ("walk right at stepsize: ",  stepsize)
+        walkingForward('R', 1, stepsize)
 
-    def STRAFE_LEFT(self, speed):
-        print ("walk left at speed: ",  speed*200)
-        walkingForward('L', 1, 1.5, speed*200)
+    def STRAFE_LEFT(self, stepsize):
+        print ("walk left at stepsize: ",  stepsize)
+        walkingForward('L', 1, stepsize)
 
     def TURN_RIGHT(self, speed):
         # 10 degrees rotation for now
         # True implies clockwise
-        print ("turn right at speed: ",  speed*200)
-        rotate(10, True, speed*200)
+        print ("turn right at speed: ",  speed*s.MAX_SERVO_SPEED)
+        rotate(20, True, speed*s.MAX_SERVO_SPEED)
 
     def TURN_LEFT(self, speed):
         # 10 degrees rotation for now
-        print ("turn left at speed: ", speed*200)
-        rotate(10, False, speed*200)
+        print ("turn left at speed: ", speed)
+        rotate(20, False, speed*s.MAX_SERVO_SPEED)
 
 ZERO = (0, 0)
 def nonzero(x):

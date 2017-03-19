@@ -5,7 +5,20 @@ from .video import Video
 from .turret import GunController
 from .move import MovementController
 
+import TESTGAITS.RealAndAnimated.settings as s
+import math 
+
 DEADZONE = 0.1
+
+def sign(x):
+    if x > 0:
+        return 1.
+    elif x < 0:
+        return -1.
+    elif x == 0:
+        return 0.
+    else:
+        return x
 
 class Bot:
     def __init__(self):
@@ -60,9 +73,9 @@ class Bot:
         # make sure val is above a certain axis threshold
         if(abs(val) < DEADZONE):
             val = 0.0
-        if id == 0: self.move.strafe(val)
-        elif id == 1: self.move.forward(-val)
-        elif id == 3: self.gun.tilt(-val)
-        elif id == 2: self.gun.pan(val)
+        if id == 0: self.move.strafe(val*s.STEP_SIZE)
+        elif id == 1: self.move.forward(-val*s.STEP_SIZE)
+        elif id == 3: self.gun.tilt(-1* sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED)
+        elif id == 2: self.gun.pan(sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED)
 
             

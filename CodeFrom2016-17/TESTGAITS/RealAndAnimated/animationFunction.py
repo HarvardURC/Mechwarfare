@@ -165,6 +165,7 @@ def updateServosAndBase():
         for i in range(3):
             stringServoPositions = stringServoPositions + str(float(s.BasePos[i])) + ";"
         stringServoPositions = stringServoPositions + str(float(s.BaseOrientationAngle)) + ";" + str(float(s.TurretPos[0])) + ";" + str(float(s.TurretPos[1])) + ";"
+        stringServoPositions = stringServoPositions + str(float(s.isFiring)) + ";"
         #print ("sending: ", stringServoPositions)
 
         # send data over pipe

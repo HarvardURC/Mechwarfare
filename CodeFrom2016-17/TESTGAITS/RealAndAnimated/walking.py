@@ -28,7 +28,7 @@ my_config = {
         'leg2': ['hip2', 'knee2', 'ankle2'],
         'leg3': ['hip3', 'knee3', 'ankle3'],
         'leg4': ['hip4', 'knee4', 'ankle4'],
-        'turret': ['pan', 'tilt']
+        'turret': ['pan', 'tilt', 'agitator']
         
     },
     'motors': {
@@ -127,6 +127,13 @@ my_config = {
             'orientation': 'direct',
             'type': 'AX-18',
             'id': 18,
+            'angle_limit': [-150.0, 150.0],
+            'offset': 0.0
+        },
+        'agitator': {
+            'orientation': 'direct',
+            'type': 'AX-12',
+            'id': 19,
             'angle_limit': [-150.0, 150.0],
             'offset': 0.0
         },
@@ -472,63 +479,50 @@ def rotate(degree, isClockwise, speed = None):
     moveAndDragMultFeet([1, 3, 2, 4], [s.HOMEPOS["1"], s.HOMEPOS["3"], s.HOMEPOS["2"], s.HOMEPOS["4"]], [0,0,0,0])
 
 
-def movePan(x):
-    if (x > s.TURRET_SERVO_BOUNDS[0][1]):
-        raise ValueError('Pan servo out of range. Requested position was ' + x + ' but max is ' + TURRET_SERVO_BOUNDS[0][1] + ' - Baby Mech has declared')
-    elif (x < s.TURRET_SERVO_BOUNDS[0][0]):
-        raise ValueError('Pan servo out of range. Requested position was ' + x + ' but min is ' + TURRET_SERVO_BOUNDS[0][0] + ' - Baby Mech has declared')
+def moveTurretServo(m,x):
+    names = ["pan", "tilt"]
+    if (x > s.TURRET_SERVO_BOUNDS[m][1] or x < s.TURRET_SERVO_BOUNDS[m][0]):
+        print(names[m] + ' servo out of range. Requested position was ' + str(x) + ' but range is ' + str(s.TURRET_SERVO_BOUNDS[m][0]) + ' to ' + str(s.TURRET_SERVO_BOUNDS[m][1]) + ' - Baby Mech has declared')
+        current = getTurretServoAngle(m)
+        if s.isAnimation:
+            s.turretServoGoalPos[m] = x
+        else:
+            getattr(robot,names[m]).goal_position = current
     else:
         if s.isAnimation:
-            s.turretServoGoalPos[0] = x
+            s.turretServoGoalPos[m] = x
         else:
-            getattr(robot,"pan").goal_position = x
-    
+            getattr(robot,names[m]).goal_position = x
 
-def moveTilt(x):
-    if (x > s.TURRET_SERVO_BOUNDS[1][1]):
-        raise ValueError('Tilt servo out of range. Requested position was ' + x + ' but max is ' + TURRET_SERVO_BOUNDS[1][1] + ' - Baby Mech has declared')
-    elif (x < s.TURRET_SERVO_BOUNDS[1][0]):
-        raise ValueError('Tilt servo out of range. Requested position was ' + x + ' but min is ' + TURRET_SERVO_BOUNDS[1][0] + ' - Baby Mech has declared')
+def getTurretServoAngle(m):
+    if s.isAnimation:
+        return s.TurretPos[m]
     else:
-        if s.isAnimation:
-            s.turretServoGoalPos[1] = x
-        else:
-            getattr(robot,"tilt").goal_position = x
+        names = ["pan", "tilt"]
+        return getattr(robot,names[m]).present_position
 
+def getTurretBound(m,b):
+    return s.TURRET_SERVO_BOUNDS[m][b]
+
+def moveAgitator(x):
+    getattr(robot,"agitator").goal_position = x
+            
 # 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change
-def rotatePan(degrees, isClockwise, speed = None):
+def rotateTurretServo(m, degrees, isClockwise, speed = None):
+    names = ["pan", "tilt"]
     if (speed != None):
-        changeServoSpeeds(speed, ["pan"])
+        changeServoSpeeds(speed, [names[m]])
 
     direction = 1
     if isClockwise:
         direction = -1
 
-    if s.isAnimation:
-        currentPanAngle = s.TurretPos[0]
-    else:
-        currentPanAngle = getattr(robot,"pan").present_position
+    currentServoAngle = getTurretServoAngle(m)
 
-    movePan(currentPanAngle + direction*degrees)
-
-def rotateTilt(degrees, isClockwise, speed = None):
-    if (speed != None):
-        changeServoSpeeds(speed, ["tilt"])
-
-    direction = 1
-    if isClockwise:
-        direction = -1
-
-    if s.isAnimation:
-        currentTiltAngle = s.TurretPos[1]
-    else:
-        currentTiltAngle = getattr(robot,"tilt").present_position
-
-    moveTilt(currentTiltAngle + direction * degrees)
+    moveTurretServo(0,currentServoAngle + direction*degrees)
 
 
 # initialize robot config if not animation
-
 if s.isAnimation:
     # if we're in animation mode, then call the while loop in af that updates servo positions and other dependent variables
     servoThread = Thread(target=aF.updateServosAndBase, args=())
