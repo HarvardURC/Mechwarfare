@@ -29,7 +29,7 @@ class BroadcastServer:
         if not server["address"]:
             #server["address"] = gethostbyname(gethostname())
             # change this to your ip address if your ip is not what it says in the terminal prompt
-            server["address"] = gethostbyname("10.251.41.180")
+            server["address"] = gethostbyname("10.251.208.72")
         return json.dumps(server)
 
 class AutoClient:

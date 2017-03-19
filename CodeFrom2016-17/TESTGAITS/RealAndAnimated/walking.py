@@ -28,7 +28,7 @@ my_config = {
         'leg2': ['hip2', 'knee2', 'ankle2'],
         'leg3': ['hip3', 'knee3', 'ankle3'],
         'leg4': ['hip4', 'knee4', 'ankle4'],
-        'turret': ['pan', 'tilt']
+        'turret': ['pan', 'tilt', 'agitator']
         
     },
     'motors': {
@@ -127,6 +127,13 @@ my_config = {
             'orientation': 'direct',
             'type': 'AX-18',
             'id': 18,
+            'angle_limit': [-150.0, 150.0],
+            'offset': 0.0
+        },
+        'agitator': {
+            'orientation': 'direct',
+            'type': 'AX-12',
+            'id': 19,
             'angle_limit': [-150.0, 150.0],
             'offset': 0.0
         },
@@ -496,6 +503,9 @@ def getTurretServoAngle(m):
 
 def getTurretBound(m,b):
     return s.TURRET_SERVO_BOUNDS[m][b]
+
+def moveAgitator(x):
+    return getattr(robot,"agitator").goal_position = x
             
 # 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change
 def rotateTurretServo(m, degrees, isClockwise, speed = None):

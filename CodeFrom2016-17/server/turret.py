@@ -12,7 +12,7 @@ import TESTGAITS.RealAndAnimated.settings as s
 if not s.isAnimation:
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)  
-    GPIO.setup(16, GPIO.OUT)
+    GPIO.setup(s.GUN_PIN, GPIO.OUT)
 
 
 class GunController(Thread):
@@ -25,11 +25,11 @@ class GunController(Thread):
         if isOn:
             print ("FIRING GUN POW POW")
             if not s.isAnimation:
-                GPIO.output(16,True)
+                GPIO.output(s.GUN_PIN,True)
         else:
             print ("Stopped firing")
             if not s.isAnimation:
-                GPIO.output(16,False)
+                GPIO.output(s.GUN_PIN,False)
 
     def run(self):
         self.stop = Event()
@@ -49,10 +49,10 @@ class GunController(Thread):
         if speed == 0.0:
             moveTurretServo(0, getTurretServoAngle(0))
         elif speed < 0.0:
-            changeServoSpeeds(-speed, ["tilt"])
+            changeServoSpeeds(-speed, ["pan"])
             moveTurretServo(0, getTurretBound(0,1))
         elif speed > 0.0:
-            changeServoSpeeds(speed, ["tilt"])
+            changeServoSpeeds(speed, ["pan"])
             moveTurretServo(0, getTurretBound(0,0))
 
     def tilt(self, speed):
@@ -74,13 +74,13 @@ class GunController(Thread):
     def tiltHome(self, isOn):
         if isOn:
             print ("go to tilt home")
-            changeServoSpeeds(200.0, ['tilt'])
+            changeServoSpeeds(MAX_SERVO_SPEED, ['tilt'])
             moveTurretServo(1,0.0)
 
     def panHome(self, isOn):
         if isOn:
             print ("go to pan home")
-            changeServoSpeeds(200.0, ['pan'])
+            changeServoSpeeds(MAX_SERVO_SPEED, ['pan'])
             moveTurretServo(0,0.0)
 
 

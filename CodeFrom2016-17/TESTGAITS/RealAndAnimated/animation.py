@@ -103,25 +103,28 @@ def updateLegsAndBase():
 
         legs['leg'+leg]['foot'].pos = vectorAdd(legs['leg'+leg]['ankle2foot'].pos,legs['leg'+leg]['ankle2foot'].axis)
 
+        if i == 1:
+            print (legs['leg'+leg]['foot'].pos)
 
-        base.pos = revForV(s.BasePos)
-        base.axis =revForV((math.cos(s.BaseOrientationAngle),math.sin(s.BaseOrientationAngle),0))
-        base.length = s.BASE_LENGTH
+    base.pos = revForV(s.BasePos)
+    base.axis =revForV((math.cos(s.BaseOrientationAngle),math.sin(s.BaseOrientationAngle),0))
+    base.length = s.BASE_LENGTH
 
-        TurretPosRadians = [math.radians(s.TurretPos[0]), math.radians(s.TurretPos[1])]
-        panBox.axis = revForV((math.cos(s.BaseOrientationAngle + TurretPosRadians[0]),math.sin(s.BaseOrientationAngle + TurretPosRadians[0]),0))
-        panBox.pos = numpy.add(base.pos, revForV([0,0,s.PANBOX_HEIGHT/2.0]))
-        panBox.length = s.PANBOX_LENGTH
-
-
-        barrel.pos = numpy.add(panBox.pos, revForV([0,0,s.PANBOX_HEIGHT/2.0]))
-        barrel.axis = revForV((math.cos(TurretPosRadians[1]) * math.cos(s.BaseOrientationAngle + TurretPosRadians[0] + math.pi/2.0),math.cos(TurretPosRadians[1]) * math.sin(s.BaseOrientationAngle + TurretPosRadians[0] + + math.pi/2.0), math.sin(TurretPosRadians[1])))
-        barrel.length = s.BARREL_LENGTH
+    TurretPosRadians = [math.radians(s.TurretPos[0]), math.radians(s.TurretPos[1])]
+    panBox.axis = revForV((math.cos(s.BaseOrientationAngle + TurretPosRadians[0]),math.sin(s.BaseOrientationAngle + TurretPosRadians[0]),0))
+    panBox.pos = numpy.add(base.pos, revForV([0,0,s.PANBOX_HEIGHT/2.0]))
+    panBox.length = s.PANBOX_LENGTH
 
 
-        directionArrow.pos = [base.pos[0], base.pos[1], base.pos[2] + s.BASE_THICKNESS]
-        directionArrow.axis = revForV((math.cos(s.BaseOrientationAngle + math.pi/2.0),math.sin(s.BaseOrientationAngle + math.pi/2.0),0))
-        directionArrow.length = s.BASE_LENGTH
+    barrel.pos = numpy.add(panBox.pos, revForV([0,0,s.PANBOX_HEIGHT/2.0]))
+    tiltAngle = TurretPosRadians[1]/s.TURRET_GEAR_RATIO
+    barrel.axis = revForV((math.cos(tiltAngle) * math.cos(s.BaseOrientationAngle + TurretPosRadians[0] + math.pi/2.0),math.cos(tiltAngle) * math.sin(s.BaseOrientationAngle + TurretPosRadians[0] + + math.pi/2.0), math.sin(tiltAngle)))
+    barrel.length = s.BARREL_LENGTH
+
+
+    directionArrow.pos = [base.pos[0], base.pos[1], base.pos[2] + s.BASE_THICKNESS]
+    directionArrow.axis = revForV((math.cos(s.BaseOrientationAngle + math.pi/2.0),math.sin(s.BaseOrientationAngle + math.pi/2.0),0))
+    directionArrow.length = s.BASE_LENGTH
         
 
 
