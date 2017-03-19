@@ -23,14 +23,14 @@ class GunController(Thread):
     ### THIS IS THE FUNCTION
     def fire(self, isOn):
         if isOn:
-            print ("FIRING GUN POW POW")
+            debug("FIRING GUN POW POW")
             if not s.isAnimation:
                 self.firing = True
                 GPIO.output(s.GUN_PIN,True)
             else:
                 s.isFiring = True
         else:
-            print ("Stopped firing")
+            debug("Stopped firing")
             if not s.isAnimation:
                 GPIO.output(s.GUN_PIN,False)
                 self.firing = False
@@ -52,7 +52,7 @@ class GunController(Thread):
            positive values are to the right, negative to the left. Zero is off.
            The input will range from -1 to +1. `pan` should return instantly."""
 
-        print ("rotate pan at speed: ",  speed)
+        debug("rotate pan at speed: ",  speed)
         if speed == 0.0:
             moveTurretServo(0, getTurretServoAngle(0))
         elif speed < 0.0:
@@ -63,10 +63,10 @@ class GunController(Thread):
             moveTurretServo(0, getTurretBound(0,0))
 
     def tilt(self, speed):
-        """This function should behave like the `pan` function, but for the tilt
+        """This function should behave like the `pan` function, but for the
         tilt motor. It should return instantly."""
 
-        print ("rotate tilt at speed: ", speed)
+        debug("rotate tilt at speed: ", speed)
         if speed == 0.0:
             moveTurretServo(1,getTurretServoAngle(1))
         elif speed < 0.0:
