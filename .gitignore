@@ -3,6 +3,8 @@ __pycache__
 
 *.log
 
+*~
+
 TESTGAITS/RealAndAnimated/p1
 
 serversettings.json
