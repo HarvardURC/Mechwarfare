@@ -52,11 +52,6 @@ class GunController(Thread):
             else:
                 time.sleep(.05)
 
-                   
-
-    ### Ignore below for now
-    # I stopped ignoring these Aaron :)
-
     def pan(self, speed):
         """This function should turn on the pan motor at the specified speed,
            positive values are to the right, negative to the left. Zero is off.
@@ -64,7 +59,7 @@ class GunController(Thread):
 
         debug("rotate pan at speed: ",  speed)
         if speed == 0.0:
-            moveTurretServo(0, getTurretServoAngle(0))
+            stopTurretServo(0)
         elif speed < 0.0:
             changeServoSpeeds(-speed, ["pan"])
             moveTurretServo(0, getTurretBound(0,1))
@@ -78,7 +73,7 @@ class GunController(Thread):
 
         debug("rotate tilt at speed: ", speed)
         if speed == 0.0:
-            moveTurretServo(1,getTurretServoAngle(1))
+            stopTurretServo(1)
         elif speed < 0.0:
             changeServoSpeeds(-speed, ["tilt"])
             moveTurretServo(1,getTurretBound(1,1))

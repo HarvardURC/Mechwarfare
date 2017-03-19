@@ -489,6 +489,13 @@ def moveTurretServo(m,x):
             s.turretServoGoalPos[m] = x
         else:
             getattr(robot,names[m]).goal_position = x
+            
+def stopTurretServo(m):
+    names = ["pan", "tilt"]
+    if s.isAnimation:
+        s.turretServoGoalPos[m]
+    else:
+        getattr(robot,names[m]).goal_speed = 0
 
 def getTurretServoAngle(m):
     if s.isAnimation:
