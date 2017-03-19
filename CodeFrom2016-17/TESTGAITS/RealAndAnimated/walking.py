@@ -473,10 +473,10 @@ def rotate(degree, isClockwise, speed = None):
     x = circleRadius * math.cos(math.radians(45.0 + direction * degree)) - (s.BASE_WIDTH/2.0) - s.HOMEPOS["1"][0]
     y = circleRadius * math.sin(math.radians(45.0 + direction * degree)) - (s.BASE_WIDTH/2.0) - s.HOMEPOS["1"][1]
 
-    moveAndDragMultFeet([1, 3], [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0])], [1,1])
-    moveAndDragMultFeet([2, 4], [numpy.add(s.HOMEPOS["2"], [-y,x,0]), numpy.add(s.HOMEPOS["4"], [y,-x,0])], [1,1])
-
-    moveAndDragMultFeet([1, 3, 2, 4], [s.HOMEPOS["1"], s.HOMEPOS["3"], s.HOMEPOS["2"], s.HOMEPOS["4"]], [0,0,0,0])
+    #moveAndDragMultFeet([1, 3], [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0])], [1,1])
+    moveAndDragMultFeet([1,3,2, 4], [s.HOMEPOS["1"], s.HOMEPOS["3"], numpy.add(s.HOMEPOS["2"], [-y,x,0]), numpy.add(s.HOMEPOS["4"], [y,-x,0])], [0,0,1,1])
+    moveAndDragMultFeet([1,3,2, 4], [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), s.HOMEPOS["2"], s.HOMEPOS["4"]], [1,1,0,0])
+    #moveAndDragMultFeet([1, 3, 2, 4], [s.HOMEPOS["1"], s.HOMEPOS["3"], s.HOMEPOS["2"], s.HOMEPOS["4"]], [0,0,0,0])
 
 
 def moveTurretServo(m,x):
