@@ -1,0 +1,18 @@
+{
+    "server": {
+	"address": "",
+	"port": 8642,
+	"bcast_port": 8646,
+	"friendly_name": "Baby Mech",
+	"hostname": ""
+    }
+    ,
+    "logging": {
+	"errors": 2,
+	"warnings": 2,
+	"debug": 0,
+	"logging": 1,
+	"folder": "."
+    },
+    "daemon": false
+}
