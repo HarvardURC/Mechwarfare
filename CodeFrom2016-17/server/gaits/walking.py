@@ -477,6 +477,7 @@ def rotate(degree, isClockwise, speed = None):
 
 def moveTurretServo(m,x):
     names = ["pan", "tilt"]
+    getattr(robot,names[m]).compliant = False
     if (x > s.TURRET_SERVO_BOUNDS[m][1] or x < s.TURRET_SERVO_BOUNDS[m][0]):
         print(names[m] + ' servo out of range. Requested position was ' + str(x) + ' but range is ' + str(s.TURRET_SERVO_BOUNDS[m][0]) + ' to ' + str(s.TURRET_SERVO_BOUNDS[m][1]) + ' - Baby Mech has declared')
         current = getTurretServoAngle(m)
@@ -495,7 +496,7 @@ def stopTurretServo(m):
     if s.isAnimation:
         s.turretServoGoalPos[m]
     else:
-        getattr(robot,names[m]).goal_speed = 0
+        getattr(robot,names[m]).compliant = True
 
 def getTurretServoAngle(m):
     if s.isAnimation:

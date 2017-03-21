@@ -7,8 +7,11 @@ from threading import Thread
 
 import shlex, atexit
 
-CMD1 = "raspivid --flush -hf -vf --profile baseline -w {width} -h {height} -t 0 --bitrate {bitrate} -n -o -"
-CMD2 = ("nc.traditional", "-l", "-p")
+
+CMD1 = "raspivid -g 5 --profile baseline -t 0 -h {height} -w {width} -fps 60 -vf -hf -b {bitrate} -o -"
+CMD2 = ("gst-launch-1.0", "fdsrc", "!", "h264parse", "!", "rtph264pay", "pt=96", "!", "udpsink")
+HOST = "host={}"
+PORT = "port={}"
 
 class Video(dict):
     def __init__(self, **kwargs):
@@ -22,8 +25,11 @@ class Video(dict):
     def run(self):
         self.kill()
         cmdline = shlex.split(CMD1.format(**self))
+        gst = (CMD2 + (HOST.format(self.host),) +
+               (PORT.format(self["port"]),))
+        log(cmdline, gst)
         self.proc = Popen(cmdline, stdout=PIPE)
-        self.proc2 = Popen(CMD2 + (str(self["port"]),), stdin=self.proc.stdout)
+        self.proc2 = Popen(gst, stdin=self.proc.stdout)
         self.proc.stdout.close()
 
     def kill(self):
