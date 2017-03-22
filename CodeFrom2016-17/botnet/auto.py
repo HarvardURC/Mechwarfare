@@ -27,9 +27,13 @@ class BroadcastServer:
     def _bcast_info(self):
         server = conf["server"].copy()
         if not server["address"]:
+            ip = "127.0.0.1"
             iface = [i for i in netifaces.interfaces() if
-                     i.startswith("e") or i.startswith("w")][0]
-            ip = netifaces.ifaddresses(iface)[netifaces.AF_INET][0]["addr"]
+                     i.startswith("e") or i.startswith("w")]
+            for i in iface:
+                addresses = netifaces.ifaddresses(i)
+                if addresses.get(netifaces.AF_INET, False):
+                    ip = addresses[netifaces.AF_INET][0]["addr"]
             server["address"] = ip
         if not server["hostname"]:
             server["hostname"] = gethostname()
