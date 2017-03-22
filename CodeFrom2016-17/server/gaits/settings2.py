@@ -16,10 +16,11 @@ GUN_PIN = 18
 
 # constants
 HOMEPOS_FOOTHEIGHT = -2.25
+
 HOMEPOS = {"1": [3.0,3.0,HOMEPOS_FOOTHEIGHT],
-           "2": [-3.0,3.0, HOMEPOS_FOOTHEIGHT],
-           "3": [-3.0,-3.0,HOMEPOS_FOOTHEIGHT],
-           "4": [3.0,-3.0,HOMEPOS_FOOTHEIGHT]}
+    "2": [-3.0,3.0, HOMEPOS_FOOTHEIGHT],
+        "3": [-3.0,-3.0,HOMEPOS_FOOTHEIGHT],
+            "4": [3.0,-3.0,HOMEPOS_FOOTHEIGHT]}
 
 
 # static lengths from robot model
@@ -43,15 +44,23 @@ STEP_DELAY = .2
 STEP_SIZE = 1.5
 MAX_SERVO_SPEED = 200.0
 
+SPRAY_TIME_3 = .25
+SPRAY_TIME_1 = .08
+SPRAY_DELAY = 1.0
+spray_time = SPRAY_TIME_3
+
+
 
 
 # ANIMATION SETTINGS
 
 # is animation tells walking.py whether to use animation functions or real functions. running animation.py sets this to True
-global isAnimation
-isAnimation = True
+import os
 
-global t_per_second 
+global isAnimation
+isAnimation = True if os.environ.get("IS_ANIMATION", False) else False
+
+global t_per_second
 t_per_second = 30
 
 BASE_THICKNESS = 1.0
@@ -65,14 +74,14 @@ BARREL_LENGTH = 5.0
 # degrees per second
 ANIMATED_LEG_SERVO_SPEED = 200.0
 
-global isFiring 
+global isFiring
 isFiring = False
 
 # pan speed then tilt speed
 ANIMATED_TURRET_SERVO_SPEED = [100.0,100.0]
 SERVO_UPDATE_DELAY = .01
 
-global ServoPos 
+global ServoPos
 ServoPos = [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]]
 
 global servoGoalPos
@@ -88,10 +97,10 @@ global draggingLegs
 draggingLegs = [False,False,False,False]
 
 # made for individual legs so that we could average them together
-global legBasePos 
+global legBasePos
 legBasePos = [[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS],[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS],[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS],[0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS]]
 
-global BasePos 
+global BasePos
 BasePos = [0,0,-HOMEPOS_FOOTHEIGHT + BASE_THICKNESS/2.0 + FOOT_RADIUS]
 
 global BaseOrientationAngle

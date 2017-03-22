@@ -14,6 +14,12 @@ if not s.isAnimation:
     GPIO.setmode(GPIO.BCM)  
     GPIO.setup(s.GUN_PIN, GPIO.OUT, initial=GPIO.LOW)
 
+def changeSprayTime():
+    if s.spray_time == s.SPRAY_TIME_3:
+        s.spray_time = s.SPRAY_TIME_1
+    else:
+        s.spray_time = s.SPRAY_TIME_3 
+
 
 class GunController(Thread):
     def __init__(self, *args, **kwargs):
@@ -23,17 +29,13 @@ class GunController(Thread):
     ### THIS IS THE FUNCTION
     def fire(self, isOn):
         if isOn:
-            debug("FIRING GUN POW POW")
-            if not s.isAnimation:
-                GPIO.output(s.GUN_PIN,True)
-            else:
+            debug("Started Firing")
+            if s.isAnimation:
                 s.isFiring = True
             self.firing = True
         else:
             debug("Stopped firing")
-            if not s.isAnimation:
-                GPIO.output(s.GUN_PIN,False)
-            else:
+            if s.isAnimation:
                 s.isFiring = False
             self.firing = False
                 
@@ -42,15 +44,22 @@ class GunController(Thread):
         self.stop = Event()
         while not self.stop.is_set():
             if not s.isAnimation:
+                # fire for spray time and then wait 1 second so user doesn't spray too much
                 if self.firing:
-                    moveAgitatorServo(0)
-                    time.sleep(.5) 
-                    moveAgitatorServo(90)
-                    time.sleep(.5) 
+                    GPIO.output(18,True)
+                    time.sleep(s.spray_time)
+                    GPIO.output(18,False)
+                    time.sleep(s.SPRAY_DELAY)
                 else:
                     time.sleep(.05)
             else:
-                time.sleep(.05)
+                if self.firing:
+                    GPIO.output(18,True)
+                    time.sleep(s.spray_time)
+                    GPIO.output(18,False)
+                    time.sleep(s.SPRAY_DELAY)
+                else:
+                    time.sleep(.05)
 
     def pan(self, speed):
         """This function should turn on the pan motor at the specified speed,

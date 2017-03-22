@@ -16,6 +16,7 @@ GUN_PIN = 18
 
 # constants
 HOMEPOS_FOOTHEIGHT = -2.25
+
 HOMEPOS = {"1": [3.0,3.0,HOMEPOS_FOOTHEIGHT],
            "2": [-3.0,3.0, HOMEPOS_FOOTHEIGHT],
            "3": [-3.0,-3.0,HOMEPOS_FOOTHEIGHT],
@@ -42,6 +43,12 @@ STEP_DELAY = .2
 
 STEP_SIZE = 1.5
 MAX_SERVO_SPEED = 200.0
+
+SPRAY_TIME_3 = .25
+SPRAY_TIME_1 = .08
+SPRAY_DELAY = 1.0
+spray_time = SPRAY_TIME_3
+
 
 
 
