@@ -24,7 +24,7 @@ my_config = {
         'leg2': ['hip2', 'knee2', 'ankle2'],
         'leg3': ['hip3', 'knee3', 'ankle3'],
         'leg4': ['hip4', 'knee4', 'ankle4'],
-        'turret': ['pan', 'tilt', 'agitator']
+        'turret': ['pan', 'tilt']
         
     },
     'motors': {
@@ -126,13 +126,6 @@ my_config = {
             'angle_limit': [-150.0, 150.0],
             'offset': 0.0
         },
-        'agitator': {
-            'orientation': 'direct',
-            'type': 'AX-12',
-            'id': 19,
-            'angle_limit': [-90.0, 90.0],
-            'offset': 0.0
-        }
     }
 }
 
