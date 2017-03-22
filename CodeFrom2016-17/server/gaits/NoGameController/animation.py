@@ -1,4 +1,4 @@
-import settings2 as s
+import settings as s
 from visual import *
 import time
 import math

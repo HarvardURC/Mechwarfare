@@ -370,7 +370,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
 
         moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
 
-    time.sleep(s.STEP_DELAY)
+    time.sleep(s.STEP_DELAY1)
 
     # put multiple foots down and finish drag
     for l in range(len(legNums)):
@@ -387,7 +387,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
 
         moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
 
-    time.sleep(s.STEP_DELAY)
+    time.sleep(s.STEP_DELAY2)
 
 # moves two legs at a time to get back from home position. Should work without problem as long as robot
 # is reasonably balanced when this is called
@@ -404,7 +404,9 @@ def changeServoSpeeds(speed, motors = None):
     if (s.isAnimation):
         if (motors == None):
             s.ANIMATED_LEG_SERVO_SPEED = speed
-            s.STEP_DELAY = (200.0/speed) * s.STEP_DELAY_AT200
+            s.STEP_DELAY1 = (200.0/speed) * s.STEP_DELAY_AT200_1
+            s.STEP_DELAY2 = (200.0/speed) * s.STEP_DELAY_AT200_2
+            print (s.STEP_DELAY1, s.STEP_DELAY2)
         else:
             for name in motors:
                 if name == 'pan':
@@ -419,7 +421,8 @@ def changeServoSpeeds(speed, motors = None):
                 # only change leg motor speed
                 if ((m.name != 'tilt') and (m.name != 'pan')):
                     m.moving_speed = speed
-            s.STEP_DELAY = (200.0/speed) * s.STEP_DELAY_AT200
+            s.STEP_DELAY1 = (200.0/speed) * s.STEP_DELAY_AT200_1
+            s.STEP_DELAY2 = (200.0/speed) * s.STEP_DELAY_AT200_2
         else:
             for m in motors:
                 getattr(robot,m).moving_speed = speed
@@ -602,7 +605,7 @@ else:
     robot = pypot.robot.from_config(my_config)
 
     for m in robot.motors:
-        m.moving_speed = 150
+        m.moving_speed = 200
         m.compliant = False
         print(m.name, m.present_position)
 
