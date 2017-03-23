@@ -21,7 +21,7 @@ class MotorController:
         pass
 
     def STOP(self, speed):
-        print ("GO TO HOME POS: ",  stepsize)
+        print ("GO TO HOME POS: ")
         goToHomeFromAnyPosition()
 
     def FORWARD(self, stepsize):

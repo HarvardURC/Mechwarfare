@@ -98,7 +98,7 @@ def updateServosAndBase():
                 # check if servo needs changing
                 if abs(goalPos - currentPos) > 0.0:
                     difference = goalPos - currentPos
-                    animationServoDelta = s.ANIMATED_LEG_SERVO_SPEED * s.SERVO_UPDATE_DELAY
+                    animationServoDelta = s.currentLegServoSpeed * s.SERVO_UPDATE_DELAY
 
                     # if difference is smaller than delta, then just make servo what it should be
                     if abs(difference) < animationServoDelta:

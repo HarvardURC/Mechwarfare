@@ -288,6 +288,12 @@ def dragFoot(legNum, newDispVector):
 
         time.sleep(.5)
 
+# gets the maximum angle that a servo has to move in a leg move from currentIdealAngles to newIdealAngles
+def getMaxServoDisp(legNum, newIdealAngles, currentIdealAngles):
+    currentServoAngles = getServoAnglesFromIdeals(legNum, currentIdealAngles[0], currentIdealAngles[1], currentIdealAngles[2])
+    newServoAngles = getServoAnglesFromIdeals(legNum, newIdealAngles[0], newIdealAngles[1], newIdealAngles[2])
+    servo_disp_max = max(numpy.absolute(numpy.subtract(newServoAngles,currentServoAngles)))
+    return servo_disp_max
 
 # this one is a generalized version of the others. Dragging is discretized only into two
 # because it matches with the two discretizations of the move foot
@@ -301,6 +307,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
         currentAngles = getCurrentAngles(legNum)
         currentDispVectors.append(getDisplacementFromAngles(legNum, currentAngles))
 
+    servo_disp_max = 0
     # take multiple steps up at the same time and half drag
     for l in range(len(legNums)):
         legNum = legNums[l]
@@ -321,7 +328,17 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
 
         moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
 
-    time.sleep(s.STEP_DELAY)
+
+        servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
+        if servo_disp > servo_disp_max:
+            servo_disp_max = servo_disp
+
+    time.sleep(servo_disp_max/s.currentLegServoSpeed)
+
+    print("time: ", servo_disp_max/s.currentLegServoSpeed)
+    print ("MAXDISP: ", servo_disp_max)
+
+    servo_disp_max = 0
 
     # put multiple foots down and finish drag
     for l in range(len(legNums)):
@@ -333,17 +350,22 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
         else:
             [x,y,z] = newDispVector
 
-
         newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
 
         moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
 
-    time.sleep(s.STEP_DELAY)
+        servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
+        if servo_disp > servo_disp_max:
+            servo_disp_max = servo_disp
+
+    time.sleep(servo_disp_max/s.currentLegServoSpeed)
+
+    print("time2", servo_disp_max/s.currentLegServoSpeed)
+    print ("MAXDISP: ", servo_disp_max)
 
 # moves two legs at a time to get back from home position. Should work without problem as long as robot
 # is reasonably balanced when this is called
 def goToHomeFromAnyPosition():
-    changeServoSpeeds(s.MAX_SERVO_SPEED)
     moveAndDragMultFeet([1, 3],  [s.HOMEPOS["1"], s.HOMEPOS["3"]],[1,1])
     moveAndDragMultFeet([2, 4],  [s.HOMEPOS["2"], s.HOMEPOS["4"]], [1,1])
 
@@ -354,7 +376,7 @@ def changeServoSpeeds(speed, motors = None):
     # in the animated version you could either change all leg servos at same time or pan or tilt servo
     if (s.isAnimation):
         if (motors == None):
-            s.ANIMATED_LEG_SERVO_SPEED = speed
+            s.currentLegServoSpeed = speed
         else:
             for name in motors:
                 if name == 'pan':
@@ -369,6 +391,7 @@ def changeServoSpeeds(speed, motors = None):
                 # only change leg motor speed
                 if ((m.name != 'tilt') and (m.name != 'pan')):
                     m.moving_speed = speed
+            s.currentLegServoSpeed = speed
         else:
             for m in motors:
                 getattr(robot,m).moving_speed = speed
@@ -470,7 +493,6 @@ def rotate(degree, isClockwise, speed = None):
 
 def moveTurretServo(m,x):
     names = ["pan", "tilt"]
-    getattr(robot,names[m]).compliant = False
     if (x > s.TURRET_SERVO_BOUNDS[m][1] or x < s.TURRET_SERVO_BOUNDS[m][0]):
         print(names[m] + ' servo out of range. Requested position was ' + str(x) + ' but range is ' + str(s.TURRET_SERVO_BOUNDS[m][0]) + ' to ' + str(s.TURRET_SERVO_BOUNDS[m][1]) + ' - Baby Mech has declared')
         current = getTurretServoAngle(m)
@@ -482,14 +504,15 @@ def moveTurretServo(m,x):
         if s.isAnimation:
             s.turretServoGoalPos[m] = x
         else:
+            getattr(robot,names[m]).compliant = True
             getattr(robot,names[m]).goal_position = x
             
 def stopTurretServo(m):
     names = ["pan", "tilt"]
     if s.isAnimation:
-        s.turretServoGoalPos[m]
+        s.turretServoGoalPos[m] = getTurretServoAngle(m)
     else:
-        getattr(robot,names[m]).compliant = True
+        getattr(robot,names[m]).compliant = False
 
 def getTurretServoAngle(m):
     if s.isAnimation:

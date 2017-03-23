@@ -1,4 +1,4 @@
-import settings2 as s
+import settings as s
 from visual import *
 import time
 import math
@@ -101,6 +101,7 @@ def updateLegsAndBase():
 
         legs['leg'+leg]['foot'].pos = vectorAdd(legs['leg'+leg]['ankle2foot'].pos,legs['leg'+leg]['ankle2foot'].axis)
 
+        print(legs['leg'+leg]['foot'].pos)
         #if i == 1:
            # print (legs['leg'+leg]['foot'].pos)
 

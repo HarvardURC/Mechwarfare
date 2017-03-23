@@ -6,9 +6,13 @@ from .turret import GunController
 from .move import MovementController
 
 import server.gaits.settings as s
+import server.gaits.walking as w
 import math 
 
 DEADZONE = 0.1
+
+buttons = ["button_X", "button_A", "button_B", "button_Y", "button_LB", "button_RB", "button_LT", "button_RT", "button_back", "button_start", "button_toggleleft", "button_toggleright"]
+d = dict(zip(buttons,range(len(buttons))))
 
 def sign(x):
     if x > 0:
@@ -55,18 +59,26 @@ class Bot:
         
     def BUTN(self, id, val):
         print ("id: ", id, "val: ", val)
-        if id == 5:
+        if id == d["button_RB"]:
             self.gun.fire(val)
-        elif id == 6:
+        elif id == d["button_LT"]:
             self.move.left(val)
-        elif id == 7:
+        elif id == d["button_RT"]:
             self.move.right(val)
-        elif id == 10:
+        elif id == d["button_toggleleft"]:
             self.gun.panHome(val)
-        elif id == 11:
+        elif id == d["button_toggleright"]:
             self.gun.tiltHome(val)
-        elif id == 4:
-            self.gun.changeSprayTime()
+        elif id == d["button_LB"]:
+            self.gun.changeSprayTime(val)
+        elif id == d["button_X"]:
+            if s.currentLegServoSpeed >= 11:
+                w.changeServoSpeeds(s.currentLegServoSpeed - 10)
+                print("BUTTONX", s.currentLegServoSpeed)
+        elif id == d["button_B"]:
+            if s.currentLegServoSpeed <= s.MAX_SERVO_SPEED - 10:
+                w.changeServoSpeeds(s.currentLegServoSpeed + 10)
+                print("BUTTONB", s.currentLegServoSpeed)
         
 
 
@@ -76,8 +88,8 @@ class Bot:
         # make sure val is above a certain axis threshold
         if(abs(val) < DEADZONE):
             val = 0.0
-        if id == 0: self.move.strafe(val*s.STEP_SIZE)
-        elif id == 1: self.move.forward(-val*s.STEP_SIZE)
+        if id == 0: self.move.strafe(val*s.MAX_STEP_SIZE)
+        elif id == 1: self.move.forward(-val*s.MAX_STEP_SIZE)
         elif id == 3: self.gun.tilt(1* sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED)
         elif id == 2: self.gun.pan(sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED)
 

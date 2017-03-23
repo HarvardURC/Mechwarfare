@@ -14,11 +14,6 @@ if not s.isAnimation:
     GPIO.setmode(GPIO.BCM)  
     GPIO.setup(s.GUN_PIN, GPIO.OUT, initial=GPIO.LOW)
 
-def changeSprayTime():
-    if s.spray_time == s.SPRAY_TIME_3:
-        s.spray_time = s.SPRAY_TIME_1
-    else:
-        s.spray_time = s.SPRAY_TIME_3 
 
 
 class GunController(Thread):
@@ -26,17 +21,20 @@ class GunController(Thread):
         super().__init__(*args, **kwargs)
         self.firing = False
 
+    def changeSprayTime(self, isOn):
+        if isOn:
+            if s.spray_time == s.SPRAY_TIME_3:
+                s.spray_time = s.SPRAY_TIME_1
+            else:
+                s.spray_time = s.SPRAY_TIME_3 
+
     ### THIS IS THE FUNCTION
     def fire(self, isOn):
         if isOn:
             debug("Started Firing")
-            if s.isAnimation:
-                s.isFiring = True
             self.firing = True
         else:
             debug("Stopped firing")
-            if s.isAnimation:
-                s.isFiring = False
             self.firing = False
                 
 
@@ -54,9 +52,10 @@ class GunController(Thread):
                     time.sleep(.05)
             else:
                 if self.firing:
-                    GPIO.output(18,True)
+                    s.isFiring = True
                     time.sleep(s.spray_time)
-                    GPIO.output(18,False)
+                    print (s.spray_time)
+                    s.isFiring = False
                     time.sleep(s.SPRAY_DELAY)
                 else:
                     time.sleep(.05)
@@ -92,16 +91,17 @@ class GunController(Thread):
 
     # is on deals with the fact that when you release the button, the value changes. 
     # This should probably be handled on the client side though
-    def tiltHome(self, isOn):
-        if isOn:
-            print ("go to tilt home")
-            changeServoSpeeds(MAX_SERVO_SPEED, ['tilt'])
-            moveTurretServo(1,0.0)
 
     def panHome(self, isOn):
         if isOn:
             print ("go to pan home")
-            changeServoSpeeds(MAX_SERVO_SPEED, ['pan'])
+            changeServoSpeeds(s.MAX_SERVO_SPEED, ['pan'])
             moveTurretServo(0,0.0)
+
+    def tiltHome(self, isOn):
+        if isOn:
+            print ("go to tilt home")
+            changeServoSpeeds(s.MAX_SERVO_SPEED, ['tilt'])
+            moveTurretServo(1,0.0)
 
 
