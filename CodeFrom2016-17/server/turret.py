@@ -104,4 +104,10 @@ class GunController(Thread):
             changeServoSpeeds(s.MAX_SERVO_SPEED, ['tilt'])
             moveTurretServo(1,0.0)
 
+    def StringMotor(self, isOn):
+        if isOn:
+            moveStringMotor()
+
+
+
 
