@@ -23,10 +23,7 @@ class GunController(Thread):
 
     def changeSprayTime(self, isOn):
         if isOn:
-            if s.spray_time == s.SPRAY_TIME_3:
-                s.spray_time = s.SPRAY_TIME_1
-            else:
-                s.spray_time = s.SPRAY_TIME_3 
+            s.autoFire = not s.autoFire
 
     ### THIS IS THE FUNCTION
     def fire(self, isOn):
@@ -36,7 +33,7 @@ class GunController(Thread):
         else:
             debug("Stopped firing")
             self.firing = False
-                
+
 
     def run(self):
         self.stop = Event()
@@ -44,20 +41,31 @@ class GunController(Thread):
             if not s.isAnimation:
                 # fire for spray time and then wait 1 second so user doesn't spray too much
                 if self.firing:
-                    GPIO.output(18,True)
-                    time.sleep(s.spray_time)
-                    GPIO.output(18,False)
-                    time.sleep(s.SPRAY_DELAY)
+                    if s.autoFire:
+                        GPIO.output(18,True)
+                        time.sleep(.05)
+                    # else do 3 spray
+                    else:
+                        GPIO.output(18,True)
+                        time.sleep(s.spray_time)
+                        GPIO.output(18,False)
+                        time.sleep(s.SPRAY_DELAY)
                 else:
+                    GPIO.output(18,False)
                     time.sleep(.05)
             else:
                 if self.firing:
-                    s.isFiring = True
-                    time.sleep(s.spray_time)
-                    print (s.spray_time)
-                    s.isFiring = False
-                    time.sleep(s.SPRAY_DELAY)
+                    if s.autoFire:
+                        s.isFiring = True
+                        time.sleep(.05)
+                    # else do 3 spray
+                    else:
+                        s.isFiring = True
+                        time.sleep(s.spray_time)
+                        s.isFiring = False
+                        time.sleep(s.SPRAY_DELAY)
                 else:
+                    s.isFiring = False
                     time.sleep(.05)
 
     def pan(self, speed):
@@ -104,7 +112,7 @@ class GunController(Thread):
             changeServoSpeeds(s.MAX_SERVO_SPEED, ['tilt'])
             moveTurretServo(1,0.0)
 
-    def StringMotor(self, isOn):
+    def reload(self, isOn):
         if isOn:
             moveStringMotor()
 

@@ -24,7 +24,7 @@ my_config = {
         'leg2': ['hip2', 'knee2', 'ankle2'],
         'leg3': ['hip3', 'knee3', 'ankle3'],
         'leg4': ['hip4', 'knee4', 'ankle4'],
-        'turret': ['pan', 'tilt']
+        'turret': ['pan', 'tilt', 'string']
         
     },
     'motors': {
@@ -124,6 +124,13 @@ my_config = {
             'type': 'AX-18',
             'id': 18,
             'angle_limit': [-150.0, 150.0],
+            'offset': 0.0
+        },
+        'string': {
+            'angle_limit': [-150.0, 150.0],
+            'orientation': 'direct',
+            'type': 'AX-12',
+            'id': 19,
             'offset': 0.0
         }
     }
@@ -624,6 +631,8 @@ def stopTurretServo(m):
         s.turretServoGoalPos[m] = getTurretServoAngle(m)
     else:
         getattr(robot,names[m]).compliant = True
+        time.sleep(.1)
+        getattr(robot,names[m]).compliant = False
 
 
 def getTurretServoAngle(m):
@@ -634,18 +643,19 @@ def getTurretServoAngle(m):
         return getattr(robot,names[m]).present_position
 
 def getTurretBound(m,b):
-    return s.TURRET_SERVO_BOUNDS[m][b]
+    return s.TURRET_SERVO_BOUNDS[m][b] + s.TURRET_HOME_POSITIONS[m]
 
 def moveAgitatorServo(x):
     getattr(robot,"agitator").goal_position = x
 
 def moveStringMotor():
-    print(getattr(robot,"string").moving_speed)
-    time.sleep(1)
-    getattr(robot,"string").moving_speed = 100
-    time.sleep(1)
-    getattr(robot,"string").moving_speed = 1
-    getattr(robot,"string").moving_speed = 0
+    currentPos = getattr(robot,"string").present_position
+    if (currentPos > 148):
+        getattr(robot,"string").goal_position = -150
+        getattr(robot,"string").goal_position = 150
+        s.reloading = True
+    
+
             
 # 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change
 def rotateTurretServo(m, degrees, isClockwise, speed = None):

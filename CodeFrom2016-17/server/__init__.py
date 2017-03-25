@@ -92,7 +92,7 @@ class Bot:
             val = 0.0
         if id == 0: self.move.strafe(val*s.MAX_STEP_SIZE)
         elif id == 1: self.move.forward(-val*s.MAX_STEP_SIZE)
-        elif id == 3: self.gun.tilt(1* sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED)
-        elif id == 2: self.gun.pan(sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED)
+        elif id == 3: self.gun.tilt(-1* sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED/2.0)
+        elif id == 2: self.gun.pan(sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED/2.0)
 
             

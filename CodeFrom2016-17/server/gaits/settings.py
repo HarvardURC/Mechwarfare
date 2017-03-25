@@ -50,13 +50,21 @@ STEP_DELAY = .2
 global currentLegServoSpeed
 currentLegServoSpeed = 200.0
 
-MAX_STEP_SIZE = 1.5
+MAX_STEP_SIZE = 1.0
 MAX_SERVO_SPEED = 200.0
 
+# 3 round burst, 1 round burst, auto
 SPRAY_TIME_3 = .25
 SPRAY_TIME_1 = .08
 SPRAY_DELAY = 1.0
-spray_time = SPRAY_TIME_1
+spray_time = SPRAY_TIME_3
+
+global autoFire
+autoFire = True
+
+
+global StringMotorMovingClockwise
+StringMotorMovingClockwise = True
 
 
 

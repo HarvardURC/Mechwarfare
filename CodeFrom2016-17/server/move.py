@@ -44,12 +44,12 @@ class MotorController:
         # 10 degrees rotation for now
         # True implies clockwise
         print ("turn right at speed: ",  speed*s.MAX_SERVO_SPEED)
-        rotate(20, True, speed*s.MAX_SERVO_SPEED)
+        rotate(10, True, speed*s.MAX_SERVO_SPEED)
 
     def TURN_LEFT(self, speed):
         # 10 degrees rotation for now
         print ("turn left at speed: ", speed)
-        rotate(20, False, speed*s.MAX_SERVO_SPEED)
+        rotate(10, False, speed*s.MAX_SERVO_SPEED)
 
 ZERO = (0, 0)
 def nonzero(x):

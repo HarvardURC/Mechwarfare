@@ -101,7 +101,6 @@ def updateLegsAndBase():
 
         legs['leg'+leg]['foot'].pos = vectorAdd(legs['leg'+leg]['ankle2foot'].pos,legs['leg'+leg]['ankle2foot'].axis)
 
-        print(legs['leg'+leg]['foot'].pos)
         #if i == 1:
            # print (legs['leg'+leg]['foot'].pos)
 
@@ -245,7 +244,6 @@ while True:
             newforward = rotate(newforward, angle=angley, axis=right)
             newray = rotate(newray, angle=angley, axis=right)
         scene.forward = newforward
-        print scene.forward
         lastray = newray
 
 
