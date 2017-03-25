@@ -623,7 +623,7 @@ def moveTurretServo(m,x):
             s.turretServoGoalPos[m] = x
         else:
             getattr(robot,names[m]).compliant = False
-            getattr(robot,names[m]).goal_position = x
+            getattr(robot,names[m]).goal_position = getTurretServoAngle(m)
             
 def stopTurretServo(m):
     names = ["pan", "tilt"]
@@ -633,6 +633,8 @@ def stopTurretServo(m):
         getattr(robot,names[m]).compliant = True
         time.sleep(.1)
         getattr(robot,names[m]).compliant = False
+        print (getattr(robot,names[m]).compliant)
+        print ("I put that statement^")
 
 
 def getTurretServoAngle(m):
@@ -650,11 +652,11 @@ def moveAgitatorServo(x):
 
 def moveStringMotor():
     currentPos = getattr(robot,"string").present_position
-    if (currentPos > 148):
-        getattr(robot,"string").goal_position = -150
+    if (currentPos < -148):
         getattr(robot,"string").goal_position = 150
-        s.reloading = True
-    
+        s.StringMotorMovingClockwise = True
+    elif (currentPos > 148):
+        getattr(robot,"string").goal_position = -150
 
             
 # 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change
