@@ -101,7 +101,11 @@ def updateLegsAndBase():
 
         legs['leg'+leg]['foot'].pos = vectorAdd(legs['leg'+leg]['ankle2foot'].pos,legs['leg'+leg]['ankle2foot'].axis)
 
-        print(legs['leg'+leg]['foot'].pos)
+        legs['leg'+leg]['vert'].length = s.HIPVERTUP_LENGTH
+        legs['leg'+leg]['horiz'].length = s.HIPHORIZ_LENGTH
+        legs['leg'+leg]['knee2ankle'].length = s.L1_LENGTH
+        legs['leg'+leg]['ankle2foot'].length = s.L2_LENGTH
+
         #if i == 1:
            # print (legs['leg'+leg]['foot'].pos)
 

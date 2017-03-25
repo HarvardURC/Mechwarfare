@@ -7,9 +7,9 @@ import json
 import os
 
 
-from . import settings as s
+import settings as s
 
-wfPath = "./server/gaits/p1"
+wfPath = "p1"
 
 x_negs = [(-1) ** ((leg)%3 > 0) for leg in range(4)]
 y_negs = [(-1)** math.floor(leg/2) for leg in range(4)]
@@ -71,7 +71,7 @@ def updateTurretServosAndTurret():
 
 def updateServosAndBase():
     while True:
-        time.sleep(s.SERVO_UPDATE_DELAY)
+        time.sleep(s.SERVO_UPDATE_DELAY*4)
 
 
         storeLegPos = list(s.ServoPos)
@@ -98,7 +98,7 @@ def updateServosAndBase():
                 # check if servo needs changing
                 if abs(goalPos - currentPos) > 0.0:
                     difference = goalPos - currentPos
-                    animationServoDelta = s.currentLegServoSpeed * s.SERVO_UPDATE_DELAY
+                    animationServoDelta = s.ANIMATED_LEG_SERVO_SPEED * s.SERVO_UPDATE_DELAY
 
                     # if difference is smaller than delta, then just make servo what it should be
                     if abs(difference) < animationServoDelta:

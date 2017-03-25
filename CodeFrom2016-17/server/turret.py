@@ -15,26 +15,26 @@ if not s.isAnimation:
     GPIO.setup(s.GUN_PIN, GPIO.OUT, initial=GPIO.LOW)
 
 
+
 class GunController(Thread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.firing = False
 
+    def changeSprayTime(self, isOn):
+        if isOn:
+            if s.spray_time == s.SPRAY_TIME_3:
+                s.spray_time = s.SPRAY_TIME_1
+            else:
+                s.spray_time = s.SPRAY_TIME_3 
+
     ### THIS IS THE FUNCTION
     def fire(self, isOn):
         if isOn:
-            debug("FIRING GUN POW POW")
-            if not s.isAnimation:
-                GPIO.output(s.GUN_PIN,True)
-            else:
-                s.isFiring = True
+            debug("Started Firing")
             self.firing = True
         else:
             debug("Stopped firing")
-            if not s.isAnimation:
-                GPIO.output(s.GUN_PIN,False)
-            else:
-                s.isFiring = False
             self.firing = False
                 
 
@@ -42,15 +42,23 @@ class GunController(Thread):
         self.stop = Event()
         while not self.stop.is_set():
             if not s.isAnimation:
+                # fire for spray time and then wait 1 second so user doesn't spray too much
                 if self.firing:
-                    moveAgitatorServo(0)
-                    time.sleep(.5) 
-                    moveAgitatorServo(90)
-                    time.sleep(.5) 
+                    GPIO.output(18,True)
+                    time.sleep(s.spray_time)
+                    GPIO.output(18,False)
+                    time.sleep(s.SPRAY_DELAY)
                 else:
                     time.sleep(.05)
             else:
-                time.sleep(.05)
+                if self.firing:
+                    s.isFiring = True
+                    time.sleep(s.spray_time)
+                    print (s.spray_time)
+                    s.isFiring = False
+                    time.sleep(s.SPRAY_DELAY)
+                else:
+                    time.sleep(.05)
 
     def pan(self, speed):
         """This function should turn on the pan motor at the specified speed,
@@ -83,16 +91,23 @@ class GunController(Thread):
 
     # is on deals with the fact that when you release the button, the value changes. 
     # This should probably be handled on the client side though
-    def tiltHome(self, isOn):
-        if isOn:
-            print ("go to tilt home")
-            changeServoSpeeds(MAX_SERVO_SPEED, ['tilt'])
-            moveTurretServo(1,0.0)
 
     def panHome(self, isOn):
         if isOn:
             print ("go to pan home")
-            changeServoSpeeds(MAX_SERVO_SPEED, ['pan'])
+            changeServoSpeeds(s.MAX_SERVO_SPEED, ['pan'])
             moveTurretServo(0,0.0)
+
+    def tiltHome(self, isOn):
+        if isOn:
+            print ("go to tilt home")
+            changeServoSpeeds(s.MAX_SERVO_SPEED, ['tilt'])
+            moveTurretServo(1,0.0)
+
+    def StringMotor(self, isOn):
+        if isOn:
+            moveStringMotor()
+
+
 
 

@@ -26,7 +26,7 @@ FOOT_RADIUS = .74
 
 # constants
 #HOMEPOS_FOOTHEIGHT = -2.25
-HOMEPOS_FOOTHEIGHT = (HIPVERTUP_LENGTH-L2_LENGTH)
+HOMEPOS_FOOTHEIGHT = ( HIPVERTUP_LENGTH-L2_LENGTH)
 
 HOMELEN =  (HIPHORIZ_LENGTH + L1_LENGTH) / 1.414
 
@@ -39,12 +39,18 @@ HOMEPOS = {"1": [HOMELEN,HOMELEN,HOMEPOS_FOOTHEIGHT],
 
 
 # variables for robot walk gait
-LIFTFOOTHEIGHT = 1.0
+LIFTFOOTHEIGHT = .8
 DRAG_INTERVALS = 5
 
 
-global STEP_DELAY
-STEP_DELAY = .2
+STEP_DELAY_AT200_1 = .5
+STEP_DELAY_AT200_2 = .1
+
+global STEP_DELAY1
+STEP_DELAY1 = STEP_DELAY_AT200_1
+
+global STEP_DELAY2
+STEP_DELAY1 = STEP_DELAY_AT200_2
 
 STEP_SIZE = 1.5
 MAX_SERVO_SPEED = 200.0
@@ -63,7 +69,7 @@ spray_time = SPRAY_TIME_3
 import os
 
 global isAnimation
-isAnimation = True if os.environ.get("IS_ANIMATION", False) else False
+isAnimation = True
 
 global t_per_second 
 t_per_second = 30
