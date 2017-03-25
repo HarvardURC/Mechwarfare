@@ -304,7 +304,7 @@ def getMaxServoDisp(legNum, newIdealAngles, currentIdealAngles):
 
 # this one is a generalized version of the others. Dragging is discretized only into two
 # because it matches with the two discretizations of the move foot
-def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
+def moveAndDragMultFeet2(legNums, newDispVectors, isMovings):
     print ("moving to: ", newDispVectors, "...")
 
     # find current displacement vectors at beginning
@@ -370,7 +370,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
     print("time2", servo_disp_max/s.currentLegServoSpeed)
     print ("MAXDISP: ", servo_disp_max)
 
-def moveAndDragMultFeet2(legNums, newDispVectors, isMovings):
+def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
     print ("moving to: ", newDispVectors, "...")
 
     # find current displacement vectors at beginning
@@ -392,14 +392,14 @@ def moveAndDragMultFeet2(legNums, newDispVectors, isMovings):
             [x,y,z] = currentDispVector
             z = z + s.LIFTFOOTHEIGHT
 
-        newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
+            newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
 
-        moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
+            moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
 
 
-        servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
-        if servo_disp > servo_disp_max:
-            servo_disp_max = servo_disp
+            servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
+            if servo_disp > servo_disp_max:
+                servo_disp_max = servo_disp
 
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
@@ -441,13 +441,13 @@ def moveAndDragMultFeet2(legNums, newDispVectors, isMovings):
         if isMovings[l]:
             [x,y,z] = newDispVector
 
-        newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
+            newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
 
-        moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
+            moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], isMovings[l])
 
-        servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
-        if servo_disp > servo_disp_max:
-            servo_disp_max = servo_disp
+            servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
+            if servo_disp > servo_disp_max:
+                servo_disp_max = servo_disp
 
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
@@ -611,7 +611,7 @@ def rotate(degree, isClockwise, speed = None):
 
 def moveTurretServo(m,x):
     names = ["pan", "tilt"]
-    if (x > s.TURRET_SERVO_BOUNDS[m][1] or x < s.TURRET_SERVO_BOUNDS[m][0]):
+    if (x > s.TURRET_SERVO_BOUNDS[m][1] + s.TURRET_HOME_POSITIONS[m] or x < s.TURRET_SERVO_BOUNDS[m][0] + s.TURRET_HOME_POSITIONS[m]):
         print(names[m] + ' servo out of range. Requested position was ' + str(x) + ' but range is ' + str(s.TURRET_SERVO_BOUNDS[m][0]) + ' to ' + str(s.TURRET_SERVO_BOUNDS[m][1]) + ' - Baby Mech has declared')
         current = getTurretServoAngle(m)
         if s.isAnimation:
@@ -623,7 +623,7 @@ def moveTurretServo(m,x):
             s.turretServoGoalPos[m] = x
         else:
             getattr(robot,names[m]).compliant = False
-            getattr(robot,names[m]).goal_position = getTurretServoAngle(m)
+            getattr(robot,names[m]).goal_position = x
             
 def stopTurretServo(m):
     names = ["pan", "tilt"]
@@ -635,7 +635,7 @@ def stopTurretServo(m):
         getattr(robot,names[m]).compliant = False
         print (getattr(robot,names[m]).compliant)
         print ("I put that statement^")
-
+        getattr(robot,names[m]).goal_position = getTurretServoAngle(m)
 
 def getTurretServoAngle(m):
     if s.isAnimation:
@@ -657,7 +657,6 @@ def moveStringMotor():
         s.StringMotorMovingClockwise = True
     elif (currentPos > 148):
         getattr(robot,"string").goal_position = -150
-
             
 # 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change
 def rotateTurretServo(m, degrees, isClockwise, speed = None):
