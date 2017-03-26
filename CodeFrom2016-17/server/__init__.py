@@ -79,8 +79,8 @@ class Bot:
             if s.currentLegServoSpeed <= s.MAX_SERVO_SPEED - 10:
                 w.changeServoSpeeds(s.currentLegServoSpeed + 10)
                 print("BUTTONB", s.currentLegServoSpeed)
-        elif id == d["BUTTONA"]:
-            self.gun.StringMotor()
+        elif id == d["button_A"]:
+            self.gun.reload(val)
         
 
 
