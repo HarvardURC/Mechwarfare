@@ -304,7 +304,7 @@ def getMaxServoDisp(legNum, newIdealAngles, currentIdealAngles):
 
 # this one is a generalized version of the others. Dragging is discretized only into two
 # because it matches with the two discretizations of the move foot
-def moveAndDragMultFeet2(legNums, newDispVectors, isMovings):
+def moveAndDragMultFeetOld(legNums, newDispVectors, isMovings):
     print ("moving to: ", newDispVectors, "...")
 
     # find current displacement vectors at beginning
@@ -388,9 +388,12 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
         newDispVector = newDispVectors[l]
         currentDispVector = currentDispVectors[l]
 
+
         if isMovings[l]:
             [x,y,z] = currentDispVector
+            print ("CURRENTXYZ: ", currentDispVector)
             z = z + s.LIFTFOOTHEIGHT
+            print ("NEWXYZ", [x,y,z])
 
             newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
 
@@ -401,6 +404,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
             if servo_disp > servo_disp_max:
                 servo_disp_max = servo_disp
 
+    time.sleep(4)
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
     print("time: ", servo_disp_max/s.currentLegServoSpeed)
@@ -651,12 +655,26 @@ def moveAgitatorServo(x):
     getattr(robot,"agitator").goal_position = x
 
 def moveStringMotor():
-    currentPos = getattr(robot,"string").present_position
-    if (currentPos < -148):
-        getattr(robot,"string").goal_position = 150
-        s.StringMotorMovingClockwise = True
-    elif (currentPos > 148):
-        getattr(robot,"string").goal_position = -150
+    if not s.isAnimation:
+        # -148 is the rest position, 150 is the wounded position
+        currentPos = getattr(robot,"string").present_position
+        if (currentPos < -148):
+            # not StringMotorMovingBack is False means servo is just starting to reload
+            if not s.StringMotorMovingBack:
+                # go to opposite side, therefore pulling string
+                getattr(robot,"string").goal_position = 150
+                # save the BBcount in case it changes while reloading, want to use old BBcount just before reload began
+                s.saveBBcount = s.BBCount
+            # notMovingBack is True meaning it came back from 150 and is done reloading
+            else:
+                # now that the pastBBcount is the same as the saved BBcount. This function will then stop being called from turret.py
+                s.pastBBcountBeforeReloading = s.saveBBcount 
+                s.StringMotorMovingBack = False
+        elif (currentPos > 148):
+            # now servo is on opposite side of, therefore should put string back
+            getattr(robot,"string").goal_position = -150
+            s.StringMotorMovingBack = True
+
             
 # 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change
 def rotateTurretServo(m, degrees, isClockwise, speed = None):

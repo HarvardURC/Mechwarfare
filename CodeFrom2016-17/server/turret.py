@@ -37,23 +37,34 @@ class GunController(Thread):
 
     def run(self):
         self.stop = Event()
+        s.BBcount = 0.0
+        s.pastBBcountBeforeReloading = 0.0
         while not self.stop.is_set():
             if not s.isAnimation:
-                # fire for spray time and then wait 1 second so user doesn't spray too much
+                # firing code, choose between auto and 3 burst
                 if self.firing:
                     if s.autoFire:
                         GPIO.output(18,True)
                         time.sleep(.05)
+                        s.BBcount += .05 * 12
                     # else do 3 spray
                     else:
                         GPIO.output(18,True)
                         time.sleep(s.spray_time)
                         GPIO.output(18,False)
                         time.sleep(s.SPRAY_DELAY)
+                        s.BBcount += 3
                 else:
                     GPIO.output(18,False)
                     time.sleep(.05)
+
+                # reload code
+                if s.BBcount > s.pastBBcountBeforeReloading + s.BB_RELOAD_THRESHOLD
+                    moveStringMotor()
+                    time.sleep(.05)
+
             else:
+                # animation firing code, choose between auto and 3 burst
                 if self.firing:
                     if s.autoFire:
                         s.isFiring = True
@@ -67,6 +78,8 @@ class GunController(Thread):
                 else:
                     s.isFiring = False
                     time.sleep(.05)
+
+
 
     def pan(self, speed):
         """This function should turn on the pan motor at the specified speed,

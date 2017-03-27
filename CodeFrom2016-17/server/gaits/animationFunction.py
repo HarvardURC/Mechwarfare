@@ -71,7 +71,7 @@ def updateTurretServosAndTurret():
 
 def updateServosAndBase():
     while True:
-        time.sleep(s.SERVO_UPDATE_DELAY)
+        time.sleep(s.SERVO_UPDATE_DELAY * s.animationSlowMo)
 
 
         storeLegPos = list(s.ServoPos)

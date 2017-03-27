@@ -26,6 +26,8 @@ panBox = box (pos = numpy.add(base.pos, revForV([0,0, s.PANBOX_HEIGHT/2.0])), le
 barrel = cylinder(pos=numpy.add(panBox.pos, revForV([0,0, s.PANBOX_HEIGHT/2.0])),  axis=(1,0,0), length = s.BARREL_LENGTH, radius=.1, color= color.white)
 directionArrow = arrow(pos=(0,0,1.0), axis=revForV((0,0,2.0)), shaftwidth=.3, color=color.black)
 
+testDot = sphere(pos=revForV((-3.3627298444130176, -2.7127298444130177,1)), radius=.2, color=color.white)
+
 
 # initialize Leg Arrows
 legs = {
@@ -165,6 +167,8 @@ def readPipe():
 
 readPipeThread = Thread(target=readPipe, args=())
 readPipeThread.start()
+
+
 
 
 

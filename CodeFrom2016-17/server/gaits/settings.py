@@ -1,5 +1,3 @@
-
-
 # REAL MOVEMENT SETTINGS
 HOME_LEG_POSITIONS = [[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0],[-45.0, 0.0, 0.0],[45.0, 0.0, 0.0]]
 
@@ -26,15 +24,11 @@ FOOT_RADIUS = .74
 
 # constants
 #HOMEPOS_FOOTHEIGHT = -2.25
-<<<<<<< HEAD
-HOMEPOS_FOOTHEIGHT =(HIPVERTUP_LENGTH-L2_LENGTH)
 
-HOMELEN =  (HIPHORIZ_LENGTH + L1_LENGTH) / 1.414
-=======
+
 HOMEPOS_FOOTHEIGHT = -.4 + (HIPVERTUP_LENGTH-L2_LENGTH)
 
-HOMELEN = -.3 +  (HIPHORIZ_LENGTH + L1_LENGTH) / 1.414
->>>>>>> f4d6e62ea50b2e40fa007cb75b026415f53ae866
+HOMELEN = -.3 + (HIPHORIZ_LENGTH + L1_LENGTH) / 1.414
 
 
 HOMEPOS = {"1": [HOMELEN,HOMELEN,HOMEPOS_FOOTHEIGHT],
@@ -69,8 +63,15 @@ global autoFire
 autoFire = True
 
 
-global StringMotorMovingClockwise
-StringMotorMovingClockwise = True
+global StringMotorMoving
+StringMotorMoving = False
+
+global BBcount
+BBcount = 0.0
+global pastBBcountBeforeReloading 
+pastBBcountBeforeReloading  = 0.0
+
+BB_RELOAD_THRESHOLD = 50
 
 
 
@@ -82,6 +83,9 @@ import os
 
 global isAnimation
 isAnimation = True if os.environ.get("IS_ANIMATION", False) else False
+
+global animationSlowMo
+animationSlowMo = 1
 
 global t_per_second 
 t_per_second = 30
