@@ -141,7 +141,6 @@ def updateLegsAndBase():
     directionArrow.axis = revForV((math.cos(s.BaseOrientationAngle + math.pi/2.0),math.sin(s.BaseOrientationAngle + math.pi/2.0),0))
     directionArrow.length = s.BASE_LENGTH
     
-    print (TurretPosRadians[1], tiltAngle)
 
 
 #updateLegsAndBase()

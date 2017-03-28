@@ -142,7 +142,7 @@ def checkServoBounds(legNum, servoAngles):
     for i in range(len(servoAngles)):
         home = s.HOME_LEG_POSITIONS[legNum - 1][i]
         if (servoAngles[i] > home + s.SERVO_BOUNDS[i][1]) or (servoAngles[i] < home + s.SERVO_BOUNDS[i][0]):
-            raise ValueError(names[i] + ' servo out of range. Requested position was ' + str(servoAngles[i]) + ' but range is ' + str(home + s.SERVO_BOUNDS[i][0]) + ' to ' + str(home + s.SERVO_BOUNDS[i][1]) + ' - Will')
+            raise ValueError(names[i] + str(legNum) + ' servo out of range. Requested position was ' + str(servoAngles[i]) + ' but range is ' + str(home + s.SERVO_BOUNDS[i][0]) + ' to ' + str(home + s.SERVO_BOUNDS[i][1]) + ' - Will')
 
 
 def getServoAnglesFromIdeals(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle):
@@ -480,7 +480,7 @@ def changeServoSpeeds(speed, motors = None):
         if (motors == None):
             for m in robot.motors:
                 # only change leg motor speed
-                if ((m.name != 'tilt') and (m.name != 'pan')):
+                if ((m.name != 'tilt') and (m.name != 'pan') and (m.name != 'string')):
                     m.moving_speed = speed
             s.currentLegServoSpeed = speed
         else:
@@ -571,21 +571,7 @@ def walkingSideToSide(direction, numSteps, stepSize, speed = None):
         x = -stepSize * math.cos(alpha)
     else:
         print ("You must choose either F, B, L, or R")
-    '''
-    for iterations in range(numSteps):
-        newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [x,y,0]), numpy.add(s.HOMEPOS["2"], [-x,-y,0]), numpy.add(s.HOMEPOS["4"], [-x,-y,0])]
-        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
 
-        #newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,-y,0]), numpy.add(s.HOMEPOS["3"], [x,-y,0]), numpy.add(s.HOMEPOS["2"], [-x,y,0]), numpy.add(s.HOMEPOS["4"], [-x,y,0])]
-        newDispVectors = [numpy.add(s.HOMEPOS["1"], [0,0,0]), numpy.add(s.HOMEPOS["3"], [0,0,0]), numpy.add(s.HOMEPOS["2"], [0,0,0]), numpy.add(s.HOMEPOS["4"], [0,0,0])]
-        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
-
-        newDispVectors = [numpy.add(s.HOMEPOS["1"], [-x,-y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), numpy.add(s.HOMEPOS["2"], [x,y,0]), numpy.add(s.HOMEPOS["4"], [x,y,0])]
-        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
-
-        newDispVectors = [numpy.add(s.HOMEPOS["1"], [0,0,0]), numpy.add(s.HOMEPOS["3"], [0,0,0]), numpy.add(s.HOMEPOS["2"], [0,0,0]), numpy.add(s.HOMEPOS["4"], [0,0,0])]
-        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
-    '''
     for iterations in range(numSteps):
         newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [x,y,0]), numpy.add(s.HOMEPOS["2"], [x,-y,0]), numpy.add(s.HOMEPOS["4"], [x,-y,0])]
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
@@ -594,13 +580,44 @@ def walkingSideToSide(direction, numSteps, stepSize, speed = None):
         newDispVectors = [numpy.add(s.HOMEPOS["1"], [-x,-y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), numpy.add(s.HOMEPOS["2"], [-x,y,0]), numpy.add(s.HOMEPOS["4"], [-x,y,0])]
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
 
-    '''
-        newDispVectors = [numpy.add(s.HOMEPOS["1"], [-x,-y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), numpy.add(s.HOMEPOS["2"], [x,y,0]), numpy.add(s.HOMEPOS["4"], [x,y,0])]
-        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
+def walkingSideToSideMaintainingAngle(direction, numSteps, stepSize, speed = None):
+    if (speed != None):
+        changeServoSpeeds(speed)
 
-        newDispVectors = [numpy.add(s.HOMEPOS["1"], [0,0,0]), numpy.add(s.HOMEPOS["3"], [0,0,0]), numpy.add(s.HOMEPOS["2"], [0,0,0]), numpy.add(s.HOMEPOS["4"], [0,0,0])]
-        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
-    '''
+    # alpha is the angle clockwise from vertical
+    alpha = 0
+    alpha = math.radians(alpha)
+
+    longLength = s.HOMEPOS["1"][0] * 1.414 + 2*stepSize
+    shortLength = s.HOMEPOS["1"][0] * 1.414 - 2*stepSize
+
+
+    height = s.HOMEPOS_FOOTHEIGHT
+
+    if (direction == 'F'):
+        y = -math.cos(alpha)
+        x = -math.sin(alpha)
+        newDispVectors1 = [[-x * shortLength,-y * shortLength,height], [x * longLength, y * longLength,height], [x * longLength, -y * longLength,height], [-x * shortLength, y * shortLength,height]]
+        newDispVectors2 = [[-x * longLength,-y * longLength,height], [x * shortLength, y * shortLength,height], [x * shortLength, -y * shortLength,height], [-x * longLength, y * longLength,height]]   
+    elif (direction == 'B'):
+        y = -math.cos(alpha)
+        x = -math.sin(alpha)
+        newDispVectors1 = [[-x * longLength,-y * longLength,height], [x * shortLength, y * shortLength,height], [x * shortLength, -y * shortLength,height], [-x * longLength, y * longLength,height]]
+        newDispVectors2 = [[-x * shortLength,-y * shortLength,height], [x * longLength, y * longLength,height], [x * longLength, -y * longLength,height], [-x * shortLength, y * shortLength,height]]
+    elif (direction == 'L'):
+        y = math.cos(alpha)
+        x = math.sin(alpha)
+    elif (direction == 'R'):
+        y = math.sin(alpha)
+        x = math.cos(alpha)
+    else:
+        print ("You must choose either F, B, L, or R")
+
+    
+    for iterations in range(numSteps):
+        
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors1, [0,0,1,1])
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors2, [1,1,0,0])
 
 def relHomPos(legNum, displacement):
     return numpy.add(s.HOMEPOS[str(legNum)], displacement)

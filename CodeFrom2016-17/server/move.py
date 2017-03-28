@@ -31,11 +31,11 @@ class MotorController:
 
     def FORWARD(self, stepsize):
         print ("walk forward at stepsize: ",  stepsize)
-        walkingSideToSide('F', 1, stepsize)
+        walkingSideToSideMaintainingAngle('F', 1, stepsize)
 
     def BACKWARD(self, stepsize):
         print ("walk backwards at stepsize: ",  stepsize)
-        walkingSideToSide('B', 1, stepsize)
+        walkingSideToSideMaintainingAngle('B', 1, stepsize)
 
     def STRAFE_RIGHT(self, stepsize):
         print ("walk right at stepsize: ",  stepsize)
