@@ -81,6 +81,7 @@ class Bot:
                 print("BUTTONB", s.currentLegServoSpeed)
         elif id == d["button_A"]:
             self.gun.reload(val)
+            s.alpha += 10
         
 
 

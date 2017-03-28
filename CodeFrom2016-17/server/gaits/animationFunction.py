@@ -67,6 +67,22 @@ def updateTurretServosAndTurret():
                 # else move servoPos closer to goal servo position
                 s.TurretPos[i] = s.TurretPos[i] + animationServoDelta * numpy.sign(difference)
 
+def updateStringServo():
+
+    storeStringPos = s.StringServoPos
+    storeGoalPos = s.StringGoalPos
+
+    # check if servo needs changing
+    if abs(storeGoalPos - storeStringPos) > 0.0:
+        difference = storeGoalPos - storeStringPos
+        animationServoDelta = 200 * s.SERVO_UPDATE_DELAY
+
+        # if difference is smaller than delta, then just make servo what it should be
+        if abs(difference) < animationServoDelta:
+            s.StringServoPos = s.StringGoalPos
+        else:
+            # else move servoPos closer to goal servo position
+            s.StringServoPos = s.StringServoPos + animationServoDelta * numpy.sign(difference)
 
 
 def updateServosAndBase():
@@ -176,6 +192,8 @@ def updateServosAndBase():
         # then update turret
         updateTurretServosAndTurret()
 
+        # then updaate string motor
+        updateStringServo()
         
 
 

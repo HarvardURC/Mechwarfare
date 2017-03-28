@@ -26,7 +26,7 @@ panBox = box (pos = numpy.add(base.pos, revForV([0,0, s.PANBOX_HEIGHT/2.0])), le
 barrel = cylinder(pos=numpy.add(panBox.pos, revForV([0,0, s.PANBOX_HEIGHT/2.0])),  axis=(1,0,0), length = s.BARREL_LENGTH, radius=.1, color= color.white)
 directionArrow = arrow(pos=(0,0,1.0), axis=revForV((0,0,2.0)), shaftwidth=.3, color=color.black)
 
-testDot = sphere(pos=revForV((-3.3627298444130176, -2.7127298444130177,1)), radius=.2, color=color.white)
+#footTest = sphere(pos=revForV((0,0,0)), radius=.4, color=color.white)
 
 
 # initialize Leg Arrows
@@ -81,6 +81,13 @@ def rotateVector(vector, theta):
 
     return [L * math.cos(alpha + theta), L * math.sin(alpha + theta), vector[2]]
 
+def getDisplacementFromAngles(legNum, currentAngles):
+    currentAngles = makeRadian(currentAngles)
+    x = (s.HIPHORIZ_LENGTH + s.L1_LENGTH * math.cos(currentAngles[1]) + s.L2_LENGTH * math.cos(currentAngles[1] + currentAngles[2])) * math.cos(currentAngles[0])
+    y = (s.HIPHORIZ_LENGTH + s.L1_LENGTH * math.cos(currentAngles[1]) + s.L2_LENGTH * math.cos(currentAngles[1] + currentAngles[2])) * math.sin(currentAngles[0])
+    z = s.HIPVERTUP_LENGTH + s.L1_LENGTH * math.sin(currentAngles[1]) + s.L2_LENGTH * math.sin(currentAngles[1] + currentAngles[2])
+    return [x,y,z]
+
 def updateLegsAndBase():
 
     # get ideal angles in radian for the visual arrows to update
@@ -94,17 +101,22 @@ def updateLegsAndBase():
 
         legs['leg'+leg]['vert'].pos = vectorAdd(base.pos,revForV(rotateVector((x_neg * s.BASE_LENGTH/2.0,y_neg * s.BASE_WIDTH/2.0,-s.BASE_THICKNESS/2.0), s.BaseOrientationAngle)))
         legs['leg'+leg]['vert'].axis = revForV((0,0,s.HIPVERTUP_LENGTH))
+        legs['leg'+leg]['vert'].length = s.HIPVERTUP_LENGTH
+
         legs['leg'+leg]['horiz'].pos = vectorAdd(legs['leg'+leg]['vert'].pos,legs['leg'+leg]['vert'].axis)
         legs['leg'+leg]['horiz'].axis = revForV(rotateVector((s.HIPHORIZ_LENGTH*cos(ServoPosRadian[i - 1][0]),s.HIPHORIZ_LENGTH*sin(ServoPosRadian[i - 1][0]),0), s.BaseOrientationAngle))
+        legs['leg'+leg]['horiz'].length = s.HIPHORIZ_LENGTH
+
         legs['leg'+leg]['knee2ankle'].pos = vectorAdd(legs['leg'+leg]['horiz'].pos,legs['leg'+leg]['horiz'].axis)
         legs['leg'+leg]['knee2ankle'].axis = revForV(rotateVector((s.L1_LENGTH*cos(ServoPosRadian[i - 1][1])*cos(ServoPosRadian[i - 1][0]),s.L1_LENGTH*cos(ServoPosRadian[i - 1][1])*sin(ServoPosRadian[i - 1][0]),s.L1_LENGTH*sin(ServoPosRadian[i - 1][1])), s.BaseOrientationAngle))
+        legs['leg'+leg]['knee2ankle'].length = s.L1_LENGTH
+
         legs['leg'+leg]['ankle2foot'].pos = vectorAdd(legs['leg'+leg]['knee2ankle'].pos,legs['leg'+leg]['knee2ankle'].axis)
-        legs['leg'+leg]['ankle2foot'].axis = revForV(rotateVector((s.L2_LENGTH*cos(ServoPosRadian[i - 1][2])*cos(ServoPosRadian[i - 1][0]),s.L2_LENGTH*cos(ServoPosRadian[i - 1][2])*sin(ServoPosRadian[i - 1][0]),s.L2_LENGTH*sin(ServoPosRadian[i - 1][2])), s.BaseOrientationAngle))
+        legs['leg'+leg]['ankle2foot'].axis = revForV(rotateVector((s.L2_LENGTH*cos(ServoPosRadian[i - 1][1] + ServoPosRadian[i - 1][2])*cos(ServoPosRadian[i - 1][0]),s.L2_LENGTH*cos(ServoPosRadian[i - 1][1] + ServoPosRadian[i - 1][2])*sin(ServoPosRadian[i - 1][0]),s.L2_LENGTH*sin(ServoPosRadian[i - 1][1] + ServoPosRadian[i - 1][2])), s.BaseOrientationAngle))
+        legs['leg'+leg]['ankle2foot'].length = s.L2_LENGTH
 
         legs['leg'+leg]['foot'].pos = vectorAdd(legs['leg'+leg]['ankle2foot'].pos,legs['leg'+leg]['ankle2foot'].axis)
-
-        #if i == 1:
-           # print (legs['leg'+leg]['foot'].pos)
+        
 
     base.pos = revForV(s.BasePos)
     base.axis =revForV((math.cos(s.BaseOrientationAngle),math.sin(s.BaseOrientationAngle),0))
@@ -117,7 +129,7 @@ def updateLegsAndBase():
 
 
     barrel.pos = numpy.add(panBox.pos, revForV([0,0,s.PANBOX_HEIGHT/2.0]))
-    tiltAngle = TurretPosRadians[1]/s.TURRET_GEAR_RATIO
+    tiltAngle = (TurretPosRadians[1] - math.radians(s.TURRET_HOME_POSITIONS[1]))/s.TURRET_GEAR_RATIO
     barrel.axis = revForV((math.cos(tiltAngle) * math.cos(s.BaseOrientationAngle + TurretPosRadians[0] + math.pi/2.0),math.cos(tiltAngle) * math.sin(s.BaseOrientationAngle + TurretPosRadians[0] + + math.pi/2.0), math.sin(tiltAngle)))
     barrel.length = s.BARREL_LENGTH
     if s.isFiring:
@@ -128,7 +140,8 @@ def updateLegsAndBase():
     directionArrow.pos = [base.pos[0], base.pos[1], base.pos[2] + s.BASE_THICKNESS]
     directionArrow.axis = revForV((math.cos(s.BaseOrientationAngle + math.pi/2.0),math.sin(s.BaseOrientationAngle + math.pi/2.0),0))
     directionArrow.length = s.BASE_LENGTH
-        
+    
+    print (TurretPosRadians[1], tiltAngle)
 
 
 #updateLegsAndBase()

@@ -403,8 +403,6 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
             servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
             if servo_disp > servo_disp_max:
                 servo_disp_max = servo_disp
-
-    time.sleep(4)
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
     print("time: ", servo_disp_max/s.currentLegServoSpeed)
@@ -430,7 +428,6 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
         servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
         if servo_disp > servo_disp_max:
             servo_disp_max = servo_disp
-
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
     print("time2", servo_disp_max/s.currentLegServoSpeed)
@@ -452,7 +449,6 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
             servo_disp = getMaxServoDisp(legNum, newAngles, getCurrentAngles(legNum))
             if servo_disp > servo_disp_max:
                 servo_disp_max = servo_disp
-
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
     print("time3", servo_disp_max/s.currentLegServoSpeed)
@@ -527,18 +523,22 @@ def walkingForwardAngled(direction, numSteps, stepSize, speed = None):
     if (speed != None):
         changeServoSpeeds(speed)
 
+    # alpha is the angle clockwise from vertical
+    #s.alpha = 45
+    alpha = math.radians(s.alpha)
+
     if (direction == 'F'):
-        y = -stepSize
-        x = 0
+        y = -stepSize * math.cos(alpha)
+        x = -stepSize * math.sin(alpha)
     elif (direction == 'B'):
-        y = stepSize
-        x = 0
+        y = stepSize * math.cos(alpha)
+        x = stepSize * math.sin(alpha)
     elif (direction == 'L'):
-        y = 0
-        x = stepSize
+        y = stepSize * math.sin(alpha)
+        x = stepSize * math.cos(alpha)
     elif (direction == 'R'):
-        y = 0
-        x = -stepSize
+        y = -stepSize * math.sin(alpha)
+        x = -stepSize * math.cos(alpha)
     else:
         print ("You must choose either F, B, L, or R")
 
@@ -548,6 +548,37 @@ def walkingForwardAngled(direction, numSteps, stepSize, speed = None):
 
         newDispVectors = [numpy.add(s.HOMEPOS["1"], [-x,-y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), numpy.add(s.HOMEPOS["2"], [x,y,0]), numpy.add(s.HOMEPOS["4"], [x,y,0])]
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
+
+def walkingSideToSide(direction, numSteps, stepSize, speed = None):
+    if (speed != None):
+        changeServoSpeeds(speed)
+
+    # alpha is the angle clockwise from vertical
+    alpha = 45
+    alpha = math.radians(alpha)
+
+    if (direction == 'F'):
+        y = -stepSize * math.cos(alpha)
+        x = -stepSize * math.sin(alpha)
+    elif (direction == 'B'):
+        y = stepSize * math.cos(alpha)
+        x = stepSize * math.sin(alpha)
+    elif (direction == 'L'):
+        y = stepSize * math.sin(alpha)
+        x = stepSize * math.cos(alpha)
+    elif (direction == 'R'):
+        y = -stepSize * math.sin(alpha)
+        x = -stepSize * math.cos(alpha)
+    else:
+        print ("You must choose either F, B, L, or R")
+
+    for iterations in range(numSteps):
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [x,y,0]), numpy.add(s.HOMEPOS["2"], [-x,-y,0]), numpy.add(s.HOMEPOS["4"], [-x,-y,0])]
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
+
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,-y,0]), numpy.add(s.HOMEPOS["3"], [x,-y,0]), numpy.add(s.HOMEPOS["2"], [-x,y,0]), numpy.add(s.HOMEPOS["4"], [-x,y,0])]
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
+
 
 def relHomPos(legNum, displacement):
     return numpy.add(s.HOMEPOS[str(legNum)], displacement)
@@ -664,7 +695,7 @@ def moveStringMotor():
                 # go to opposite side, therefore pulling string
                 getattr(robot,"string").goal_position = 150
                 # save the BBcount in case it changes while reloading, want to use old BBcount just before reload began
-                s.saveBBcount = s.BBCount
+                s.saveBBcount = s.BBcount
             # notMovingBack is True meaning it came back from 150 and is done reloading
             else:
                 # now that the pastBBcount is the same as the saved BBcount. This function will then stop being called from turret.py
@@ -674,6 +705,27 @@ def moveStringMotor():
             # now servo is on opposite side of, therefore should put string back
             getattr(robot,"string").goal_position = -150
             s.StringMotorMovingBack = True
+    else:
+        # -148 is the rest position, 150 is the wounded position
+        currentPos = s.StringServoPos
+        if (currentPos < -148):
+            # not StringMotorMovingBack is False means servo is just starting to reload
+            if not s.StringMotorMovingBack:
+                # go to opposite side, therefore pulling string
+                s.StringGoalPos = 150
+                # save the BBcount in case it changes while reloading, want to use old BBcount just before reload began
+                s.saveBBcount = s.BBcount
+            # notMovingBack is True meaning it came back from 150 and is done reloading
+            else:
+                # now that the pastBBcount is the same as the saved BBcount. This function will then stop being called from turret.py
+                s.pastBBcountBeforeReloading = s.saveBBcount 
+                s.StringMotorMovingBack = False
+        elif (currentPos > 148):
+            # now servo is on opposite side of, therefore should put string back
+            s.StringGoalPos = -150
+            s.StringMotorMovingBack = True
+
+
 
             
 # 1 for direction is clockwise, -1 is counterclockwise. degrees is number of degrees motor will change

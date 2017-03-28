@@ -11,8 +11,10 @@ from server.gaits.walking import *
 import server.gaits.settings as s
 import math
 
-moveAndDragMultFeetOld([1, 3],  [s.HOMEPOS["1"], s.HOMEPOS["3"]],[1,1])
-moveAndDragMultFeetOld([2, 4],  [s.HOMEPOS["2"], s.HOMEPOS["4"]], [1,1])
+
+moveAndDragMultFeet([1, 3],  [s.HOMEPOS["1"], s.HOMEPOS["3"]],[0,0])
+moveAndDragMultFeet([2, 4],  [s.HOMEPOS["2"], s.HOMEPOS["4"]], [0,0])
+
 
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
 

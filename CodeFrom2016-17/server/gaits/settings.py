@@ -24,7 +24,7 @@ FOOT_RADIUS = .74
 
 # constants
 #HOMEPOS_FOOTHEIGHT = -2.25
-
+alpha = 45
 
 HOMEPOS_FOOTHEIGHT = -.4 + (HIPVERTUP_LENGTH-L2_LENGTH)
 
@@ -63,13 +63,15 @@ global autoFire
 autoFire = True
 
 
-global StringMotorMoving
-StringMotorMoving = False
+global StringMotorMovingBack
+StringMotorMovingBack = False
 
 global BBcount
 BBcount = 0.0
 global pastBBcountBeforeReloading 
 pastBBcountBeforeReloading  = 0.0
+global saveBBcount
+saveBBcount = 0.0
 
 BB_RELOAD_THRESHOLD = 50
 
@@ -116,6 +118,11 @@ global TurretPos
 TurretPos = [0.0, 0.0]
 global turretServoGoalPos
 turretServoGoalPos = [0.0, 0.0]
+
+global StringServoPos
+StringServoPos = 0.0
+global StringGoalPos
+StringGoalPos = 0.0
 
 global draggingLegs
 draggingLegs = [False,False,False,False]
