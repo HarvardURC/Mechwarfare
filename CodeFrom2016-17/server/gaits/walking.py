@@ -554,7 +554,7 @@ def walkingSideToSide(direction, numSteps, stepSize, speed = None):
         changeServoSpeeds(speed)
 
     # alpha is the angle clockwise from vertical
-    alpha = 45
+    alpha = 20
     alpha = math.radians(alpha)
 
     if (direction == 'F'):
@@ -564,21 +564,43 @@ def walkingSideToSide(direction, numSteps, stepSize, speed = None):
         y = stepSize * math.cos(alpha)
         x = stepSize * math.sin(alpha)
     elif (direction == 'L'):
-        y = stepSize * math.sin(alpha)
-        x = stepSize * math.cos(alpha)
+        y = -stepSize * math.cos(alpha)
+        x = stepSize * math.sin(alpha)
     elif (direction == 'R'):
         y = -stepSize * math.sin(alpha)
         x = -stepSize * math.cos(alpha)
     else:
         print ("You must choose either F, B, L, or R")
-
+    '''
     for iterations in range(numSteps):
         newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [x,y,0]), numpy.add(s.HOMEPOS["2"], [-x,-y,0]), numpy.add(s.HOMEPOS["4"], [-x,-y,0])]
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
 
-        newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,-y,0]), numpy.add(s.HOMEPOS["3"], [x,-y,0]), numpy.add(s.HOMEPOS["2"], [-x,y,0]), numpy.add(s.HOMEPOS["4"], [-x,y,0])]
+        #newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,-y,0]), numpy.add(s.HOMEPOS["3"], [x,-y,0]), numpy.add(s.HOMEPOS["2"], [-x,y,0]), numpy.add(s.HOMEPOS["4"], [-x,y,0])]
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [0,0,0]), numpy.add(s.HOMEPOS["3"], [0,0,0]), numpy.add(s.HOMEPOS["2"], [0,0,0]), numpy.add(s.HOMEPOS["4"], [0,0,0])]
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
 
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [-x,-y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), numpy.add(s.HOMEPOS["2"], [x,y,0]), numpy.add(s.HOMEPOS["4"], [x,y,0])]
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
+
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [0,0,0]), numpy.add(s.HOMEPOS["3"], [0,0,0]), numpy.add(s.HOMEPOS["2"], [0,0,0]), numpy.add(s.HOMEPOS["4"], [0,0,0])]
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
+    '''
+    for iterations in range(numSteps):
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,y,0]), numpy.add(s.HOMEPOS["3"], [x,y,0]), numpy.add(s.HOMEPOS["2"], [x,-y,0]), numpy.add(s.HOMEPOS["4"], [x,-y,0])]
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
+
+        #newDispVectors = [numpy.add(s.HOMEPOS["1"], [x,-y,0]), numpy.add(s.HOMEPOS["3"], [x,-y,0]), numpy.add(s.HOMEPOS["2"], [-x,y,0]), numpy.add(s.HOMEPOS["4"], [-x,y,0])]
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [-x,-y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), numpy.add(s.HOMEPOS["2"], [-x,y,0]), numpy.add(s.HOMEPOS["4"], [-x,y,0])]
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
+
+    '''
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [-x,-y,0]), numpy.add(s.HOMEPOS["3"], [-x,-y,0]), numpy.add(s.HOMEPOS["2"], [x,y,0]), numpy.add(s.HOMEPOS["4"], [x,y,0])]
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [0,0,1,1])
+
+        newDispVectors = [numpy.add(s.HOMEPOS["1"], [0,0,0]), numpy.add(s.HOMEPOS["3"], [0,0,0]), numpy.add(s.HOMEPOS["2"], [0,0,0]), numpy.add(s.HOMEPOS["4"], [0,0,0])]
+        moveAndDragMultFeet([1, 3, 2, 4], newDispVectors, [1,1,0,0])
+    '''
 
 def relHomPos(legNum, displacement):
     return numpy.add(s.HOMEPOS[str(legNum)], displacement)
@@ -666,7 +688,7 @@ def stopTurretServo(m):
         s.turretServoGoalPos[m] = getTurretServoAngle(m)
     else:
         getattr(robot,names[m]).compliant = True
-        time.sleep(.1)
+        time.sleep(.05)
         getattr(robot,names[m]).compliant = False
         print (getattr(robot,names[m]).compliant)
         print ("I put that statement^")
