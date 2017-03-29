@@ -619,6 +619,9 @@ def walkingSideToSideMaintainingAngle(direction, numSteps, stepSize, speed = Non
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors1, [0,0,1,1])
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors2, [1,1,0,0])
 
+    for m in robot.motors:
+        print("************: ", m.moving_speed)
+
 def relHomPos(legNum, displacement):
     return numpy.add(s.HOMEPOS[str(legNum)], displacement)
 
@@ -726,32 +729,32 @@ def moveAgitatorServo(x):
 
 def moveStringMotor():
     if not s.isAnimation:
-        # -148 is the rest position, 150 is the wounded position
+        # 150 is the rest position, -150 is the wounded position
         currentPos = getattr(robot,"string").present_position
-        if (currentPos < -148):
+        if (currentPos > 148):
             # not StringMotorMovingBack is False means servo is just starting to reload
             if not s.StringMotorMovingBack:
                 # go to opposite side, therefore pulling string
-                getattr(robot,"string").goal_position = 150
+                getattr(robot,"string").goal_position = -150
                 # save the BBcount in case it changes while reloading, want to use old BBcount just before reload began
                 s.saveBBcount = s.BBcount
-            # notMovingBack is True meaning it came back from 150 and is done reloading
+            # notMovingBack is True meaning it came back from -150 and is done reloading
             else:
                 # now that the pastBBcount is the same as the saved BBcount. This function will then stop being called from turret.py
                 s.pastBBcountBeforeReloading = s.saveBBcount 
                 s.StringMotorMovingBack = False
-        elif (currentPos > 148):
+        elif (currentPos < -148):
             # now servo is on opposite side of, therefore should put string back
-            getattr(robot,"string").goal_position = -150
+            getattr(robot,"string").goal_position = 150
             s.StringMotorMovingBack = True
     else:
         # -148 is the rest position, 150 is the wounded position
         currentPos = s.StringServoPos
-        if (currentPos < -148):
+        if (currentPos > 148):
             # not StringMotorMovingBack is False means servo is just starting to reload
             if not s.StringMotorMovingBack:
                 # go to opposite side, therefore pulling string
-                s.StringGoalPos = 150
+                s.StringGoalPos = -150
                 # save the BBcount in case it changes while reloading, want to use old BBcount just before reload began
                 s.saveBBcount = s.BBcount
             # notMovingBack is True meaning it came back from 150 and is done reloading
@@ -759,9 +762,9 @@ def moveStringMotor():
                 # now that the pastBBcount is the same as the saved BBcount. This function will then stop being called from turret.py
                 s.pastBBcountBeforeReloading = s.saveBBcount 
                 s.StringMotorMovingBack = False
-        elif (currentPos > 148):
+        elif (currentPos < -148):
             # now servo is on opposite side of, therefore should put string back
-            s.StringGoalPos = -150
+            s.StringGoalPos = 150
             s.StringMotorMovingBack = True
 
 

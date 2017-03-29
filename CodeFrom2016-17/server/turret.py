@@ -15,11 +15,11 @@ if not s.isAnimation:
     GPIO.setup(s.GUN_PIN, GPIO.OUT, initial=GPIO.LOW)
 
 
-# start by moving servo to -150
+# start by moving servo to 150
 if not s.isAnimation:
-    getattr(robot,"string").goal_position = -150
+    getattr(robot,"string").goal_position = 150
 else:
-    s.StringGoalPos = -150
+    s.StringGoalPos = 150
 
 class GunController(Thread):
     def __init__(self, *args, **kwargs):

@@ -120,9 +120,9 @@ global turretServoGoalPos
 turretServoGoalPos = [0.0, 0.0]
 
 global StringServoPos
-StringServoPos = 0.0
+StringServoPos = 150.0
 global StringGoalPos
-StringGoalPos = 0.0
+StringGoalPos = 150.0
 
 global draggingLegs
 draggingLegs = [False,False,False,False]
