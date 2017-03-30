@@ -20,6 +20,8 @@ moveAndDragMultFeet([1, 3],  [[s.HOMEPOS["1"][0],s.HOMEPOS["1"][1],-2], [s.HOMEP
 moveAndDragMultFeet([2, 4],  [[s.HOMEPOS["2"][0],s.HOMEPOS["2"][1],-2], [s.HOMEPOS["4"][0],s.HOMEPOS["4"][1],-2]], [1,1])
 
 moveAndDragMultFeet([1, 2, 3, 4],  [s.HOMEPOS["1"], s.HOMEPOS["2"], s.HOMEPOS["3"], s.HOMEPOS["4"]],[0,0,0,0])
+moveAndDragMultFeet([1, 3],  [s.HOMEPOS["1"], s.HOMEPOS["3"]],[1,1])
+moveAndDragMultFeet([2, 4],  [s.HOMEPOS["2"], s.HOMEPOS["4"]],[1,1])
 
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
 
