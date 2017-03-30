@@ -797,7 +797,10 @@ else:
     robot = pypot.robot.from_config(my_config)
 
     for m in robot.motors:
-        m.moving_speed = 150
+        if m.name == 'string':
+            m.moving_speed = 180
+        else:
+            m.moving_speed = 150
         m.compliant = False
         print(m.name, m.present_position)
 

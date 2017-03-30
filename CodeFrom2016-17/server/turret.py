@@ -26,6 +26,12 @@ class GunController(Thread):
         super().__init__(*args, **kwargs)
         self.firing = False
 
+    def manualReload(self, isOn):
+        if isOn:
+            getattr(robot,"string").goal_position = -150
+            time.sleep(2)
+            getattr(robot,"string").goal_position = 150
+
     def changeSprayTime(self, isOn):
         if isOn:
             s.autoFire = not s.autoFire
