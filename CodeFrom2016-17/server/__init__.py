@@ -32,6 +32,7 @@ class Bot:
     
     def add_client(self, c, peer):
         self.protocol = c
+        w.robot.network = c
         self.video.host = peer[0]
         try:
             self.move.start()

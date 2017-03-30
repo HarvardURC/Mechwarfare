@@ -762,16 +762,34 @@ def rotateTurretServo(m, degrees, isClockwise, speed = None):
     moveTurretServo(0,currentServoAngle + direction*degrees)
 
 
+class BlankObject: pass
+    
 # initialize robot config if not animation
 if s.isAnimation:
     # if we're in animation mode, then call the while loop in af that updates servo positions and other dependent variables
     servoThread = Thread(target=aF.updateServosAndBase, args=())
     servoThread.start()
+    robot = BlankObject()
 
 else:
     import pypot.robot
 
-    robot = pypot.robot.from_config(my_config)
+    import pypot.dynamixel.error
+    class MechErrorHandler(pypot.dynamixel.error.BaseErrorHandler):
+        def handle_overload_error(self, instruction_packet):
+            try:
+                error("Overload Error")
+                robot.network.send_message("OERR")
+            except Exception:
+                pass
+
+                pypot.dynamixel.error.BaseErrorHandler = MechErrorHandler
+                
+    try:
+        robot = pypot.robot.from_config(my_config)
+    except Exception:
+        my_config["controllers"]["my_dxl_controller"]["port"] = "/dev/ttyACM1"
+        robot = pypot.robot.from_config(my_config)
 
     for m in robot.motors:
         if m.name == 'string':
