@@ -12,16 +12,21 @@ import server.gaits.settings as s
 import math
 import time
 
+# get foot heights
+foot1pos = getDisplacementFromAngles(1, getCurrentAngles(1))
+foot2pos = getDisplacementFromAngles(2, getCurrentAngles(2))
+foot3pos = getDisplacementFromAngles(3, getCurrentAngles(3))
+foot4pos = getDisplacementFromAngles(4, getCurrentAngles(4))
+# stand up if legs are flat
+if ((foot1pos[2] > -1.0) and (foot2pos[2] > -1.0) and (foot3pos[2] > -1.0) and (foot4pos[2]> -1.0)):
+    moveAndDragMultFeet([1, 3, 2, 4],  [[1.5* s.HOMEPOS["1"][0],1.5*s.HOMEPOS["1"][1],0], [1.5*s.HOMEPOS["3"][0],1.5*s.HOMEPOS["3"][1],0], [1.5*s.HOMEPOS["2"][0],1.5*s.HOMEPOS["2"][1],0], [1.5*s.HOMEPOS["4"][0],1.5*s.HOMEPOS["4"][1],0]],[0,0,0,0])
+    moveAndDragMultFeet([1, 3, 2, 4],  [[1.5* s.HOMEPOS["1"][0],1.5*s.HOMEPOS["1"][1],-2], [1.5*s.HOMEPOS["3"][0],1.5*s.HOMEPOS["3"][1],-2], [1.5*s.HOMEPOS["2"][0],1.5*s.HOMEPOS["2"][1],-2], [1.5*s.HOMEPOS["4"][0],1.5*s.HOMEPOS["4"][1],-2]], [0,0,0,0])
+    moveAndDragMultFeet([1, 3],  [[s.HOMEPOS["1"][0],s.HOMEPOS["1"][1],-2], [s.HOMEPOS["3"][0],s.HOMEPOS["3"][1],-2]],[1,1])
+    moveAndDragMultFeet([2, 4],  [[s.HOMEPOS["2"][0],s.HOMEPOS["2"][1],-2], [s.HOMEPOS["4"][0],s.HOMEPOS["4"][1],-2]], [1,1])
 
-# stand up
-moveAndDragMultFeet([1, 3, 2, 4],  [[1.5* s.HOMEPOS["1"][0],1.5*s.HOMEPOS["1"][1],0], [1.5*s.HOMEPOS["3"][0],1.5*s.HOMEPOS["3"][1],0], [1.5*s.HOMEPOS["2"][0],1.5*s.HOMEPOS["2"][1],0], [1.5*s.HOMEPOS["4"][0],1.5*s.HOMEPOS["4"][1],0]],[0,0,0,0])
-moveAndDragMultFeet([1, 3, 2, 4],  [[1.5* s.HOMEPOS["1"][0],1.5*s.HOMEPOS["1"][1],-2], [1.5*s.HOMEPOS["3"][0],1.5*s.HOMEPOS["3"][1],-2], [1.5*s.HOMEPOS["2"][0],1.5*s.HOMEPOS["2"][1],-2], [1.5*s.HOMEPOS["4"][0],1.5*s.HOMEPOS["4"][1],-2]], [0,0,0,0])
-moveAndDragMultFeet([1, 3],  [[s.HOMEPOS["1"][0],s.HOMEPOS["1"][1],-2], [s.HOMEPOS["3"][0],s.HOMEPOS["3"][1],-2]],[1,1])
-moveAndDragMultFeet([2, 4],  [[s.HOMEPOS["2"][0],s.HOMEPOS["2"][1],-2], [s.HOMEPOS["4"][0],s.HOMEPOS["4"][1],-2]], [1,1])
-
-moveAndDragMultFeet([1, 2, 3, 4],  [s.HOMEPOS["1"], s.HOMEPOS["2"], s.HOMEPOS["3"], s.HOMEPOS["4"]],[0,0,0,0])
-moveAndDragMultFeet([1, 3],  [s.HOMEPOS["1"], s.HOMEPOS["3"]],[1,1])
-moveAndDragMultFeet([2, 4],  [s.HOMEPOS["2"], s.HOMEPOS["4"]],[1,1])
+    moveAndDragMultFeet([1, 2, 3, 4],  [s.HOMEPOS["1"], s.HOMEPOS["2"], s.HOMEPOS["3"], s.HOMEPOS["4"]],[0,0,0,0])
+    moveAndDragMultFeet([1, 3],  [s.HOMEPOS["1"], s.HOMEPOS["3"]],[1,1])
+    moveAndDragMultFeet([2, 4],  [s.HOMEPOS["2"], s.HOMEPOS["4"]],[1,1])
 
 Direction = Enum("Direction", "STOP FORWARD BACKWARD STRAFE_RIGHT STRAFE_LEFT TURN_RIGHT TURN_LEFT")
 
