@@ -191,8 +191,6 @@ def moveServos(legNum, idealHipAngle, idealKneeAngle, idealAnkleAngle, isMoving)
         s.servoGoalPos[legNum - 1] = servoAngles
 
     else:
-        #print "ideals: ", (idealHipAngle, idealKneeAngle, idealAnkleAngle)
-        #print "actuals: ", (servoAngles[0], servoAngles[1], servoAngles[2])
 
         getattr(robot,"hip" + str(legNum)).goal_position = servoAngles[0]
         getattr(robot,"knee" + str(legNum)).goal_position = servoAngles[1]
@@ -251,13 +249,11 @@ def moveFoot(legNum, newDispVector):
     currentAngles = getCurrentAngles(legNum)
 
     currentDispVector = getDisplacementFromAngles(legNum, currentAngles)
-    print("currentDispVector: ", currentDispVector)
 
     [x,y,z] = currentDispVector + .5 * numpy.subtract(newDispVector, currentDispVector)
 
     z = z + s.LIFTFOOTHEIGHT
 
-    print ("halfxyz:", x,y,z)
     newAngles = getIKAnglesFromDisplacement(legNum, x, y, z)
 
     moveServos(legNum, newAngles[0], newAngles[1], newAngles[2], 1)
@@ -305,7 +301,6 @@ def getMaxServoDisp(legNum, newIdealAngles, currentIdealAngles):
 # this one is a generalized version of the others. Dragging is discretized only into two
 # because it matches with the two discretizations of the move foot
 def moveAndDragMultFeetOld(legNums, newDispVectors, isMovings):
-    print ("moving to: ", newDispVectors, "...")
 
     # find current displacement vectors at beginning
     currentDispVectors = []
@@ -342,8 +337,6 @@ def moveAndDragMultFeetOld(legNums, newDispVectors, isMovings):
 
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
-    print("time: ", servo_disp_max/s.currentLegServoSpeed)
-    print ("MAXDISP: ", servo_disp_max)
 
     servo_disp_max = 0
 
@@ -367,11 +360,8 @@ def moveAndDragMultFeetOld(legNums, newDispVectors, isMovings):
 
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
-    print("time2", servo_disp_max/s.currentLegServoSpeed)
-    print ("MAXDISP: ", servo_disp_max)
 
 def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
-    print ("moving to: ", newDispVectors, "...")
 
     # find current displacement vectors at beginning
     currentDispVectors = []
@@ -391,9 +381,7 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
 
         if isMovings[l]:
             [x,y,z] = currentDispVector
-            print ("CURRENTXYZ: ", currentDispVector)
             z = z + s.LIFTFOOTHEIGHT
-            print ("NEWXYZ", [x,y,z])
 
             newAngles = getIKAnglesFromDisplacement(legNum, x,y,z)
 
@@ -405,8 +393,6 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
                 servo_disp_max = servo_disp
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
-    print("time: ", servo_disp_max/s.currentLegServoSpeed)
-    print ("MAXDISP: ", servo_disp_max)
 
     servo_disp_max = 0
 
@@ -430,9 +416,6 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
             servo_disp_max = servo_disp
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
-    print("time2", servo_disp_max/s.currentLegServoSpeed)
-    print ("MAXDISP: ", servo_disp_max)
-
 
     # 3. Move feet down
     for l in range(len(legNums)):
@@ -451,8 +434,6 @@ def moveAndDragMultFeet(legNums, newDispVectors, isMovings):
                 servo_disp_max = servo_disp
     time.sleep(servo_disp_max/s.currentLegServoSpeed)
 
-    print("time3", servo_disp_max/s.currentLegServoSpeed)
-    print ("MAXDISP: ", servo_disp_max)
 
 # moves two legs at a time to get back from home position. Should work without problem as long as robot
 # is reasonably balanced when this is called
@@ -619,8 +600,6 @@ def walkingSideToSideMaintainingAngle(direction, numSteps, stepSize, speed = Non
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors1, [0,0,1,1])
         moveAndDragMultFeet([1, 3, 2, 4], newDispVectors2, [1,1,0,0])
 
-    for m in robot.motors:
-        print("************: ", m.moving_speed)
 
 def relHomPos(legNum, displacement):
     return numpy.add(s.HOMEPOS[str(legNum)], displacement)
@@ -692,7 +671,7 @@ def moveTurretServo(m,x):
         print(names[m] + ' servo out of range. Requested position was ' + str(x) + ' but range is ' + str(s.TURRET_SERVO_BOUNDS[m][0]) + ' to ' + str(s.TURRET_SERVO_BOUNDS[m][1]) + ' - Baby Mech has declared')
         current = getTurretServoAngle(m)
         if s.isAnimation:
-            s.turretServoGoalPos[m] = x
+            s.turretServoGoalPos[m] = current
         else:
             getattr(robot,names[m]).goal_position = current
     else:
@@ -708,10 +687,8 @@ def stopTurretServo(m):
         s.turretServoGoalPos[m] = getTurretServoAngle(m)
     else:
         getattr(robot,names[m]).compliant = True
-        time.sleep(.05)
+        time.sleep(.02)
         getattr(robot,names[m]).compliant = False
-        print (getattr(robot,names[m]).compliant)
-        print ("I put that statement^")
         getattr(robot,names[m]).goal_position = getTurretServoAngle(m)
 
 def getTurretServoAngle(m):

@@ -76,7 +76,10 @@ saveBBcount = 0.0
 BB_RELOAD_THRESHOLD = 50
 
 
+global turretStepMode
+turretStepMode = False
 
+TURRET_MAX_STEP_ANGLE = 3
 
 # ANIMATION SETTINGS
 

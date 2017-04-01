@@ -9,7 +9,7 @@ import server.gaits.settings as s
 import server.gaits.walking as w
 import math 
 
-DEADZONE = 0.1
+DEADZONE = 0.07
 
 buttons = ["button_X", "button_A", "button_B", "button_Y", "button_LB", "button_RB", "button_LT", "button_RT", "button_back", "button_start", "button_toggleleft", "button_toggleright"]
 d = dict(zip(buttons,range(len(buttons))))
@@ -81,6 +81,9 @@ class Bot:
                 print("BUTTONB", s.currentLegServoSpeed)
         elif id == d["button_A"]:
             self.gun.manualReload(val)
+        elif id == d["button_Y"]:
+            self.gun.changeTurretMode(val)
+            
         
 
 
@@ -92,7 +95,7 @@ class Bot:
             val = 0.0
         if id == 0: self.move.strafe(val*s.MAX_STEP_SIZE)
         elif id == 1: self.move.forward(-val*s.MAX_STEP_SIZE)
-        elif id == 3: self.gun.tilt(-1* sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED/2.0)
-        elif id == 2: self.gun.pan(sign(val) * pow(val,2.0) * s.MAX_SERVO_SPEED/2.0)
+        elif id == 3: self.gun.tilt(val)
+        elif id == 2: self.gun.pan(val)
 
             
