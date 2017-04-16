@@ -100,7 +100,7 @@ class GunController(Thread):
 
                 # reload code
                 if s.BBcount > (s.pastBBcountBeforeReloading + s.BB_RELOAD_THRESHOLD):
-                    print (s.BBcount, "hello")
+                    #print (s.BBcount, "hello")
                     moveStringMotor()
                     time.sleep(.05)
 

@@ -38,34 +38,27 @@ class MotorController:
         pass
 
     def STOP(self, speed):
-        print ("GO TO HOME POS: ")
         goToHomeFromAnyPosition()
 
     def FORWARD(self, stepsize):
-        print ("walk forward at stepsize: ",  stepsize)
-        walkingSideToSide('F', 1, stepsize)
+        walkingForward('F', 1, stepsize)
 
     def BACKWARD(self, stepsize):
-        print ("walk backwards at stepsize: ",  stepsize)
-        walkingSideToSide('B', 1, stepsize)
+        walkingForward('B', 1, stepsize)
 
     def STRAFE_RIGHT(self, stepsize):
-        print ("walk right at stepsize: ",  stepsize)
         walkingForward('R', 1, stepsize)
 
     def STRAFE_LEFT(self, stepsize):
-        print ("walk left at stepsize: ",  stepsize)
         walkingForward('L', 1, stepsize)
 
     def TURN_RIGHT(self, speed):
         # 10 degrees rotation for now
         # True implies clockwise
-        print ("turn right at speed: ",  speed*s.MAX_SERVO_SPEED)
         rotate(10, True, speed*s.MAX_SERVO_SPEED)
 
     def TURN_LEFT(self, speed):
         # 10 degrees rotation for now
-        print ("turn left at speed: ", speed)
         rotate(10, False, speed*s.MAX_SERVO_SPEED)
 
 ZERO = (0, 0)

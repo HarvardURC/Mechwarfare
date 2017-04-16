@@ -7,7 +7,9 @@ from .move import MovementController
 
 import server.gaits.settings as s
 import server.gaits.walking as w
-import math 
+import math
+import asyncio
+loop = asyncio.get_event_loop()
 
 DEADZONE = 0.07
 
@@ -39,7 +41,13 @@ class Bot:
             self.gun.start()
         except RuntimeError as e:
             debug(e)
+        loop.call_soon(self.send_pos, c)
 
+    def send_pos(self, protocol):
+        protocol.send_message("TILT", 0, w.robot.tilt.present_position)
+        protocol.send_message("PANP", 0, w.robot.pan.present_position)
+        loop.call_later(0.5, self.send_pos, protocol)
+        
     def remove_client(self, c):
         self.video.kill()
 
@@ -59,7 +67,7 @@ class Bot:
         exit()
         
     def BUTN(self, id, val):
-        print ("id: ", id, "val: ", val)
+        #print ("id: ", id, "val: ", val)
         if id == d["button_RB"]:
             self.gun.fire(val)
         elif id == d["button_LT"]:
@@ -99,3 +107,9 @@ class Bot:
         elif id == 3: self.gun.tilt(val)
         elif id == 2: self.gun.pan(val)
 
+
+    def JHAT(self, id, nil, val):
+        if val[0]:
+            w.moveTurretServo(0, w.getTurretServoAngle(0) - val[0] * 1.5)
+        if val[1]:
+            w.moveTurretServo(1, w.getTurretServoAngle(1) - val[1] * 1.5)

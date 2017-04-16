@@ -687,7 +687,7 @@ def stopTurretServo(m):
         s.turretServoGoalPos[m] = getTurretServoAngle(m)
     else:
         getattr(robot,names[m]).compliant = True
-        time.sleep(.02)
+        time.sleep(.05)
         getattr(robot,names[m]).compliant = False
         getattr(robot,names[m]).goal_position = getTurretServoAngle(m)
 
