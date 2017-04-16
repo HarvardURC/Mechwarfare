@@ -20,18 +20,18 @@ class KeyStick:
     
 class Joystick:
     def __init__(self, protocol, jid=0):
-        pygame.init()
-        pygame.display.iconify()
         self._protocol = protocol
         if pygame.joystick.get_count():
             self.__js = pygame.joystick.Joystick(jid)
             self.__js.init()
             self.axes = def_list(self.__js.get_numaxes())
             self.buttons = def_list(self.__js.get_numbuttons())
+            self.hats = list([(0,0) for i in range(self.__js.get_numhats())])
         else:
             warn("No joysticks found, falling back to keyboard shim.")
             self.axes = tuple()
             self.buttons = def_list(10)
+            self.hats = tuple()
             self.__js = KeyStick()
         asyncio.get_event_loop().call_soon(self.__pump_events)
 
@@ -39,9 +39,9 @@ class Joystick:
         return self.__js.get_name()
 
     def __pump_events(self):
-        pygame.event.pump()
         self.check_axes()
         self.check_buttons()
+        self.check_hats()
         asyncio.get_event_loop().call_later(0.1, self.__pump_events)
 
     def _norm_axis(self, val):
@@ -53,6 +53,13 @@ class Joystick:
             if new != val:
                 self.axes[i] = new
                 self._protocol.send_message("AXIS", i, new)
+                
+    def check_hats(self):
+        for i, val in enumerate(self.hats):
+            new = self.__js.get_hat(i)
+            if new != val:
+                self.hats[i] = new
+                self._protocol.send_message("JHAT", i, 0, new)
                 
     def check_buttons(self):
         for i, val in enumerate(self.buttons):

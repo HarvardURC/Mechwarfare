@@ -16,7 +16,7 @@ loop = asyncio.get_event_loop()
 
 from client import Client
 from client.joystick import Joystick
-    
+
 def autoconf(conf):
     log("Searching for server...")
     auto = AutoClient()
