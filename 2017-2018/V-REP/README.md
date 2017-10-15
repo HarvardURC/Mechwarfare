@@ -1,4 +1,4 @@
-#V-REP / Python interface
+# V-REP / Python interface
 
 Useful links:
 
