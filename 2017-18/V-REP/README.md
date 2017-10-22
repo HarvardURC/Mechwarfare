@@ -8,3 +8,7 @@ Useful links:
 [Client Side](http://www.coppeliarobotics.com/helpFiles/en/remoteApiClientSide.htm)
 [Python APIs](http://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsPython.htm)
 [Video Tutorial](https://www.youtube.com/watch?v=SQont-mTnfM)
+
+You need remoteApi.dll, remoteApi.dylib, or remoteApi.so from [V-REP install]>programming>remoteApi>lib>lib n your working directory in order to interface with Python.
+
+We access the V-REP scene test.ttt with as a remote API client in test.py.
