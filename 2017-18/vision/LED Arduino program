@@ -1,0 +1,78 @@
+#include "SoftwareSerial.h"
+#include "Adafruit_Pixie.h"
+
+#define NUMPIXELS 1 // Number of Pixies in the strip
+#define PIXIEPIN  6 // Pin number for SoftwareSerial output
+
+SoftwareSerial pixieSerial(-1, PIXIEPIN);
+Adafruit_Pixie strip = Adafruit_Pixie(NUMPIXELS, &Serial3);
+
+void setup() {
+  // put your setup code here, to run once:
+  int i;
+
+  Serial.begin(9600);
+  Serial.println("Ready to Pixie!");
+
+  Serial3.begin(115200); // Pixie REQUIRES this baud rate
+  // Serial1.begin(115200);  // <- Alt. if using hardware serial port
+
+  strip.setBrightness(200);  // Adjust as necessary to avoid blinding
+  
+  Serial.println("Red!");
+  for(i=0; i< NUMPIXELS; i++)
+    strip.setPixelColor(i, 255, 0, 0);
+  strip.show();
+  delay(300);
+
+  Serial.println("Green!");
+  for(i=0; i< NUMPIXELS; i++)
+    strip.setPixelColor(i, 0, 255, 0);
+  strip.show();
+  delay(300);
+
+  Serial.println("Blue!");
+  for(i=0; i< NUMPIXELS; i++)
+    strip.setPixelColor(i, 0, 0, 255);
+  strip.show();
+  delay(300);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+    int i;
+int bri, red, green, blue=0;
+  Serial.begin(9600);
+  Serial.println("Ready to Pixie!");
+  Serial.println("Input brightness:");
+  delay(1000);
+  bri=Serial.read();
+  Serial.println("Input red:");
+  delay(1000);
+  red=Serial.read();
+  Serial.println("Input green:");
+  delay(1000);
+ green=Serial.read();
+  Serial.println("Input blue:");
+  delay(1000);
+blue=Serial.read();
+
+
+  Serial3.begin(115200); // Pixie REQUIRES this baud rate
+  // Serial1.begin(115200);  // <- Alt. if using hardware serial port
+
+  if(bri==0){strip.setBrightness(200);}
+  else{strip.setBrightness(bri);}
+  // Adjust as necessary to avoid blinding
+
+if(blue==0 and red==0 and green==0){ 
+    strip.setPixelColor(0, 255, 255, 255);
+   strip.show();
+}
+else{
+  strip.setPixelColor(0, red, blue, green);
+}
+
+  
+  delay(300);
+}
