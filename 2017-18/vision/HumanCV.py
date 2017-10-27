@@ -1,5 +1,13 @@
 import cv2
 import os
+'''
+HumanCV takes a directory of images and displays them 1 by 1--at each image the user can select approximate target centers by clicking,
+clear prior selections with the 'r' key, save their selections and move onto the next image with 'c', and state that
+there are no targets with 'n'.
+Once this is done, the program encodes target coordinates into the filename of the image, clones it, and saves the clone
+as an image file with that filename.
+'''
+
 root="C:/Users/leorf/PycharmProjects/Mechwarfare/images" #replace with path to your image directory here
 files=os.listdir(root)
 
