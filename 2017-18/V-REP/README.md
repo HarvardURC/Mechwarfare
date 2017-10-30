@@ -22,6 +22,6 @@ Useful links:
 
 You need `remoteApi.dll`, `remoteApi.dylib`, or `remoteApi.so` from `[V-REP install] > programming > remoteApi > lib > lib` in your working directory in order to interface with Python.
 
-We access the V-REP scene `test.ttt` with as a remote API client in `test.py`.
+We access the V-REP scene `test.ttt` with Python as a remote API client in `test.py`.
 
 

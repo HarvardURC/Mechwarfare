@@ -8,6 +8,14 @@ http://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsPython.htm
 """
 
 import vrep, sys
+from time import sleep
+
+joints = {
+            "Body_Leg1Upper": None, "Leg1Upper_Leg1Middle": None, "Leg1Middle_Leg1Lower": None,
+            "Body_Leg2Upper": None, "Leg2Upper_Leg2Middle": None, "Leg2Middle_Leg2Lower": None,
+            "Body_Leg3Upper": None, "Leg3Upper_Leg3Middle": None, "Leg3Middle_Leg3Lower": None,
+            "Body_Leg4Upper": None, "Leg4Upper_Leg4Middle": None, "Leg4Middle_Leg4Lower": None
+         }
 
 vrep.simxFinish(-1)     # close any existing connections
 cID = vrep.simxStart('127.0.0.1', 19999, True, True, 5000, 5)
@@ -18,16 +26,14 @@ else:
     print("Connection failed")
     sys.exit(1)
 
-err, lm = vrep.simxGetObjectHandle(cID, 'Pioneer_p3dx_leftMotor', vrep.simx_opmode_oneshot_wait)
-if err != 0:
-    print("'Pioneer_p3dx_leftMotor' couldn't be found")
-    sys.exit(1)
-
-err, rm = vrep.simxGetObjectHandle(cID, 'Pioneer_p3dx_rightMotor', vrep.simx_opmode_oneshot_wait)
-if err != 0:
-    print("'Pioneer_p3dx_rightMotor' couldn't be found")
-    sys.exit(1)
+for joint in joints.keys():
+    err, jd = vrep.simxGetObjectHandle(cID, joint, vrep.simx_opmode_oneshot_wait)
+    if err != 0:
+        print(joint + " couldn't be found")
+        sys.exit(1)
+    joints[joint] = jd
 
 while 1:
-    vrep.simxSetJointTargetVelocity(cID, lm, 0.5, vrep.simx_opmode_oneshot)
-    vrep.simxSetJointTargetVelocity(cID, rm, 0.5, vrep.simx_opmode_oneshot)
+    for jd in joints.values():
+        vrep.simxSetJointPosition(cID, jd, 0, vrep.simx_opmode_oneshot)
+
