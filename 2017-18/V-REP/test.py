@@ -10,12 +10,15 @@ http://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsPython.htm
 import vrep, sys
 from time import sleep
 
-joints = {
-            "Body_Leg1Upper": None, "Leg1Upper_Leg1Middle": None, "Leg1Middle_Leg1Lower": None,
-            "Body_Leg2Upper": None, "Leg2Upper_Leg2Middle": None, "Leg2Middle_Leg2Lower": None,
-            "Body_Leg3Upper": None, "Leg3Upper_Leg3Middle": None, "Leg3Middle_Leg3Lower": None,
-            "Body_Leg4Upper": None, "Leg4Upper_Leg4Middle": None, "Leg4Middle_Leg4Lower": None
-         }
+joints = frozenset([
+            "Leg1_BodyUpper", "Leg1_UpperMiddle", "Leg1_MiddleLower",
+            "Leg2_BodyUpper", "Leg2_UpperMiddle", "Leg2_MiddleLower",
+            "Leg3_BodyUpper", "Leg3_UpperMiddle", "Leg3_MiddleLower",
+            "Leg4_BodyUpper", "Leg4_UpperMiddle", "Leg4_MiddleLower",
+         ])
+
+jds = { joint:None for joint in joints }
+positions = { joint:0 for joint in joints }
 
 vrep.simxFinish(-1)     # close any existing connections
 cID = vrep.simxStart('127.0.0.1', 19999, True, True, 5000, 5)
@@ -26,14 +29,16 @@ else:
     print("Connection failed")
     sys.exit(1)
 
-for joint in joints.keys():
+for joint in joints:
     err, jd = vrep.simxGetObjectHandle(cID, joint, vrep.simx_opmode_oneshot_wait)
     if err != 0:
         print(joint + " couldn't be found")
         sys.exit(1)
-    joints[joint] = jd
+    jds[joint] = jd
 
 while 1:
-    for jd in joints.values():
-        vrep.simxSetJointPosition(cID, jd, 0, vrep.simx_opmode_oneshot)
+    for joint in joints:
+        vrep.simxSetJointPosition(cID, jds[joint], positions[joint], vrep.simx_opmode_oneshot)
+    for joint in joints:
+        positions[joint] -= 0.01
 
