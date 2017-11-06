@@ -10,12 +10,13 @@ http://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsPython.htm
 import vrep, sys
 from time import sleep
 
-joints = frozenset([
+# 0-2 are leg 1, 3-5 are leg 2, 6-8 are leg 3, 9-11 are leg4
+joints = [
             "Leg1_BodyUpper", "Leg1_UpperMiddle", "Leg1_MiddleLower",
             "Leg2_BodyUpper", "Leg2_UpperMiddle", "Leg2_MiddleLower",
             "Leg3_BodyUpper", "Leg3_UpperMiddle", "Leg3_MiddleLower",
             "Leg4_BodyUpper", "Leg4_UpperMiddle", "Leg4_MiddleLower",
-         ])
+         ]
 
 jds = { joint:None for joint in joints }
 positions = { joint:0 for joint in joints }
