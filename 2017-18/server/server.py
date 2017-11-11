@@ -1,13 +1,12 @@
 # server
 
 from socket import socket, AF_UNIX, SOCK_STREAM
-import pickle
-import os
+import pickle, struct, os
 
 # ----- UDS STUFF --------------------------------------------------
 
 UDS_ADDR = b'./server'	# desired UDS path
-QUEUE_MAX = 8			# maximum number of waiting connections
+QUEUE_MAX = 256			# maximum number of waiting connections
 
 # make sure we're starting fresh
 try:
@@ -29,24 +28,31 @@ while True:
     
     # expect transmissions with the format:
     
-    # (1 byte)	number of parameters
-    # (1 byte)	len(first parameter)
+    # (1 byte)	destination
+    # (4 bytes) packet size
+    # (1 byte)  number of parameters
+    # (2 bytes)	len(first parameter)
     # (n bytes)	first parameter
-    # (1 byte)	len(second parameter)
+    # (2 bytes)	len(second parameter)
     # (m bytes)	second parameter
     # etc.
     
-    protocol = ord(conn.recv(1))
-    print("protocol = " + str(protocol))
+    dest, = struct.unpack('B', conn.recv(1))
     
-    # 0 = SERVO(servo_id, angle)
-    nparams = [2, None, None]
-    p = nparams[protocol]
-    params = [0] * p
-    print("nparams = " + str(p))
+    dest, = struct.unpack('B', conn.recv(1))
+    plen, = struct.unpack('I', conn.recv(4))
+    print("dest = " + str(dest))
+    print("plen = " + str(plen))
+    #packet = conn.recv(plen)
+    #print(packet)
+    
+    nparams, = struct.unpack('B', conn.recv(1))
+    params = [0] * nparams
+    print("nparams = " + str(nparams))
 
-    for i in range(p):
-        n = ord(conn.recv(1))
+    # receive parameters
+    for i in range(nparams):
+        n, = struct.unpack('H', conn.recv(2))
         params[i] = conn.recv(n)
         
         print("received " + str(params[i]))
