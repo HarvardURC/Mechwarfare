@@ -37,9 +37,13 @@ for joint in joints:
         sys.exit(1)
     jds[joint] = jd
 
+client = UDSClient()
+client.open(0)
 while 1:
+    params = client.recv()
+    for id, angle in params:
+        positions[joints[id]] = angle
     for joint in joints:
         vrep.simxSetJointPosition(cID, jds[joint], positions[joint], vrep.simx_opmode_oneshot)
-    for joint in joints:
-        positions[joint] -= 0.01
+client.close()
 

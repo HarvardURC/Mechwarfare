@@ -41,14 +41,17 @@ while True:
                 continue
             dest, = struct.unpack('B', recv)
             
+            if(conns.get(dest, None)):
+                conns[dest].close()
             conns[dest] = conn
         else:
+        
             # expect transmissions with the format:
-            
+
             # (1 byte)	destination
             # (4 bytes) packet size
             # (n bytes) packet
-
+            
             recv = conn.recv(1)
             if(len(recv) < 1):
                 continue
@@ -68,7 +71,7 @@ while True:
             else:
                 print(str(packet) + "\n")
 
-            conns[dest].sendall(packet)
+            conns[dest].sendall(struct.pack('I', plen) + packet)
 
     for s in broken:
         if s is uds:

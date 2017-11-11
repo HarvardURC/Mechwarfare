@@ -7,7 +7,7 @@ import pickle, struct, os, sys
 UDS_ADDR = b'./server'
 UDS_BUF = 4096
 
-# 0 = SERVO(servo_id, angle)
+# 0 = SERVO[(id, angle)]
 
 class UDSClient:
 
@@ -29,14 +29,10 @@ class UDSClient:
     
     # (1 byte)	destination
     # (4 bytes) packet size
-    # (1 byte)  number of parameters
-    # (2 bytes)	len(first parameter)
-    # (n bytes)	first parameter
-    # (2 bytes)	len(second parameter)
-    # (m bytes)	second parameter
+    # (n bytes) pickled object
     # etc.
     def send(self, dest, params):
-        msg = struct.pack('B', len(params)) + b''.join([struct.pack('H', len(param)) + param for param in params])
+        msg = pickle.dumps(params)
         msg = struct.pack('B', dest) + struct.pack('I', len(msg)) + msg
         print("sending " + str(msg))
         self.conn.sendall(msg)
@@ -44,23 +40,16 @@ class UDSClient:
 
     # receive and parse a message with the format:
     
-    # (1 byte)  number of parameters
-    # (2 bytes)	len(first parameter)
-    # (n bytes)	first parameter
-    # (2 bytes)	len(second parameter)
-    # (m bytes)	second parameter
+    # (4 bytes) packet size
+    # (n bytes) pickled object
     # etc.
     def recv(self):
-        nparams, = struct.unpack('B', self.conn.recv(1))
-        params = [0] * nparams
-        print("nparams = " + str(nparams))
+        plen, = struct.unpack('I', self.conn.recv(4))
+        packet = self.conn.recv(plen)
+        
+        params = pickle.loads(packet)
+        print("received " + str(params))
 
-        # receive parameters
-        for i in range(nparams):
-            n, = struct.unpack('H', self.conn.recv(2))
-            params[i] = self.conn.recv(n)
-            
-            print("received " + str(params[i]))
         return params
 
     def close(self):
