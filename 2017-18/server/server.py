@@ -30,7 +30,6 @@ while True:
     for s in readable:
         if s is uds:
             conn, client_addr = uds.accept()
-            print("\nopening connection")
     
             # expect transmissions with the format:
             
@@ -52,30 +51,31 @@ while True:
             # (4 bytes) packet size
             # (n bytes) packet
             
-            recv = conn.recv(1)
-            if(len(recv) < 1):
-                continue
-            dest, = struct.unpack('B', recv)
-            
-            recv = conn.recv(4)
-            if(len(recv) < 4):
-                continue
-            plen, = struct.unpack('I', recv)
-            
-            print("dest = " + str(dest))
-            print("plen = " + str(plen))
-            
-            packet = conn.recv(plen)
-            if(len(packet) < plen):
-                print("malformed packet: " + str(packet))
-            else:
-                print(str(packet) + "\n")
+            try:
+                recv = conn.recv(1)
+                if(len(recv) < 1):
+                    s.close()
+                    continue
+                dest, = struct.unpack('B', recv)
+        
+                recv = conn.recv(4)
+                if(len(recv) < 4):
+                    s.close()
+                    continue
+                plen, = struct.unpack('I', recv)
+                
+                packet = conn.recv(plen)
+                if(len(packet) < plen):
+                    print("malformed packet: " + str(packet))
 
-            conns[dest].sendall(struct.pack('I', plen) + packet)
+                conns[dest].sendall(struct.pack('I', plen) + packet)
+            except:
+                s.close()
 
-    for s in broken:
-        if s is uds:
-            print("you dun fuked up")
-        else:
-            print("closing connection")
-            s.close()
+    todel = []
+    for key in conns.keys():
+        if(conns[key]._closed):
+            todel.append(key)
+
+    for key in todel:
+        del conns[key]

@@ -9,6 +9,7 @@ http://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsPython.htm
 
 import vrep, sys
 from time import sleep
+import hlsockets
 
 # 0-2 are leg 1, 3-5 are leg 2, 6-8 are leg 3, 9-11 are leg4
 joints = [
@@ -37,11 +38,11 @@ for joint in joints:
         sys.exit(1)
     jds[joint] = jd
 
-client = UDSClient()
-client.open(0)
+client = hlsockets.UDSClient()
+client.open(hlsockets.SERVO)
 while 1:
     params = client.recv()
-    for id, angle in params:
+    for id, angle in enumerate(params):
         positions[joints[id]] = angle
     for joint in joints:
         vrep.simxSetJointPosition(cID, jds[joint], positions[joint], vrep.simx_opmode_oneshot)

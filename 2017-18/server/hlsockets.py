@@ -7,7 +7,8 @@ import pickle, struct, os, sys
 UDS_ADDR = b'./server'
 UDS_BUF = 4096
 
-# 0 = SERVO[(id, angle)]
+SERVO = 0
+CONTROLLER = 1
 
 class UDSClient:
 
@@ -18,7 +19,6 @@ class UDSClient:
     # receive messages sent to 'dest' (0-255)
     def open(self, dest):
         try:
-            print("\nopening connection")
             self.conn.connect(UDS_ADDR)
             self.conn.sendall(struct.pack('B', dest))
         except sockerr:
@@ -34,9 +34,7 @@ class UDSClient:
     def send(self, dest, params):
         msg = pickle.dumps(params)
         msg = struct.pack('B', dest) + struct.pack('I', len(msg)) + msg
-        print("sending " + str(msg))
         self.conn.sendall(msg)
-        print("success!")
 
     # receive and parse a message with the format:
     
@@ -48,7 +46,6 @@ class UDSClient:
         packet = self.conn.recv(plen)
         
         params = pickle.loads(packet)
-        print("received " + str(params))
 
         return params
 
