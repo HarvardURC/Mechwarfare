@@ -26,6 +26,15 @@ class UDSClient:
             sys.exit(1)
 
     # send a message with list of parameters 'params' to 'dest' (0-255)
+    
+    # (1 byte)	destination
+    # (4 bytes) packet size
+    # (1 byte)  number of parameters
+    # (2 bytes)	len(first parameter)
+    # (n bytes)	first parameter
+    # (2 bytes)	len(second parameter)
+    # (m bytes)	second parameter
+    # etc.
     def send(self, dest, params):
         msg = struct.pack('B', len(params)) + b''.join([struct.pack('H', len(param)) + param for param in params])
         msg = struct.pack('B', dest) + struct.pack('I', len(msg)) + msg
@@ -33,8 +42,14 @@ class UDSClient:
         self.conn.sendall(msg)
         print("success!")
 
-    # receive a message
-    # returns a list of parameters
+    # receive and parse a message with the format:
+    
+    # (1 byte)  number of parameters
+    # (2 bytes)	len(first parameter)
+    # (n bytes)	first parameter
+    # (2 bytes)	len(second parameter)
+    # (m bytes)	second parameter
+    # etc.
     def recv(self):
         nparams, = struct.unpack('B', self.conn.recv(1))
         params = [0] * nparams

@@ -1,13 +1,18 @@
 # client template
 
 from hlsockets import UDSClient
+from time import sleep
 
 PROTOCOL = 0            # SERVO(servo_id, angle)
 params = [b'servo_id ', b'angle']
 
 client = UDSClient()
 client.open(PROTOCOL)
-client.send(0, params)
+while True:
+    client.send(0, params)
+    params = client.recv()
+    print(params)
+    sleep(1)
 client.close()
 
 

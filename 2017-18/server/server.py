@@ -1,7 +1,7 @@
 # server
 
 from socket import socket, AF_UNIX, SOCK_STREAM
-import pickle, struct, os
+import pickle, struct, os, select
 
 # ----- UDS STUFF --------------------------------------------------
 
@@ -20,42 +20,43 @@ uds = socket(AF_UNIX, SOCK_STREAM)
 uds.bind(UDS_ADDR)
 uds.listen(QUEUE_MAX)
 
+conns = {"uds" : uds}
+
 # wait for connections forever
 while True:
     # accept a connection
-    conn, client_addr = uds.accept()
-    print("\nopening connection")
+    readable, writeable, broken = select.select(conns.values(), [], conns.values())
     
-    # expect transmissions with the format:
+    for s in readable:
+        if s is uds:
+            conn, client_addr = uds.accept()
+            print("\nopening connection")
     
-    # (1 byte)	destination
-    # (4 bytes) packet size
-    # (1 byte)  number of parameters
-    # (2 bytes)	len(first parameter)
-    # (n bytes)	first parameter
-    # (2 bytes)	len(second parameter)
-    # (m bytes)	second parameter
-    # etc.
+            # expect transmissions with the format:
+            
+            # (1 byte)  destination
     
-    dest, = struct.unpack('B', conn.recv(1))
-    
-    dest, = struct.unpack('B', conn.recv(1))
-    plen, = struct.unpack('I', conn.recv(4))
-    print("dest = " + str(dest))
-    print("plen = " + str(plen))
-    #packet = conn.recv(plen)
-    #print(packet)
-    
-    nparams, = struct.unpack('B', conn.recv(1))
-    params = [0] * nparams
-    print("nparams = " + str(nparams))
+            dest, = struct.unpack('B', conn.recv(1))
+            conns[dest] = conn
+        else:
+            # expect transmissions with the format:
+            
+            # (1 byte)	destination
+            # (4 bytes) packet size
+            # (n bytes) packet
 
-    # receive parameters
-    for i in range(nparams):
-        n, = struct.unpack('H', conn.recv(2))
-        params[i] = conn.recv(n)
-        
-        print("received " + str(params[i]))
+            dest, = struct.unpack('B', conn.recv(1))
+            plen, = struct.unpack('I', conn.recv(4))
+            print("dest = " + str(dest))
+            print("plen = " + str(plen))
+            packet = conn.recv(plen)
+            print(packet)
 
-    print("closing connection")
-    conn.close()
+            conns[dest].sendall(packet)
+
+    for s in broken:
+        if s is uds:
+            print("you dun fuked up")
+        else:
+            print("closing connection")
+            s.close()
