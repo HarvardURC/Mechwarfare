@@ -18,9 +18,11 @@ hlsockets.py is a collection of objects that simplify network code
 
 ## How to run simulation:
 
+In `/server/` working directory:
+
 `python3 server.py`
 
-`start mech.ttt simulation`
+start `mech.ttt` simulation
 
 `python3 simclient.py`
 
