@@ -11,7 +11,7 @@ client.open(PROTOCOL)
 while True:
     client.send(0, params)
     params = client.recv()
-    print(params)
+    print(str(params) + "\n")
     sleep(1)
 client.close()
 

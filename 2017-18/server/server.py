@@ -35,8 +35,12 @@ while True:
             # expect transmissions with the format:
             
             # (1 byte)  destination
-    
-            dest, = struct.unpack('B', conn.recv(1))
+            
+            recv = conn.recv(1)
+            if(len(recv) < 1):
+                continue
+            dest, = struct.unpack('B', recv)
+            
             conns[dest] = conn
         else:
             # expect transmissions with the format:
@@ -45,12 +49,24 @@ while True:
             # (4 bytes) packet size
             # (n bytes) packet
 
-            dest, = struct.unpack('B', conn.recv(1))
-            plen, = struct.unpack('I', conn.recv(4))
+            recv = conn.recv(1)
+            if(len(recv) < 1):
+                continue
+            dest, = struct.unpack('B', recv)
+            
+            recv = conn.recv(4)
+            if(len(recv) < 4):
+                continue
+            plen, = struct.unpack('I', recv)
+            
             print("dest = " + str(dest))
             print("plen = " + str(plen))
+            
             packet = conn.recv(plen)
-            print(packet)
+            if(len(packet) < plen):
+                print("malformed packet: " + str(packet))
+            else:
+                print(str(packet) + "\n")
 
             conns[dest].sendall(packet)
 
