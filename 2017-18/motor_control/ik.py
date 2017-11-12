@@ -146,13 +146,13 @@ import sys
 # # # # # # # # # # # # # # #
 
 # trolen: length of trochanter
-trolen = 7
+trolen = 2.54
 
 # femlen: length of femur
-femlen = 6.4
+femlen = 6.16
 
 # tiblen: length of tibia
-tiblen = 14
+tiblen = 14.08
 
 # PITCH: default pitch
 PITCH = 0
@@ -161,7 +161,7 @@ PITCH = 0
 ROLL = 0
 
 # SIDE: length of test robot body's side
-SIDE = 15
+SIDE = 7.62
 
 # GAMMAS: list containing default gamma values for 4 legs
 GAMMAS = [315, 45, 135, 225]
