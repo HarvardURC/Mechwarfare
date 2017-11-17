@@ -1,1 +1,1 @@
-/Users/Tanzer/Mechwarfare/2017-18/server/hlsockets.py
+../server/hlsockets.py

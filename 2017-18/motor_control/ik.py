@@ -49,6 +49,8 @@ import sys
 # femlen: length of femur
 # tiblen: length of tibia
 #
+# PITCH, ROLL, SIDE, GAMMAS, RAD, HEIGHT: default valued
+#
 # see engineering journal for nomenclature details
 #
 #
@@ -108,7 +110,7 @@ import sys
 #     leg: leg_data object (contains angle offset information)
 #     claw: np.array (contains desired claw location)
 #   outputs:
-#     tuple (h, e, k)
+#     list [h, e, k]
 #       h is the angle of the hip relative to x-axis of body frame
 #       e is the angle of the elbow from trochanter
 #       k is the angle of the knee from femur
@@ -127,16 +129,15 @@ import sys
 #
 #
 # # # # # # # # # # # # #
-# # # Functionality # # #
+# # # # # Other # # # # #
 # # # # # # # # # # # # #
 #
-# python ik.py [first] [second]
-# If no optional command line arguments are given, run body_ik 
-#   with default PITCH and ROLL values.
-# If 1 optional command line argument [first] is given, run body_ik
-#   with PITCH=first and default ROLL value
-# If two optional command line arguments [first] and [second] are given, 
-#   run body_ik with PITCH=first and ROLL=second
+# make_standard_bot
+#   makes a robot with equidistant claws
+#
+# extract_angles
+#   returns a list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
+
 
 
 
@@ -154,17 +155,21 @@ femlen = 6.16
 # tiblen: length of tibia
 tiblen = 14.08
 
-# PITCH: default pitch
-PITCH = 0
-
-# ROLL: default roll
-ROLL = 0
+# PITCH, ROLL: default pitch and roll
+PITCH, ROLL = 0, 0
 
 # SIDE: length of test robot body's side
 SIDE = 7.62
 
 # GAMMAS: list containing default gamma values for 4 legs
-GAMMAS = [315, 45, 135, 225]
+GAMMAS = [315., 45., 135., 225.]
+
+# RAD, HEIGHT: default claw distance from hip in XY plane and Z axis, respectively
+RAD, HEIGHT = 12, -8
+
+
+
+
 
 
 
@@ -186,22 +191,22 @@ def dtor(x):
 # tocyl(point: np.array of 3d cartesian coordinates)
 #   converts point from cartesian to cylindrical
 def tocyl(point):
-    return np.array([rtod(m.atan2(-point[1], point[0])), ((point[0]**2 + point[1]**2) ** .5), point[2]])
+    return np.array([rtod(m.atan2(point[1], point[0])), ((point[0]**2 + point[1]**2) ** .5), point[2]])
 
 # fromcyl(point: np.array of cylindrical coordinates)
 #   converts point from cylindrical to cartesian)
 def fromcyl(point):
-    return np.array([point[1] * m.cos(dtor(point[0])), -point[1] * m.sin(dtor(point[0])), point[2]])
+    return np.array([point[1] * m.cos(dtor(point[0])), point[1] * m.sin(dtor(point[0])), point[2]])
 
 # get_bodylines(body: body object)
 #   returns list of lists of lines which outline robot body 
 #   in the form [[x, x], [y, y], [z, z]] for graphing purposes
 def get_bodylines(body):
     c = body.side/2
-    return [[[c, -c], [c, c], [0, 0]], 
+    return [[[c, c], [-c, c], [0, 0]], 
+            [[c, -c], [c, c], [0, 0]], 
             [[-c, -c], [c, -c], [0, 0]], 
-            [[-c, c], [-c, -c], [0, 0]], 
-            [[c, c], [-c, c], [0, 0]]]
+            [[-c, c], [-c, -c], [0, 0]]]
 
 # get_leglines(leg: leg_data object, claw: desired claw location in cylindrical coordinates in leg frame)
 #   returns list of lists of lines which outline leg segments
@@ -209,6 +214,7 @@ def get_bodylines(body):
 def get_leglines(leg, claw):
     # Get data
     angles = leg_ik(leg, claw)
+    angles[0] += leg.gamma
 
     # Define locations of joints in space; convert to cartesian
     hipp = np.array([0, 0, 0])
@@ -239,7 +245,7 @@ def change_frame(lines, off):
 
 # Leg IK
 # leg_ik(leg: leg_data object, claw: desired claw location in cylindrical coordinates in leg frame)
-#   returns (h, e, k) tuple
+#   returns [h, e, k] list
 #     h is hip angle from body frame's x-axis
 #     e is elbow angle from trochanter
 #     k is knee angle from femur
@@ -248,10 +254,10 @@ def leg_ik(leg, claw):
     hyp = ((claw[1] - trolen)**2 + claw[2]**2)**.5
 
     # Inverse Kinematics
-    h = claw[0]
+    h = claw[0] - leg.gamma
     e = rtod(m.asin((claw[1] - trolen)/hyp) + m.acos((tiblen**2 - femlen**2 - hyp**2)/(-2 * femlen * hyp)) - (m.pi/2))
     k = rtod(m.pi - m.acos((hyp**2 - tiblen**2 - femlen**2)/(-2 * tiblen * femlen)))
-    return (h, e, k)
+    return [h, e, -k]
 
 
 # Body IK
@@ -262,13 +268,16 @@ def body_ik(body, claws, pitch, roll):
     pc, ps = m.cos(dtor(pitch)), m.sin(dtor(pitch))
     rc, rs = m.cos(dtor(roll)), m.sin(dtor(roll))
     pitchm = np.matrix([[pc, 0, -ps], [0, 1, 0], [ps, 0, pc]])
-    rollm = np.matrix([[1, 0, 0], [0, rc, rs], [0, -rs, rc]])
+    rollm = np.matrix([[1, 0, 0], [0, rc, -rs], [0, rs, rc]])
     rot = pitchm * rollm
 
     newclaws = []
+    s = (2 * (body.side / 2)**2)**.5
     for i in range(len(body.legs)):
+        claws[i][1] += s
         vec = rot * body.legs[i].off[np.newaxis].T 
         newclaws.append(tocyl(fromcyl(claws[i]) - np.squeeze(np.asarray(vec))))
+        claws[i][1] -= s
 
     return newclaws
     
@@ -331,9 +340,7 @@ class leg_data:
 class body_data:
     def __init__(self, legs, side):
         self.numlegs = len(legs)
-        self.legs = []
-        for i in range(self.numlegs):
-            self.legs.append(legs[i])
+        self.legs = legs
         self.side = side
 
     # prints number of legs, sidelength, and calls printleg for each leg
@@ -360,10 +367,10 @@ class body_data:
         fig = plt.figure().gca(projection='3d')
         
         bl = get_bodylines(self)
-        fig.plot(bl[0][0], bl[0][1], bl[0][2], c='k')
+        fig.plot(bl[0][0], bl[0][1], bl[0][2], c='b')
         fig.plot(bl[1][0], bl[1][1], bl[1][2], c='k')
         fig.plot(bl[2][0], bl[2][1], bl[2][2], c='k')
-        fig.plot(bl[3][0], bl[3][1], bl[3][2], c='b')
+        fig.plot(bl[3][0], bl[3][1], bl[3][2], c='k')
         for i in range(len(newclaws)):
             ll = change_frame(get_leglines(self.legs[i], newclaws[i]), self.legs[i].off)
             fig.plot(ll[0][0], ll[0][1], ll[0][2], c='g')
@@ -385,6 +392,40 @@ class body_data:
 
 
 
+# # # # # # # # # # # # # # #
+# # # # # # Other # # # # # #
+# # # # # # # # # # # # # # #
+
+# make_standard_bot()
+#   creates a bot with equidistant claws at distance RAD from hip
+def make_standard_bot():
+    claws = []
+    claws.append(np.array([GAMMAS[0], RAD, HEIGHT]))
+    claws.append(np.array([GAMMAS[1], RAD, HEIGHT]))
+    claws.append(np.array([GAMMAS[2], RAD, HEIGHT]))
+    claws.append(np.array([GAMMAS[3], RAD, HEIGHT]))
+
+    legs = []
+    s = SIDE/2
+    legs.append(leg_data(s, -s, 0, GAMMAS[0]))
+    legs.append(leg_data(s, s, 0, GAMMAS[1]))
+    legs.append(leg_data(-s, s, 0, GAMMAS[2]))
+    legs.append(leg_data(-s, -s, 0, GAMMAS[3]))
+
+    body = body_data(legs, SIDE)
+
+    return(claws, body)
+
+# extract_angles(body: body_data object, claws: list of claw positions, pitch: desired pitch in degrees, roll: desired roll in degrees)
+#   returns list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
+def extract_angles(body, claws, pitch, roll):
+    newclaws = body_ik(body, claws, pitch, roll)
+    ret_angles = []
+    for i in range(len(body.legs)):
+        ret_angles += leg_ik(body.legs[i], newclaws[i])
+    return ret_angles
+
+
 
 
 
@@ -396,25 +437,12 @@ class body_data:
 #   If no command line arguments: use default PITCH and ROLL values
 #   If 1 command line argument: make it PITCH value, use default ROLL value
 #   If 2 command line arguments: make first PITCH value, make second ROLL value
-if (len(sys.argv) > 1):
-    PITCH = float(sys.argv[1])
-    if (len(sys.argv) > 2):
-        ROLL = float(sys.argv[2])
-
-legs = []
-s = SIDE/2
-legs.append(leg_data(s, s, 0, GAMMAS[0]))
-legs.append(leg_data(s, -s, 0, GAMMAS[1]))
-legs.append(leg_data(-s, -s, 0, GAMMAS[2]))
-legs.append(leg_data(-s, s, 0, GAMMAS[3]))
-
-distance = (s**2 + s**2)**.5
-claws = []
-claws.append(np.array([315, 12 + distance, -8]))
-claws.append(np.array([45, 20 + distance, -8]))
-claws.append(np.array([135, 12 + distance, -8]))
-claws.append(np.array([225, 12 + distance, -8]))
-
-robot = body_data(legs, SIDE)
-robot.graphbody(claws, PITCH, ROLL)
-print("Done")
+#if (len(sys.argv) > 1):
+#    PITCH = float(sys.argv[1])
+#    if (len(sys.argv) > 2):
+#        ROLL = float(sys.argv[2])
+#
+#claws, body = make_standard_bot()
+#robot = body_data(legs, SIDE)
+#robot.graphbody(claws, PITCH, ROLL)
+#print("Done")
