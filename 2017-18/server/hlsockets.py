@@ -48,7 +48,7 @@ class UDSClient:
             ret = self.conn.recv(4)
         except timeout:
             return None
-            
+        
         plen, = struct.unpack('I', ret)
         packet = self.conn.recv(plen)
         

@@ -7,7 +7,7 @@ Python client remote API documentation:
 http://www.coppeliarobotics.com/helpFiles/en/remoteApiFunctionsPython.htm
 """
 
-import vrep, sys
+import vrep, sys, math
 from time import sleep
 import hlsockets
 
@@ -60,7 +60,7 @@ while 1:
     params = client.recv()
     if(params):
         for id, angle in enumerate(params):
-            positions[joints[id]] = angle
+            positions[joints[id]] = math.radians(angle)
     for joint in joints:
         vrep.simxSetJointPosition(cID, jds[joint], positions[joint] + offsets[joint], vrep.simx_opmode_oneshot)
 client.close()

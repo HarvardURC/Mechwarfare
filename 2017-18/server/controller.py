@@ -11,12 +11,6 @@ from time import sleep
 angles = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 claws, body = ik.make_standard_bot()
 
-# converts a list of angles from degrees to radians
-def fix_angles(angles):
-    for i in range(len(angles)):
-        angles[i] = ik.dtor(angles[i])
-    return angles
-
 # given a list of angles and a time, maintains angle positions for time seconds
 def maintain_pos(time, angles):
     for i in range(40 * time):
@@ -37,16 +31,16 @@ def stand(body, claws, pitch=0, roll=0, time=10):
 def wiggle(time=10):
     for j in range(time):
         for i in range(10):
-            client.send(hlsockets.SERVO, fix_angles(ik.extract_angles(body, claws, 15, 0)))
+            client.send(hlsockets.SERVO, ik.extract_angles(body, claws, 15, 0))
             sleep(.025)
         for i in range(10):
-            client.send(hlsockets.SERVO, fix_angles(ik.extract_angles(body, claws, -10, 15)))
+            client.send(hlsockets.SERVO, ik.extract_angles(body, claws, -10, 15))
             sleep(.025)
         for i in range(10):
-            client.send(hlsockets.SERVO, fix_angles(ik.extract_angles(body, claws, 15, 0)))
+            client.send(hlsockets.SERVO, ik.extract_angles(body, claws, 15, 0))
             sleep(.025)
         for i in range(10):
-            client.send(hlsockets.SERVO, fix_angles(ik.extract_angles(body, claws, -10, -15)))
+            client.send(hlsockets.SERVO, ik.extract_angles(body, claws, -10, -15))
             sleep(.025)
         
 
