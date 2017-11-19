@@ -54,12 +54,13 @@ for joint in joints:
         sys.exit(1)
     jds[joint] = jd
 
-client = hlsockets.UDSClient()
+client = hlsockets.UDSClient(0.03)
 client.open(hlsockets.SERVO)
 while 1:
     params = client.recv()
-    for id, angle in enumerate(params):
-        positions[joints[id]] = angle
+    if(params):
+        for id, angle in enumerate(params):
+            positions[joints[id]] = angle
     for joint in joints:
         vrep.simxSetJointPosition(cID, jds[joint], positions[joint] + offsets[joint], vrep.simx_opmode_oneshot)
 client.close()
