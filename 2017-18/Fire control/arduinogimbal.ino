@@ -67,6 +67,7 @@ void loop() {
       int center = 240 + bytesfound;
       if (computer.available()) {
         spd[bytesfound] = bytetospd(computer.parseInt(), center);
+        computer.write(bytesfound);
         bytesfound++;
       }
     }
@@ -78,12 +79,12 @@ void loop() {
       gimbals[i] = convspds[i];
     }
     gimbal.write(gimbals);
-    computer.println(gimbals[0]);
+    //computer.println(gimbals[0]);
     delay(5);
     while (computer.available()) {
       computer.read();
     }
-    computer.write(1);
+    computer.write(3);
   }
   else {
 
