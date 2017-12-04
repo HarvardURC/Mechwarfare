@@ -1,6 +1,6 @@
 # higher level sockets
 
-from socket import socket, AF_UNIX, SOCK_STREAM
+from socket import socket, AF_UNIX, SOCK_STREAM, timeout
 from socket import error as sockerr
 import pickle, struct, os, sys
 
@@ -13,8 +13,10 @@ CONTROLLER = 1
 class UDSClient:
 
     # create a new unix domain socket client
-    def __init__(self):
+    def __init__(self, timeout=None):
         self.conn = socket(AF_UNIX, SOCK_STREAM)
+        if timeout != None:
+            self.conn.settimeout(timeout)
     
     # receive messages sent to 'dest' (0-255)
     def open(self, dest):
@@ -42,7 +44,12 @@ class UDSClient:
     # (n bytes) pickled object
     # etc.
     def recv(self):
-        plen, = struct.unpack('I', self.conn.recv(4))
+        try:
+            ret = self.conn.recv(4)
+        except timeout:
+            return None
+        
+        plen, = struct.unpack('I', ret)
         packet = self.conn.recv(plen)
         
         params = pickle.loads(packet)

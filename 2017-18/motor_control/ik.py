@@ -1,4 +1,5 @@
 import math as m
+import copy
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -26,18 +27,28 @@ import sys
 # BODY FRAME
 # (0, 0, 0) is the center of the body projected onto the floor
 #
-# x axis points positively directly forward
+# x axis points forward
 #
-# y axis points positively to the right
+# y axis points to the right
 #
-# z axis points positively up
+# z axis points positively up, orthogonal to body
 #
-# all axes are at all time orthogonal to the robot's body; frame shifts 
-# as robot moves
+#
+#
+# HALF FRAME
+#
+# (0, 0) is the center of the body projected onto the floor
+#
+# x axis points forward
+#
+# y axis points to the right
+#
+#
 #
 # BODY STATE:   
 # pitch: rotation around y-axis
 # roll: rotaion around x-axis
+# height: distance from floor to center of bottom body
 #
 #
 #
@@ -49,7 +60,7 @@ import sys
 # femlen: length of femur
 # tiblen: length of tibia
 #
-# PITCH, ROLL, SIDE, GAMMAS, RAD, HEIGHT: default valued
+# PITCH, ROLL, SIDE, GAMMAS, RAD, HEIGHT: default values
 #
 # see engineering journal for nomenclature details
 #
@@ -83,7 +94,7 @@ import sys
 #     printleg: prints offset and gamma
 #     graphleg: outputs graph of leg
 #       inputs: 
-#         claw (np.array containing desired claw location)
+#         claw (np.array containing desired claw location in leg frame)
 #
 #
 # body_data is a class for containing data about a robot
@@ -95,7 +106,7 @@ import sys
 #     printbody: prints list of legs and side length
 #     graphbody: outputs graph of body and legs 
 #       inputs: 
-#         claws (list of np.arrays containing desired claw locations)
+#         claws (list of np.arrays containing desired claw locations in half frame)
 #         pitch (desired pitch of robot body)
 #         roll (desired roll of robot body)
 #
@@ -118,10 +129,10 @@ import sys
 # body_ik
 #   inputs:
 #     body: body_data object (contains information about legs)
-#     claws: list of np.arrays (contain vectors describing claw 
-#          locations relative to center of robot)
+#     claws: list of np.arrays (contain claw locations in half frame)
 #     pitch: angle, in degrees, of desired pitch
 #     roll: angle, in degrees, of desired roll
+#     height: shortest distance from floor to center of bottom of body
 #   outputs:
 #     newclaws: list of claw positions relative to new coordinate 
 #       systems of legs
@@ -155,8 +166,11 @@ femlen = 6.16
 # tiblen: length of tibia
 tiblen = 14.08
 
+# distance from elbow to bottom of body
+zdist = 2.86
+
 # PITCH, ROLL: default pitch and roll
-PITCH, ROLL = 0, 0
+PITCH, ROLL = 0, 15
 
 # SIDE: length of test robot body's side
 SIDE = 7.62
@@ -165,7 +179,7 @@ SIDE = 7.62
 GAMMAS = [315., 45., 135., 225.]
 
 # RAD, HEIGHT: default claw distance from hip in XY plane and Z axis, respectively
-RAD, HEIGHT = 12, -8
+RAD, HEIGHT = 12, 8
 
 
 
@@ -261,23 +275,22 @@ def leg_ik(leg, claw):
 
 
 # Body IK
-# body_ik(legs: list of leg_data objects, claws: list of desired claw locations in cylindrical coordinates in leg frame,
+# body_ik(legs: list of leg_data objects, claws: list of desired claw locations in floor plane w/ (0, ,
 #      pitch: desired pitch of robot, roll: desired roll of robot)
 #   returns newclaws: list of desired claw positions in cylindrical coordinates in leg frame of rotated robot
-def body_ik(body, claws, pitch, roll):
-    pc, ps = m.cos(dtor(pitch)), m.sin(dtor(pitch))
-    rc, rs = m.cos(dtor(roll)), m.sin(dtor(roll))
+def body_ik(body, claws, pitch, roll, height):
+    hclaws = copy.copy(claws)
+    for i in range(len(hclaws)):
+        hclaws[i] = np.append(hclaws[i], -1 * height)
+    pc, ps, rc, rs = m.cos(dtor(pitch)), m.sin(dtor(pitch)), m.cos(dtor(roll)), m.sin(dtor(roll))
     pitchm = np.matrix([[pc, 0, -ps], [0, 1, 0], [ps, 0, pc]])
     rollm = np.matrix([[1, 0, 0], [0, rc, -rs], [0, rs, rc]])
     rot = pitchm * rollm
 
     newclaws = []
-    s = (2 * (body.side / 2)**2)**.5
     for i in range(len(body.legs)):
-        claws[i][1] += s
         vec = rot * body.legs[i].off[np.newaxis].T 
-        newclaws.append(tocyl(fromcyl(claws[i]) - np.squeeze(np.asarray(vec))))
-        claws[i][1] -= s
+        newclaws.append(tocyl(hclaws[i] - np.squeeze(np.asarray(vec))))
 
     return newclaws
     
@@ -353,10 +366,10 @@ class body_data:
             print("\n")
 
     # outputs graph of body in 3d space with legs
-    def graphbody(self, claws, pitch, roll):
+    def graphbody(self, claws, pitch, roll, height):
         print("Pitch: ", pitch)
         print("Roll: ", roll)
-        newclaws = body_ik(self, claws, pitch, roll)
+        newclaws = body_ik(self, claws, pitch, roll, height)
         cclaws = []
         for i in range(len(newclaws)):
             cclaws.append(fromcyl(newclaws[i]))
@@ -399,14 +412,16 @@ class body_data:
 # make_standard_bot()
 #   creates a bot with equidistant claws at distance RAD from hip
 def make_standard_bot():
+    s = SIDE/2
     claws = []
-    claws.append(np.array([GAMMAS[0], RAD, HEIGHT]))
-    claws.append(np.array([GAMMAS[1], RAD, HEIGHT]))
-    claws.append(np.array([GAMMAS[2], RAD, HEIGHT]))
-    claws.append(np.array([GAMMAS[3], RAD, HEIGHT]))
+    xc = s + RAD * m.cos(dtor(45))
+    yc = s + RAD * m.cos(dtor(45))
+    claws.append(np.array([xc, -yc]))
+    claws.append(np.array([xc, yc]))
+    claws.append(np.array([-xc, yc]))
+    claws.append(np.array([-xc, -yc]))
 
     legs = []
-    s = SIDE/2
     legs.append(leg_data(s, -s, 0, GAMMAS[0]))
     legs.append(leg_data(s, s, 0, GAMMAS[1]))
     legs.append(leg_data(-s, s, 0, GAMMAS[2]))
@@ -418,8 +433,8 @@ def make_standard_bot():
 
 # extract_angles(body: body_data object, claws: list of claw positions, pitch: desired pitch in degrees, roll: desired roll in degrees)
 #   returns list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
-def extract_angles(body, claws, pitch, roll):
-    newclaws = body_ik(body, claws, pitch, roll)
+def extract_angles(body, claws, pitch, roll, height):
+    newclaws = body_ik(body, claws, pitch, roll, height)
     ret_angles = []
     for i in range(len(body.legs)):
         ret_angles += leg_ik(body.legs[i], newclaws[i])
@@ -443,6 +458,5 @@ def extract_angles(body, claws, pitch, roll):
 #        ROLL = float(sys.argv[2])
 #
 #claws, body = make_standard_bot()
-#robot = body_data(legs, SIDE)
-#robot.graphbody(claws, PITCH, ROLL)
+#body.graphbody(claws, PITCH, ROLL, HEIGHT) 
 #print("Done")
