@@ -36,6 +36,9 @@ while True:
             pass
         currpos=int(ser2.read(ser.inWaiting()))
         ser2.write(numdat[1])
+        while (ser2.inWaiting()) == 0:
+            pass
+        currpos = int(ser2.read(ser.inWaiting()))
         while currpos != 3: #wait for movement to be finished
             while (ser2.inWaiting()) == 0:
                 pass
