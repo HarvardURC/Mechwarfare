@@ -1,6 +1,6 @@
 import serial
 port='/dev/ttyACM0'  #two ports here, port 1 Jevois port 2 arduino
-port2='test' #replace here
+port2='/dev/ttyACM1' #replace here
 baud=115200 #baud rate for jevois
 constbound=1000  #bounds for image--constbound is jevois struct, x and ybounds are pixel sizes
 xbound=320.
