@@ -31,11 +31,11 @@ while True:
         numdat[1]=x
         print(numdat)
     if numdat!='notarget':
-        ser2.write(numdat[0])  #actually send the bytes to the arduinonumdat='notarget't after each for a receipt notification
+        ser2.write(str(numdat[0]).encode('ascii'))  #actually send the bytes to the arduinonumdat='notarget't after each for a receipt notification
         while(ser2.inWaiting())==0:
             pass
         currpos=int(ser2.read(ser.inWaiting()))
-        ser2.write(numdat[1])
+        ser2.write(str(numdat[1]).encode('ascii'))
         while (ser2.inWaiting()) == 0:
             pass
         currpos = int(ser2.read(ser.inWaiting()))
