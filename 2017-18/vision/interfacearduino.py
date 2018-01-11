@@ -1,6 +1,6 @@
 import serial
 port='/dev/ttyACM0'  #two ports here, port 1 Jevois port 2 arduino
-port2='test' #replace here
+port2='/dev/ttyACM1' #replace here
 baud=115200 #baud rate for jevois
 constbound=1000  #bounds for image--constbound is jevois struct, x and ybounds are pixel sizes
 xbound=320.
@@ -31,11 +31,14 @@ while True:
         numdat[1]=x
         print(numdat)
     if numdat!='notarget':
-        ser2.write(numdat[0])  #actually send the bytes to the arduinonumdat='notarget't after each for a receipt notification
+        ser2.write(str(numdat[0]).encode('ascii'))  #actually send the bytes to the arduinonumdat='notarget't after each for a receipt notification
         while(ser2.inWaiting())==0:
             pass
         currpos=int(ser2.read(ser.inWaiting()))
-        ser2.write(numdat[1])
+        ser2.write(str(numdat[1]).encode('ascii'))
+        while (ser2.inWaiting()) == 0:
+            pass
+        currpos = int(ser2.read(ser.inWaiting()))
         while currpos != 3: #wait for movement to be finished
             while (ser2.inWaiting()) == 0:
                 pass

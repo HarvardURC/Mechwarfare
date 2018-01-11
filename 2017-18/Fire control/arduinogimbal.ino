@@ -1,6 +1,6 @@
 #include <SBUS.h>
-SBUS x8r(Serial2);
-SBUS gimbal(Serial3);
+SBUS x8r(Serial1);
+#define gimbal x8r;
 // channel, fail safe, and lost frames data
 float channels[16];
 uint8_t failSafe;
@@ -11,7 +11,6 @@ bool serialread = false;
 void setup() {
   // begin the SBUS communication
   x8r.begin();
-  gimbal.begin();
   computer.begin(9600);
 }
 uint16_t converttospd(float n) {
@@ -45,14 +44,21 @@ int spdstep(int i, int bound1, int bound2, int stepsize) {
   }
 }
 float bytetospd(int i, int bound) {
-  int j = (int) 10 * bound / 1000
-  if (abs(i) < j) {
-    i = 0;
+  int j = 127;
+  if (abs(i-j) < bound) {
+    i = 127;
   }
-  float newspd = (float) i / 1000.0;
+  float newspd = (((float) i)-127.0) / 127.0;
+  if(newspd>1.0){
+    newspd=1.00;
+  }
+  if(newspd<-1.00){
+    newspd=-1.00;
+  }
   return newspd;
 }
 int bytesfound = 0;
+int itemfound[2];
 float spd[16];
 int convspds[16];
 void loop() {
@@ -64,49 +70,48 @@ void loop() {
   }
   if (serialread) {
     while (bytesfound < 2) {
-      int center = 240 + bytesfound;
+      int center = 260 + bytesfound*60;
       if (computer.available()) {
-        spd[bytesfound] = bytetospd(computer.parseInt(), center);
-        computer.write(bytesfound);
+        spd[bytesfound] = bytetospd(computer.parseInt(), 10);
+        computer.println(bytesfound);
+        computer.println(spd[bytesfound]);
         bytesfound++;
       }
+      else{
+        
+      }
     }
-    while (bytesfound > 0) {
+    while (bytesfound >= 0) {
       convspds[bytesfound] = converttospd(spd[bytesfound]);
       bytesfound--;
     }
-    for (int l = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
       gimbals[i] = convspds[i];
     }
-    gimbal.write(gimbals);
+    x8r.write(gimbals);
     //computer.println(gimbals[0]);
-    delay(5);
+    delay(10);
     while (computer.available()) {
       computer.read();
     }
-    computer.write(3);
+    computer.println(3);
+    computer.println(gimbals[0]);
+    computer.println(gimbals[1]);
   }
   else {
 
-
-    // look for a good SBUS packet from the receiver
-    /*if(x8r.readCal(&channels[0], &failSafe, &lostFrames)){
-
-      // write the SBUS packet to an SBUS compatible servo
-      for(int i=0; i<2; i++){
-        //computer.println(channels[i]);
-        gimbals[i]=converttospd(channels[i]);
-      }
-      }*/
-    //else{
+for (int i = 0; i < 16; i++) {
+    gimbals[i] = 0;
+  }
+  // look for a good SBUS packet from the receiver
     spdnow = spdstep(spdnow, -100, 100, 1);
     float fltspd = ((float) spdnow) / 100.0;
     int spdsend = converttospd(fltspd);
     gimbals[0] = spdsend;
-    //}
-    gimbal.write(gimbals);
+    gimbals[1]=spdsend;
+    // write the SBUS packet to an SBUS compatible servo
+    x8r.write(gimbals);
     computer.println(gimbals[0]);
-    delay(5);
-    computer.write(10);
+    delay(10);
   }
 }

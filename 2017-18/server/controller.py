@@ -57,7 +57,8 @@ def wiggle(time=10):
         for i in range(10):
             client.send(hlsockets.SERVO, ik.extract_angles(body, claws, -10, -20, HEIGHT))
             sleep(.025)
-        
+
+def footpath
 
 client = hlsockets.UDSClient()
 client.open(hlsockets.CONTROLLER)
