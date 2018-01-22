@@ -13,36 +13,23 @@ import sys
 #
 # LEG FRAME
 # (0, 0, 0) is the hip
-#
 # all references in leg frame use cylindrical coordinates: (theta, r, z) 
-#
 # the z-axis is orthogonal to the body, positive being up
-# 
 # theta is measured from the body frame's x-axis (see below), counter-clockwise
-#
 # r is the distance from the z axis
-#
 #
 #
 # BODY FRAME
 # (0, 0, 0) is the center of the body projected onto the floor
-#
 # x axis points forward
-#
 # y axis points to the right
-#
 # z axis points positively up, orthogonal to body
 #
 #
-#
 # HALF FRAME
-#
 # (0, 0) is the center of the body projected onto the floor
-#
 # x axis points forward
-#
 # y axis points to the right
-#
 #
 #
 # BODY STATE:   
@@ -56,9 +43,20 @@ import sys
 # # GLOBAL VARIABLES  # #
 # # # # # # # # # # # # # 
 # 
-# trolen: length of trochanter
-# femlen: length of femur
-# tiblen: length of tibia
+# global_trolen: length of trochanter
+# global_femlen: length of femur
+# global_tiblen: length of tibia 
+#
+#                                      knee
+#                                      /   \
+#     \                            femur   tibia
+#      \                             /       \
+#       \                           /         \
+# BODY   hip-----trochanter------elbow         \
+#       /                                       \
+#      /                                         \
+#     /                                          claw
+#
 #
 # PITCH, ROLL, SIDE, GAMMAS, RAD, HEIGHT: default values
 #
@@ -76,8 +74,18 @@ import sys
 # tocyl: converts cartesian to cylindrical
 # fromcyl: converts cylindrical to cartesian, assumes input angles in degrees
 #
+#
+# GRAPHING FUNCTIONS
 # get_bodylines: finds lines outlining plane representing body in cartesian coordinates (for graphing)
 # get_leglines: fines lines outlining leg segments in cartesian coordinates *IN LEG FRAME* (for graphing)
+# change_frame: change the frame of leglines to be plotted with body
+#
+#
+# IK HELPER FUNCTIONS
+# body_ik_cascade: ensures variables are in acceptable range in cascade order as follows
+#    height, pitch, roll
+# leg_ik_cascade: ensures variables are in acceptable range in cascade order as follows
+#    radius, angle
 #
 #
 #
@@ -89,11 +97,12 @@ import sys
 #   inputs: 
 #     x, y, z (offset of hip from center of robot)
 #     gamma (offset of 0 position of servo from x-axis in degrees)
+#     trolen, femlen, tiblen (lengths of leg components)
 #     
 #   methods: 
 #     printleg: prints offset and gamma
 #     graphleg: outputs graph of leg
-#       inputs: 
+#       inputs:  
 #         claw (np.array containing desired claw location in leg frame)
 #
 #
@@ -132,7 +141,7 @@ import sys
 #     claws: list of np.arrays (contain claw locations in half frame)
 #     pitch: angle, in degrees, of desired pitch
 #     roll: angle, in degrees, of desired roll
-#     height: shortest distance from floor to center of bottom of body
+#     height: shortest distance from floor to centroid of elbows
 #   outputs:
 #     newclaws: list of claw positions relative to new coordinate 
 #       systems of legs
@@ -144,10 +153,14 @@ import sys
 # # # # # # # # # # # # #
 #
 # make_standard_bot
-#   makes a robot with equidistant claws
+#   inputs:
+#     (all optional, defaults to global defaults) side, trolen, femlen, tiblen
+#   outputs:
+#     makes a robot with equidistant claws
 #
 # extract_angles
-#   returns a list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
+#   inputs: body, claws, pitch, roll, height
+#   outputs: returns a list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
 
 
 
@@ -157,20 +170,19 @@ import sys
 # # # # # Globals # # # # # #
 # # # # # # # # # # # # # # #
 
-# trolen: length of trochanter
-trolen = 2.54
+# lengths of trochanter, femur, and tibia
+global_trolen = 2.54
+global_femlen = 6.16
+global_tiblen = 14.08
 
-# femlen: length of femur
-femlen = 6.16
-
-# tiblen: length of tibia
-tiblen = 14.08
-
-# distance from elbow to bottom of body
-zdist = 2.86
+# Pitch must be in +- PBOUND; roll must be in +- RBOUND
+PBOUND, RBOUND = 15, 15
 
 # PITCH, ROLL: default pitch and roll
 PITCH, ROLL = 0, 15
+
+# distance from elbow to bottom of body
+ZDIST = 2.86
 
 # SIDE: length of test robot body's side
 SIDE = 7.62
@@ -212,6 +224,16 @@ def tocyl(point):
 def fromcyl(point):
     return np.array([point[1] * m.cos(dtor(point[0])), point[1] * m.sin(dtor(point[0])), point[2]])
 
+# torad(point: np.array of 2d cartesian coordinates)
+#   converts from cartesian to radial
+def torad(point):
+    return np.array([rtod(m.atan2(point[1], point[0])), ((point[0]**2 + point[1]**2) ** .5)])
+
+# fromrad(point: np.array of radial coordinates)
+#   converts to cylindrical coordinates
+def fromrad(point):
+    return np.array([point[1] * m.cos(dtor(point[0])), point[1] * m.sin(dtor(point[0]))])
+
 # get_bodylines(body: body object)
 #   returns list of lists of lines which outline robot body 
 #   in the form [[x, x], [y, y], [z, z]] for graphing purposes
@@ -232,8 +254,8 @@ def get_leglines(leg, claw):
 
     # Define locations of joints in space; convert to cartesian
     hipp = np.array([0, 0, 0])
-    elbowp = fromcyl(np.array([angles[0], trolen, 0]))
-    kneep = fromcyl(np.array([angles[0], trolen + femlen * m.cos(dtor(angles[1])), femlen * m.sin(dtor(angles[1]))]))
+    elbowp = fromcyl(np.array([angles[0], leg.trolen, 0]))
+    kneep = fromcyl(np.array([angles[0], leg.trolen + leg.femlen * m.cos(dtor(angles[1])), leg.femlen * m.sin(dtor(angles[1]))]))
     clawp = fromcyl(np.array([angles[0], claw[1], claw[2]]))
 
     return [[[hipp[0], elbowp[0]], [hipp[1], elbowp[1]], [hipp[2], elbowp[2]]],
@@ -248,7 +270,60 @@ def change_frame(lines, off):
             lines[j][i][0] += off[i]
             lines[j][i][1] += off[i]
     return lines
-            
+
+# body_ik_error_handler(body: body_data object, claws: list of claws in floor frame, 
+#   pitch: desired pitch, roll: desired roll, height: 
+def body_ik_error_handler(body, claws, pitch, roll, height):
+    bigrad = 0;
+    for i in range(len(claws)):
+        claws[i] = torad(np.array([claws[i][0] - body.legs[i].off[0], claws[i][1] - body.legs[i].off[1]]))
+        claws[i][1] = min(max(0, claws[i][1]), body.legs[i].trolen + body.legs[i].femlen + body.legs[i].tiblen)
+        bigrad = max(bigrad, claws[i][1])
+        x, y = body.legs[i].off[0], body.legs[i].off[1]
+        claws[i][0] = (claws[i][0] + 360) % 360
+        if (x > 0):
+            if (y > 0):
+                if ((claws[i][0] > 90 + body.hip_wiggle) and (claws[i][0] < 360 - body.hip_wiggle)):
+                    if (claws[i][0] < 225):
+                        claws[i][0] = 90 + body.hip_wiggle
+                    else:
+                        claws[i][0] = 360 - body.hip_wiggle
+            else:
+                if ((claws[i][0] > body.hip_wiggle) and (claws[i][0] < 270 - body.hip_wiggle)):
+                    if (claws[i][0] < 135):
+                        claws[i][0] = body.hip_wiggle
+                    else:
+                        claws[i][0] = body.hip_wiggle
+        else: 
+            if (y > 0):
+                if ((claws[i][0] > 180 + body.hip_wiggle) or (claws[i][0] < 90 - body.hip_wiggle)):
+                    if (claws[i][0] < 315):
+                        claws[i][0] = 180 + body.hip_wiggle
+                    else:
+                        claws[i][0] = 90 - body.hip_wiggle
+            else:
+                if ((claws[i][0] > 270 + body.hip_wiggle) or (claws[i][0] < 180 - body.hip_wiggle)):
+                    if ((claws[i][0] < 180 - body.hip_wiggle) and (claws[i][0] > 45)):
+                        claws[i][0] = 180 - body.hip_wiggle
+                    else:
+                        claws[i][0] = 270 + body.hip_wiggle
+        claws[i] = fromrad(claws[i])
+        claws[i][0] = claws[i][0] + body.legs[i].off[0]
+        claws[i][1] = claws[i][1] + body.legs[i].off[1]
+
+    maxheight = m.sqrt(((body.femlen + body.tiblen) ** 2) - bigrad ** 2)
+    minheight = body.zdist
+    height = min(max(minheight, height), maxheight) 
+
+    pitch_range = min(PBOUND, rtod(m.asin(min(maxheight - height, height - minheight) / (body.side/2))))
+    pitch = min(max(-1 * pitch_range, pitch), pitch_range)
+
+    temp = abs((body.side/2) * m.sin(dtor(pitch)))
+    roll_range = min(RBOUND, rtod(m.asin((min(maxheight - height, height - minheight) - temp) / (body.side/2))))
+    roll = min(max(-1 * roll_range, roll), roll_range)
+        
+    return(claws, pitch, roll, height)
+
 
 
 
@@ -265,21 +340,22 @@ def change_frame(lines, off):
 #     k is knee angle from femur
 def leg_ik(leg, claw):
     # Constants
-    hyp = ((claw[1] - trolen)**2 + claw[2]**2)**.5
+    hyp = ((claw[1] - leg.trolen)**2 + claw[2]**2)**.5
 
     # Inverse Kinematics
     h = claw[0] - leg.gamma
-    e = rtod(m.asin((claw[1] - trolen)/hyp) + m.acos((tiblen**2 - femlen**2 - hyp**2)/(-2 * femlen * hyp)) - (m.pi/2))
-    k = rtod(m.pi - m.acos((hyp**2 - tiblen**2 - femlen**2)/(-2 * tiblen * femlen)))
+    e = rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2))
+    k = rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen)))
     return [h, e, -k]
 
 
 # Body IK
-# body_ik(legs: list of leg_data objects, claws: list of desired claw locations in floor plane w/ (0, ,
+# body_ik(legs: list of leg_data objects, claws: list of desired claw locations in floor plane,
 #      pitch: desired pitch of robot, roll: desired roll of robot)
 #   returns newclaws: list of desired claw positions in cylindrical coordinates in leg frame of rotated robot
 def body_ik(body, claws, pitch, roll, height):
     hclaws = copy.copy(claws)
+    (claws, pitch, roll, height) = body_ik_error_handler(body, claws, pitch, roll, height)
     for i in range(len(hclaws)):
         hclaws[i] = np.append(hclaws[i], -1 * height)
     pc, ps, rc, rs = m.cos(dtor(pitch)), m.sin(dtor(pitch)), m.cos(dtor(roll)), m.sin(dtor(roll))
@@ -307,9 +383,12 @@ def body_ik(body, claws, pitch, roll, height):
 #   graphleg(claw: desired claw location in cylindrical coordinates in leg frame)
 #     outputs graph of leg
 class leg_data:
-    def __init__(self, x, y, z, gamma):
+    def __init__(self, x, y, z, gamma, trolen=global_trolen, femlen=global_femlen, tiblen=global_tiblen):
         self.off = np.array([x, y, z])
         self.gamma = gamma
+        self.trolen = trolen
+        self.femlen = femlen
+        self.tiblen = tiblen
 
     # prints leg offset and gamma
     def printleg(self):
@@ -344,17 +423,21 @@ class leg_data:
 
 
 
-# body(legs: list of leg_data objects, side: length of body side)
+# body_data(legs: list of leg_data objects, side: length of body side, zdist: distance
+#   from elbow to bottom of body)
 #   printbody
 #     prints number of legs, sidelength, and calls printleg for each leg
 #   graphbody(claws: desired claw locations in cylindrical coordinates in leg frames, 
 #       pitch: desired pitch of body, roll: desired roll of body)
 #     outputs graph of body
 class body_data:
-    def __init__(self, legs, side):
+    def __init__(self, legs, side, zdist=ZDIST, trolen=global_trolen, femlen=global_femlen, tiblen=global_tiblen):
         self.numlegs = len(legs)
         self.legs = legs
         self.side = side
+        self.zdist = zdist
+        self.trolen, self.femlen, self.tiblen = trolen, femlen, tiblen
+        self.hip_wiggle = m.asin((side/2)/(trolen + femlen + tiblen))
 
     # prints number of legs, sidelength, and calls printleg for each leg
     def printbody(self):
@@ -411,8 +494,8 @@ class body_data:
 
 # make_standard_bot()
 #   creates a bot with equidistant claws at distance RAD from hip
-def make_standard_bot():
-    s = SIDE/2
+def make_standard_bot(side=SIDE, trolen=global_trolen, femlen=global_femlen, tiblen=global_tiblen, zdist=ZDIST):
+    s = side/2
     claws = []
     xc = s + RAD * m.cos(dtor(45))
     yc = s + RAD * m.cos(dtor(45))
@@ -420,14 +503,15 @@ def make_standard_bot():
     claws.append(np.array([xc, yc]))
     claws.append(np.array([-xc, yc]))
     claws.append(np.array([-xc, -yc]))
+    print(claws)
 
     legs = []
-    legs.append(leg_data(s, -s, 0, GAMMAS[0]))
-    legs.append(leg_data(s, s, 0, GAMMAS[1]))
-    legs.append(leg_data(-s, s, 0, GAMMAS[2]))
-    legs.append(leg_data(-s, -s, 0, GAMMAS[3]))
+    legs.append(leg_data(s, -s, 0, GAMMAS[0], trolen, femlen, tiblen))
+    legs.append(leg_data(s, s, 0, GAMMAS[1], trolen, femlen, tiblen))
+    legs.append(leg_data(-s, s, 0, GAMMAS[2], trolen, femlen, tiblen))
+    legs.append(leg_data(-s, -s, 0, GAMMAS[3], trolen, femlen, tiblen))
 
-    body = body_data(legs, SIDE)
+    body = body_data(legs, side, zdist, trolen, femlen, tiblen)
 
     return(claws, body)
 
