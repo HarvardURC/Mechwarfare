@@ -31,21 +31,11 @@ while True:
         numdat[1]=x
         print(numdat)
     if numdat!='notarget':
-        ser2.write(numdat[0])  #actually send the bytes to the arduinonumdat='notarget't after each for a receipt notification
+        ser2.write(numdat)  #actually send the bytes to the arduinonumdat='notarget't after each for a receipt notification
         while(ser2.inWaiting())==0:
             pass
-        currpos=int(ser2.read(ser.inWaiting()))
-        ser2.write(numdat[1])
-        while (ser2.inWaiting()) == 0:
-            pass
-        currpos = int(ser2.read(ser.inWaiting()))
-        while currpos != 3: #wait for movement to be finished
-            while (ser2.inWaiting()) == 0:
-                pass
-            currpos = int(ser2.read(ser.inWaiting()))
-        ser.reset_input_buffer() #flush all data accumulated while movement was happening to avoid contamination
-        ser2.reset_input_buffer()
-        ser2.reset_output_buffer()
+    ser.reset_input_buffer() #flush all data accumulated while movement was happening to avoid contamination
+
 
     #else:
         #numdat= [-1500, -1500]
