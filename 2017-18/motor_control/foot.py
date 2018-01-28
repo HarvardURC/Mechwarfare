@@ -7,49 +7,46 @@ from math import pow
 t = 0
 step = 0.01
 
-homex, homey, homez = 3, -3, 1
-endx, endy, endz = homex, homey, homez
-x, y, z = homex, homey, 0
+homes = [[3, -3, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+ends = [home for home in homes]
+coords = [[home[0], home[1], 0] for home in homes]
+vs = [[5, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+ωs = [1, 0, 0, 0]
 
-vx, vy, vz = 5, 0, 0
-ω = 1
-
-xpoints = []
-ypoints = []
-zpoints = []
+points = [[[],[],[]], [[],[],[]], [[],[],[]], [[],[],[]]]
 
 beats = 4
-beatlen = 1;
+beatlen = 1
 
 while t < (beats * beatlen):
     if 2.0 < (t / beatlen) % 4 < 2.02:
-        vx = 0
-        vy = 2
+        vs[0][0] = 0
+        vs[0][1] = 2
     if (t / beatlen) % 4 < 3:
-        xpoints.append(x)
-        ypoints.append(y)
-        zpoints.append(z)
-        x += (-vx + y*ω) * step
-        y += (-vy - x*ω) * step
+        points[0][0].append(coords[0][0])
+        points[0][1].append(coords[0][1])
+        points[0][2].append(coords[0][2])
+        coords[0][0] += (-vs[0][0] + coords[0][1]*ωs[0]) * step
+        coords[0][1] += (-vs[0][1] - coords[0][0]*ωs[0]) * step
     else:
-        if endx == homex:
-            endx = x
-            endy = y
-            endz = z
-        xpoints.append(x)
-        ypoints.append(y)
-        zpoints.append(z)
-        x += (homex - endx) * (step / beatlen)
-        y += (homey - endy) * (step / beatlen)
+        if ends[0][0] == homes[0][0]:
+            ends[0][0] = coords[0][0]
+            ends[0][1] = coords[0][1]
+            ends[0][2] = coords[0][2]
+        points[0][0].append(coords[0][0])
+        points[0][1].append(coords[0][1])
+        points[0][2].append(coords[0][2])
+        coords[0][0] += (homes[0][0] - ends[0][0]) * (step / beatlen)
+        coords[0][1] += (homes[0][1] - ends[0][1]) * (step / beatlen)
         if (t % beatlen)/beatlen < 1/4:
-            z += (homez - endz) * (step / (beatlen / 4))
+            coords[0][2] += (homes[0][2] - ends[0][2]) * (step / (beatlen / 4))
         if (t % beatlen)/beatlen > 3/4:
-            z -= (homez - endz) * (step / (beatlen / 4))
+            coords[0][2] -= (homes[0][2] - ends[0][2]) * (step / (beatlen / 4))
     t += step
 
-colors = cm.rainbow(np.linspace(0, 1, len(xpoints)))
+colors = cm.rainbow(np.linspace(0, 1, len(points[0][0])))
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(xs=xpoints, ys=ypoints, zs=zpoints, c=colors)
+ax.scatter(xs=points[0][0], ys=points[0][1], zs=points[0][2], c=colors)
 plt.show()
