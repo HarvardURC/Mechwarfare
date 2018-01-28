@@ -8,7 +8,7 @@ t = 0
 step = 0.01
 
 homes = [[3, -3, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-ends = [home for home in homes]
+ends = [list(home) for home in homes]
 coords = [[home[0], home[1], 0] for home in homes]
 vs = [[5, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
 ωs = [1, 0, 0, 0]
