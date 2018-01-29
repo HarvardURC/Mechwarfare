@@ -49,6 +49,9 @@ def update_leg(i):
         # drop foot
         if (tphase % beatlen)/beatlen > 3/4:
             coords[i][2] -= (homes[i][2]) * (step / (beatlen / 4))
+            if(homes[i][0] - 0.01 < coords[i][0] < homes[i][0] + 0.01):
+                coords[i][0] = homes[i][0]
+                coords[i][1] = homes[i][1]
 
 while t < (beats * beatlen):
     update_leg(0)
