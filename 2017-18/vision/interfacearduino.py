@@ -15,9 +15,7 @@ while True:
         #print(ser.inWaiting())
         datastr=ser.read(ser.inWaiting())  #read and process Jevois target data
         datastr=datastr.split()
-        datastr=datastr[2]
-        datastr=str(datastr, 'utf-8')
-        datastr=datastr.split(',')
+        datastr=datastr[1:2]
         numdat= [int(i) for i in datastr]  #convert into bytes to send to arduino
         x=numdat[0]
         #if abs(x)>constbound:
