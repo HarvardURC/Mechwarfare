@@ -9,6 +9,7 @@ UDS_BUF = 4096
 
 SERVO = 0
 CONTROLLER = 1
+TEENSY = 2
 
 class UDSClient:
 
