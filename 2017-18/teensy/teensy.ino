@@ -27,7 +27,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 // a SBUS object, which is on Teensy hardware
 // serial port 1
-SBUS x8r(Serial1);
+SBUS x8r(Serial2);
 
 // analog read values, 16 bit counts
 uint16_t ain[10];
@@ -44,7 +44,7 @@ void setup() {
   	analogReadResolution(16);
 
   	// setup an interrupt to send packets every 9 ms
-  	Timer1.initialize(9000);
+  	Timer1.initialize(500000);
   	Timer1.attachInterrupt(sendSBUS);
 }
 
