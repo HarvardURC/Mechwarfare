@@ -315,11 +315,20 @@ def body_ik_error_handler(body, claws, pitch, roll, height):
     minheight = body.zdist
     height = min(max(minheight, height), maxheight) 
 
-    pitch_range = min(PBOUND, rtod(m.asin(min(maxheight - height, height - minheight) / (body.side/2))))
+    pitch_range = 0
+    if (min(maxheight - height, height - minheight) < body.side/2):
+        pitch_range = min(PBOUND, rtod(m.asin(min(maxheight - height, height - minheight) / (body.side/2))))
+    else:
+        pitch_range = PBOUND
     pitch = min(max(-1 * pitch_range, pitch), pitch_range)
 
     temp = abs((body.side/2) * m.sin(dtor(pitch)))
-    roll_range = min(RBOUND, rtod(m.asin((min(maxheight - height, height - minheight) - temp) / (body.side/2))))
+    roll_range = 0
+    if (min(maxheight - height, height - minheight) - temp < body.side/2):
+        roll_range = min(RBOUND, rtod(m.asin(min(maxheight - height, height - minheight) / (body.side/2))))
+    else:
+        roll_range = RBOUND
+#    roll_range = min(RBOUND, rtod(m.asin((min(maxheight - height, height - minheight) - temp) / (body.side/2))))
     roll = min(max(-1 * roll_range, roll), roll_range)
         
     return(claws, pitch, roll, height)
@@ -353,7 +362,7 @@ def leg_ik(leg, claw):
 # body_ik(legs: list of leg_data objects, claws: list of desired claw locations in floor plane,
 #      pitch: desired pitch of robot, roll: desired roll of robot)
 #   returns newclaws: list of desired claw positions in cylindrical coordinates in leg frame of rotated robot
-def body_ik(body, claws, pitch, roll, height):
+def body_ik(body, claws, pitch, roll, height, heights=[0,0,0,0]):
     hclaws = copy.copy(claws)
     (claws, pitch, roll, height) = body_ik_error_handler(body, claws, pitch, roll, height)
     for i in range(len(hclaws)):
@@ -368,7 +377,15 @@ def body_ik(body, claws, pitch, roll, height):
         vec = rot * body.legs[i].off[np.newaxis].T 
         newclaws.append(tocyl(hclaws[i] - np.squeeze(np.asarray(vec))))
 
+    lift_legs(newclaws, heights)
+
     return newclaws
+
+def lift_legs(claws, heights):
+    for i in range(len(claws)):
+        if (heights[i] > 0):
+            claws[i][2] = heights[i]
+    
     
 
 
@@ -517,7 +534,7 @@ def make_standard_bot(side=SIDE, trolen=global_trolen, femlen=global_femlen, tib
 
 # extract_angles(body: body_data object, claws: list of claw positions, pitch: desired pitch in degrees, roll: desired roll in degrees)
 #   returns list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
-def extract_angles(body, claws, pitch, roll, height):
+def extract_angles(body, claws, pitch, roll, height, heights=[0,0,0,0]):
     newclaws = body_ik(body, claws, pitch, roll, height)
     ret_angles = []
     for i in range(len(body.legs)):

@@ -1,6 +1,7 @@
 import math as m
 import numpy as np
 import ik
+import gait
 import hlsockets
 from time import sleep
 
@@ -58,13 +59,33 @@ def wiggle(time=10):
             client.send(hlsockets.SERVO, ik.extract_angles(body, claws, -10, -20, HEIGHT))
             sleep(.025)
 
-def footpath
+def walk(cycles=10, pitch=0, roll=0, height=HEIGHT):
+    # loop through cycles
+    for i in range(cycles):
+        points = gait.create_points()
+        print(len(points), len(points[0]), len(points[1]), len(points[2])) 
+        print(len(points[0][0]), len(points[0][1]), len(points[0][2]))
+        print(len(points[1][0]), len(points[1][1]), len(points[1][2]))
+        print(len(points[2][0]), len(points[2][1]), len(points[2][2]))
+        print(len(points[3][0]), len(points[3][1]), len(points[3][2]))
+        # loop through timepoints in each cycle
+        for j in range(len(points[i][0])):
+            cs = []
+            heights = []
+            # loop through legs
+            for k in range(len(points)):
+                cs.append(np.array([points[k][0][j], points[k][1][j]]))
+                heights.append(points[k][2][j])
+            client.send(hlsockets.SERVO, ik.extract_angles(body, cs, pitch, roll, height, heights))
+
 
 client = hlsockets.UDSClient()
 client.open(hlsockets.CONTROLLER)
 reset(2)
 while True:
-    wiggle()
+    reset(2)
+    walk()
+    reset()
 client.close()
 
 
