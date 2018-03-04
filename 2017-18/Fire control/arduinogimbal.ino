@@ -73,8 +73,8 @@ void loop() {
       int center = 260 + bytesfound*60;
       if (computer.available()) {
         spd[bytesfound] = bytetospd(computer.parseInt(), 10);
-        computer.println(bytesfound);
-        computer.println(spd[bytesfound]);
+        //computer.println(bytesfound);
+        //computer.println(spd[bytesfound]);
         bytesfound++;
       }
       else{
@@ -94,11 +94,11 @@ void loop() {
     while (computer.available()) {
       computer.read();
     }
-    computer.println(3);
-    computer.println(gimbals[0]);
-    computer.println(gimbals[1]);
+    //computer.println(3);
+    //computer.println(gimbals[0]);
+    //computer.println(gimbals[1]);
   }
-  else {
+  /*else {
 
 for (int i = 0; i < 16; i++) {
     gimbals[i] = 0;
@@ -113,5 +113,5 @@ for (int i = 0; i < 16; i++) {
     x8r.write(gimbals);
     computer.println(gimbals[0]);
     delay(10);
-  }
+  }*/
 }
