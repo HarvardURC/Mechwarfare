@@ -36,9 +36,18 @@ def timestep(vx, vy, omega, pitch, roll, height, body):
         # for each leg in ground mode: 
         #   hyp = m.sqrt(leg.x^2 + leg.y^2)
         #   convert angular velocity to x- and y- 
-        #       velocities due to rotation for each hip (???)
+        #       velocities due to rotation for each hip
+        #           let l be the line between the robot's center and the hip
+        #           let theta_1 be the initial angle between l and the x axis
+        #           let theta_2 be the angle between l and the x axis after rotation 
+        #             of (omega * RES) radians
+        #           the x- and y- velocity vector components of the rotation are now:
+        #           x: cos(theta_2) - cos(theta_1)
+        #           y: sin(theta_2) - sin(theta_1)
+        #           we know theta_1 is -45, 45, 135, and -135 in order of legs (0-4)
         #   add those x- and y- velocities to normal 
-        #       x- and y- velocities to create cumulative x- and y- velocities
+        #       x- and y- velocities to create cumulative x- and y- velocities for both 
+        #       translation and rotation
         #   add negative of cumulative x- and y- velocities to leg's associated claw location
     
         # for leg not in ground mode:
