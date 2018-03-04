@@ -7,7 +7,6 @@ import pypot.dynamixel
 
 """motor stuff from last year"""
 
-
 # Config code
 my_config = {
     'controllers': {
@@ -133,3 +132,5 @@ my_config = {
         }
     }
 }
+
+dxl_io = pypot.dynamixel.DxlIO('/dev/ttyACM0', baudrate=57600)
