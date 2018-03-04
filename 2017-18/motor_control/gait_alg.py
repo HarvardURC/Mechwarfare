@@ -4,6 +4,10 @@ import math as m
 import copy
 
 RES = .02
+STRIDETIME = 1.4
+BEATTIME = STRIDETIME/4
+LIFTPUT = BEATTIME/10
+HOME = np.array(["""DOTHIS"""])
 
 # contains both data about leg and claw position
 class gait_leg(ik.leg_data):
@@ -11,6 +15,7 @@ class gait_leg(ik.leg_data):
         leg_data.init(self, leg.x, leg.y, leg.z, leg.gamma)
         self.claw = claw
         self.mode = mode
+        self.home_update_val = [0, 0]
 
 # object to hold multiple legs and some body metadata
 class gait_body:
@@ -19,20 +24,41 @@ class gait_body:
         self.legmodes = legmodes
         self.side = side
         self.zdist = zdist
+        self.beat = 1
+        self.ctr = 0
+        self.stridetime = STRIDETIME
 
 # given center, angular velocity, body (with legs & leg data), 
 #   and timestep resolution, calculates the next claw locations
-def timestep(vx, vy, omega, body, res=RES):
-    # calculate where body needs to be 
-        # curloc[x] - vx * res, curloc[y] - vy * res
-        # calculate difference in hip location due to 
-        #   rotation, incorporate that into new claw location as well
-
-    # how to deal with legs in the air?
-        # hard-code phasing, keep track of where in phase the 
-        #   bot is, update correspondingly
-        # hard-code length of beat
+def timestep(vx, vy, omega, pitch, roll, height, body):
+    # update claw locations for each leg
+        # calculate where body needs to be 
+        # for each leg in ground mode: 
+        #   hyp = m.sqrt(leg.x^2 + leg.y^2)
+        #   convert angular velocity to x- and y- 
+        #       velocities due to rotation for each hip (???)
+        #   add those x- and y- velocities to normal 
+        #       x- and y- velocities to create cumulative x- and y- velocities
+        #   add negative of cumulative x- and y- velocities to leg's associated claw location
     
-    # update body.legs[i].claw for all i
+        # for leg not in ground mode:
+        #   where in beat is it?  beat should be split: (this is literally just me making something up)
+        #      first .1 beat: lift
+        #      middle .8 beat: move to home
+        #      final .1 beat: put
+        #   determine where in beat it is: 
+        #     on each call of timestep within a single beat, increment body.ctr
+        #     thus, at any given time, we are (body.ctr*RES)/BEATTIME through current beat
+        #     based on that calculation, move claw accordingly
+        #       up or down if in first or last .1 of beat
+        #       towards home position otherwise
+        #         by what amount? when beat changes to make this leg the 
+        #           one being picked up: calculate difference between 
+        #           pickup location and home in xy plane, find x and y vector 
+        #           components, divide both by BEATTIME*.8, 
+        #           store in body.legs[current_leg].home_update_val,
+        #           move by this each time until last .1 of beat (when 
+        #           the robot should be putting the leg down)
     
     # calculate angles for next claw locations and return
+    #   ik.extract_angles(body, list of new claw locations, pitch, roll, height, list of z coordinates of claws)
