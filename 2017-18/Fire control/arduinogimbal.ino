@@ -25,6 +25,7 @@ uint8_t failSafe;
 uint16_t lostFrames = 0;
 uint16_t gimbals[3];
 
+//remote control channels
 #define IDLE_SWITCH 0
 #define GUN_CHANNEL 0
 #define GUN_COMMAND 0
@@ -71,22 +72,27 @@ bool donefiring() {
 int gunState(int currState)
 {
   switch (currState) {
+    //idle state for gun
     case 0:
       analogWrite(hoppermotor, 0);
       digitalWrite(gunmotor, LOW);
       if (channels[GUN_CHANNEL] == GUN_COMMAND) {
+        //if remote control sends fire signal
         return 1;
       }
       return 0;
     case 1:
+    //load state
       //might need more complex code here for loading
       analogWrite(hoppermotor, HOPPER_MOTOR);
       //change number later
       if (analogRead(lightsensor) >= LIGHT_SENSOR) {
+        //if gun is loaded, move to fire
         return 2;
       }
       return 1;
     case 2:
+    //fire state
       digitalWrite(gunmotor, HIGH);
       if (donefiring()) {
         return 0;
@@ -100,6 +106,7 @@ int gunState(int currState)
 //needs code
 void legCode()
 {
+  //send remote control info to pi
   String baseString = "";
   for (int i = 0; i < 16; i++) {
     baseString = baseString + String(channels[i]) + ", ";
@@ -111,11 +118,13 @@ int legState(int currState)
 {
   switch (currState) {
     case 0:
+    //legs idle
       if (channels[IDLE_SWITCH] > 0) {
         return 1;
       }
       return 0;
     case 1:
+    //legs active
       legCode();
       if (channels[IDLE_SWITCH] == 0) {
         return 0;
@@ -125,12 +134,14 @@ int legState(int currState)
 }
 uint16_t converttospd(float n) {
   //This is a janky hack that is annoying. Sad.
+  //conversion of within pi targeting data into gimbal ready data
   float x = 1020.0 + 500.0 * n;
   int y = (int) x;
   uint16_t z = (uint16_t) y;
   return z;
 }
 
+//initialization and description for the sweep function
 int spdnow = 0;
 bool dir = true;
 
@@ -156,7 +167,20 @@ int spdstep(int i, int bound1, int bound2, int stepsize) {
     }
   }
 }
-
+/*
+ * Sample usage of sweeper:
+ * for (int i = 0; i < 16; i++) {
+    gimbals[i] = 0;
+  }
+    spdnow = spdstep(spdnow, -100, 100, 1);
+    float fltspd = ((float) spdnow) / 100.0;
+    int spdsend = converttospd(fltspd);
+    gimbals[0] = spdsend;
+    gimbals[1]=spdsend;
+    // write the SBUS packet to an SBUS compatible servo
+    x8r.write(gimbals);
+ */
+//conversion of bytes from the Pi into -1 to 1 float values for internal calculations, with low precision near the center to avoid jittering
 float bytetospd(int i, int bound) {
   int j = 127;
   if (abs(i - j) < bound) {
@@ -176,6 +200,7 @@ int bytesfound = 0;
 float spd[16];
 int convspds[16];
 void aimCode() {
+  //If in aim state, then take in byte-based targeting data from computer, then convert to float, then convert to gimbal commands
   bytesfound = 0;
   for (int i = 0; i < 16; i++) {
     gimbals[i] = 0;
@@ -194,15 +219,20 @@ void aimCode() {
 
     }
   }
+  /*
+   * Here is where we'd put PID calculations--the output should go into the spd array, or something of similar structure: an array with up to 16 elements, with float values between -1 and 1.
+   */
   while (bytesfound >= 0) {
     convspds[bytesfound] = converttospd(spd[bytesfound]);
     bytesfound--;
   }
+  //write new data to the gimbals
   for (int i = 0; i < 2; i++) {
     gimbals[i] = convspds[i];
   }
   x8r.write(gimbals);
   //computer.println(gimbals[0]);
+  //purging the input buffer
   while (computer.available()) {
     computer.read();
   }
@@ -214,17 +244,20 @@ void aimCode() {
 int aimState(int currState)
 {
   switch (currState) {
+    //idle state
     case 0:
       if (channels[IDLE_SWITCH] > 0) {
         return 1;
       }
       return 0;
     case 1:
+    //automatic state
       aimCode();
       if (channels[IDLE_SWITCH] == 0) {
         return 0;
       }
       return 1;
+     //NEED TO IMPLEMENT MANUAL STATE
   }
 
 }
