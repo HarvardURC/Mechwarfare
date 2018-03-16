@@ -38,13 +38,7 @@ while True:
             #    pass
             #currpos=int(ser2.read(ser.inWaiting()))
             ser2.write(numdat[1])
-            while (ser2.inWaiting()) == 0:
-                pass
-                '''while (ser2.inWaiting()) == 0:
-                    pass
-                currpos = int(ser2.read(ser.inWaiting()))'''
             ser.reset_input_buffer() #flush all data accumulated while movement was happening to avoid contamination
-            ser2.reset_input_buffer()
             ser2.reset_output_buffer()
 
     #else:
