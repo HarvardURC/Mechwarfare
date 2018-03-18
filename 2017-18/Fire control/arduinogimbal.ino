@@ -33,6 +33,7 @@ uint16_t gimbals[3];
 #define AIM_CHANNEL 0
 #define LIGHT_SENSOR 0
 #define HOPPER_MOTOR 0
+#define MANUAL_CHANNEL 0
 
 //Comms defines for comms with gun subsystems
 int gunmotor = 6;
@@ -82,7 +83,7 @@ int gunState(int currState)
     //idle state for gun
     case 0:
       analogWrite(hoppermotor, 0);
-      digitalWrite(gunmotor, LOW);
+      analogWrite(gunmotor, 0);
       if (channels[GUN_CHANNEL] == GUN_COMMAND) {
         //if remote control sends fire signal
         return 1;
@@ -100,7 +101,7 @@ int gunState(int currState)
       return 1;
     case 2:
       //fire state
-      digitalWrite(gunmotor, HIGH);
+      analogWrite(gunmotor, 256);
       if (donefiring()) {
         return 0;
       }
@@ -114,7 +115,7 @@ int gunState(int currState)
         return 1;
       }
       else {
-        return 2;
+        return 3;
       }
   }
 
@@ -240,6 +241,12 @@ void sweepCode() {
   // write the SBUS packet to an SBUS compatible servo
   x8r.write(gimbals);
 }
+void manualCode() {
+  for (int i = 0; i < 16; i++) {
+    gimbals[i] = channels[i];
+  }
+  x8r.write(gimbals);
+}
 void aimCode() {
   //If in aim state, then take in byte-based targeting data from computer, then convert to float, then convert to gimbal commands
   bytesfound = 0;
@@ -290,6 +297,9 @@ int aimState(int currState)
       if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] > 0) {
         return 1;
       }
+      if (channels[IDLE_SWITCH] > 0 && channels[MANUAL_CHANNEL] > 0) {
+        return 3;
+      }
       if (channels[IDLE_SWITCH] > 0) {
         return 2;
       }
@@ -303,17 +313,34 @@ int aimState(int currState)
       if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] == 0) {
         return 2;
       }
+      if (channels[IDLE_SWITCH] > 0 && channels[MANUAL_CHANNEL] > 0) {
+        return 3;
+      }
       return 1;
     case 2:
       sweepCode();
       if (channels[IDLE_SWITCH] == 0) {
         return 0;
       }
+      if (channels[IDLE_SWITCH] > 0 && channels[MANUAL_CHANNEL] > 0) {
+        return 3;
+      }
       if (channels[AIM_CHANNEL] > 0) {
         return 1;
       }
       return 2;
-
+    case 3:
+      manualCode();
+      if (channels[IDLE_SWITCH] == 0) {
+        return 0;
+      }
+      if (channels[MANUAL_CHANNEL] == 0 && channels[AIM_CHANNEL] > 0) {
+        return 1;
+      }
+      if (channels[MANUAL_CHANNEL] == 0 && channels[AIM_CHANNEL] == 0) {
+        return 2;
+      }
+      return 3;
   }
 
 }
