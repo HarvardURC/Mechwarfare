@@ -124,11 +124,11 @@ def set_target_positions(pos_list):
 
 from time import sleep
 
-err = init_motors([2,3], [0, 90])    # should be 12 in final version
-err = set_target_positions([300, 300])
+err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [0,90,90, 0,90,90, 0,90,90, 0,90,90])
+err = set_target_positions([300,300,300, 300,300,300, 300,300,300, 300,300,300])
 sleep(1)
-err = set_target_positions([400, 400])
+err = set_target_positions([400,400,400, 400,400,400, 400,400,400, 400,400,400])
 sleep(1)
-err = set_target_positions([500, 500])
+err = set_target_positions([500,500,500, 500,500,500, 500,500,500, 500,500,500])
 sleep(1)
 err = deinit_motors()
