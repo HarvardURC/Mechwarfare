@@ -40,6 +40,8 @@ def body_ik(body, claws, pitch, roll, height, zs):
     # error check inputs
 #    (claws, pitch, roll, height, zs) = body_ik_error_handler(body, claws, pitch, roll, height, zs)
 
+    # THIS IS JANK AS FUCK. DELETE AT EARLIEST CONVENIENCE.
+    height += 10
     # copy claws to prevent error propagation and add z coordinate
     hclaws = copy.copy(claws)
     for i in range(len(hclaws)):
@@ -60,9 +62,9 @@ def body_ik(body, claws, pitch, roll, height, zs):
     # incorporate leg lifts
     for i in range(len(zs)):
         if (zs[i] > 0):
-            claws[i][2] = zs[i]
+            newclaws[i][2] = -1*(height-zs[i])
 
-    print(newclaws)
+#    print(newclaws)
 
     return newclaws
     

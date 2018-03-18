@@ -38,7 +38,7 @@ offsets = {
           }
 
 vrep.simxFinish(-1)     # close any existing connections
-cID = vrep.simxStart('127.0.0.1', 19999, True, True, 5000, 5)
+cID = vrep.simxStart('127.0.0.1', 19999, True, True, 5000, 1)
 
 if cID != -1:
     print("Connected to remote API server")
