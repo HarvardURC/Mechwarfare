@@ -9,6 +9,7 @@ from time import sleep
 # 0 -> hip, 1 -> elbow, 2 -> knee
 angles = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 claws, body = ik.make_standard_bot()
+print("First: ", claws, "\n\n")
 HEIGHT = 13
 
 # default position (robot laying on ground, splayed out): stands for time seconds
@@ -17,8 +18,10 @@ def reset(time=10):
     sleep(time)
 
 # given body, list of claw positions, pitch, and roll, stands at pitch and roll for time seconds
-def stand(pitch=0, roll=0, height=8, time=10):
-    client.send(hlsockets.SERVO, ik.extract_angles(body, claws, pitch, roll, height))
+def stand(pitch=0, roll=0, height=12, time=10):
+    print("Second: ", claws, "\n\n")
+    angles = ik.extract_angles(body, claws, pitch, roll, height)
+    client.send(hlsockets.SERVO, angles)
     sleep(time)
 
 # stands on tippy toes
@@ -49,8 +52,21 @@ def walk(vx, vy, omega, time=10):
     t = 0
     while (t < time):
         sleeptime, angles = gait_alg.timestep(body, vx, vy, omega, t)
+        t += sleeptime
         client.send(hlsockets.SERVO, angles)
         sleep(sleeptime)
+
+def test_leg_order():
+    angles = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    for i in range(4):
+        ctr = 0
+        angles[i * 3] = 10
+        while (ctr < 6):
+            client.send(hlsockets.SERVO, angles)
+            angles[i * 3] = angles[i * 3] * -1
+            sleep(.1)
+            ctr = ctr + 1
+        angles[i * 3] = 0
 
 
 client = hlsockets.UDSClient()
@@ -58,8 +74,5 @@ client.open(hlsockets.CONTROLLER)
 reset(2)
 while True:
     reset(1)
-    walk(1, 0, 20)
-    reset(1)
+    stand(height=8)
 client.close()
-
-

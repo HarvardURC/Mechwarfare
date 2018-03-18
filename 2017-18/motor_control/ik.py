@@ -36,30 +36,35 @@ def leg_ik(leg, claw):
 # body_ik(legs: list of leg_data objects, claws: list of desired claw locations in floor plane,
 #      pitch: desired pitch of robot, roll: desired roll of robot)
 #   returns newclaws: list of desired claw positions in cylindrical coordinates in leg frame of rotated robot
-def body_ik(body, claws, pitch, roll, height, heights):
+def body_ik(body, claws, pitch, roll, height, zs):
+    # error check inputs
+#    (claws, pitch, roll, height, zs) = body_ik_error_handler(body, claws, pitch, roll, height, zs)
+
+    # copy claws to prevent error propagation and add z coordinate
     hclaws = copy.copy(claws)
-    # (claws, pitch, roll, height) = body_ik_error_handler(body, claws, pitch, roll, height)
     for i in range(len(hclaws)):
         hclaws[i] = np.append(hclaws[i], -1 * height)
+
+    # create rotation matrix
     pc, ps, rc, rs = m.cos(helpers.dtor(pitch)), m.sin(helpers.dtor(pitch)), m.cos(helpers.dtor(roll)), m.sin(helpers.dtor(roll))
     pitchm = np.matrix([[pc, 0, -ps], [0, 1, 0], [ps, 0, pc]])
     rollm = np.matrix([[1, 0, 0], [0, rc, -rs], [0, rs, rc]])
     rot = pitchm * rollm
 
+    # put leg offsets through rotation and subtract difference
     newclaws = []
     for i in range(len(body.legs)):
         vec = rot * body.legs[i].off[np.newaxis].T 
         newclaws.append(helpers.tocyl(hclaws[i] - np.squeeze(np.asarray(vec))))
 
-    # Incorporate leg lifts after greater body_ik calculation
-    lift_legs(newclaws, heights)
+    # incorporate leg lifts
+    for i in range(len(zs)):
+        if (zs[i] > 0):
+            claws[i][2] = zs[i]
+
+    print(newclaws)
 
     return newclaws
-
-def lift_legs(claws, heights):
-    for i in range(len(claws)):
-        if (heights[i] > 0):
-            claws[i][2] = heights[i]
     
     
 
@@ -89,81 +94,65 @@ def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEML
 
 # extract_angles(body: body_data object, claws: list of claw positions, pitch: desired pitch in degrees, roll: desired roll in degrees)
 #   returns list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
-def extract_angles(body, claws, pitch, roll, height, heights=[0,0,0,0]):
-    newclaws = body_ik(body, claws, pitch, roll, height, heights)
+def extract_angles(body, claws, pitch, roll, height, zs=[0,0,0,0]):
+    newclaws = body_ik(body, claws, pitch, roll, height, zs)
     ret_angles = []
     for i in range(len(body.legs)):
         ret_angles += leg_ik(body.legs[i], newclaws[i])
     return ret_angles
 
-# # body_ik_error_handler(body: body_data object, claws: list of claws in floor frame, 
-# #   pitch: desired pitch, roll: desired roll, height: 
-# def body_ik_error_handler(body, claws, pitch, roll, height):
-#     bigrad = 0;
-#     for i in range(len(claws)):
-#         claws[i] = helpers.torad(np.array([claws[i][0] - body.legs[i].off[0], claws[i][1] - body.legs[i].off[1]]))
-#         claws[i][1] = min(max(0, claws[i][1]), body.legs[i].trolen + body.legs[i].femlen + body.legs[i].tiblen)
-#         bigrad = max(bigrad, claws[i][1])
-#         x, y = body.legs[i].off[0], body.legs[i].off[1]
-#         claws[i][0] = (claws[i][0] + 360) % 360
-#         if (x > 0):
-#             if (y > 0):
-#                 if ((claws[i][0] > 90 + body.hip_wiggle) and (claws[i][0] < 360 - body.hip_wiggle)):
-#                     if (claws[i][0] < 225):
-#                         claws[i][0] = 90 + body.hip_wiggle
-#                     else:
-#                         claws[i][0] = 360 - body.hip_wiggle
-#             else:
-#                 if ((claws[i][0] > body.hip_wiggle) and (claws[i][0] < 270 - body.hip_wiggle)):
-#                     if (claws[i][0] < 135):
-#                         claws[i][0] = body.hip_wiggle
-#                     else:
-#                         claws[i][0] = body.hip_wiggle
-#         else: 
-#             if (y > 0):
-#                 if ((claws[i][0] > 180 + body.hip_wiggle) or (claws[i][0] < 90 - body.hip_wiggle)):
-#                     if (claws[i][0] < 315):
-#                         claws[i][0] = 180 + body.hip_wiggle
-#                     else:
-#                         claws[i][0] = 90 - body.hip_wiggle
-#             else:
-#                 if ((claws[i][0] > 270 + body.hip_wiggle) or (claws[i][0] < 180 - body.hip_wiggle)):
-#                     if ((claws[i][0] < 180 - body.hip_wiggle) and (claws[i][0] > 45)):
-#                         claws[i][0] = 180 - body.hip_wiggle
-#                     else:
-#                         claws[i][0] = 270 + body.hip_wiggle
-#         claws[i] = helpers.fromrad(claws[i])
-#         claws[i][0] = claws[i][0] + body.legs[i].off[0]
-#         claws[i][1] = claws[i][1] + body.legs[i].off[1]
+# body_ik_error_handler(body: body_data object, claws: list of claws in floor frame, 
+#   pitch: desired pitch, roll: desired roll, height: 
+def body_ik_error_handler(body, claws, pitch, roll, height, zs):
+    # variable for height
+    bigrad = 0
 
-#     maxheight = m.sqrt(((body.femlen + body.tiblen) ** 2) - bigrad ** 2)
-#     minheight = body.zdist
-#     height = min(max(minheight, height), maxheight) 
+    # check each claw location
+    for i in range(len(claws)):
+        xoff, yoff = body.legs[i].off[0], body.legs[i].off[1]
 
-#     pitch_range = 0
-#     if (min(maxheight - height, height - minheight) < body.side/2):
-#         pitch_range = min(macros.PITCH_BOUND, helpers.rtod(m.asin(min(maxheight - height, height - minheight) / (body.side/2))))
-#     else:
-#         pitch_range = macros.PITCH_BOUND
-#     pitch = min(max(-1 * pitch_range, pitch), pitch_range)
+        # convert claw to radial coordinates
+        claws[i] = helpers.torad(np.array([claws[i][0]-xoff, claws[i][1]-yoff]))
 
-#     temp = abs((body.side/2) * m.sin(helpers.dtor(pitch)))
-#     roll_range = 0
-#     if (min(maxheight - height, height - minheight) - temp < body.side/2):
-#         roll_range = min(macros.ROLL_BOUND, helpers.rtod(m.asin(min(maxheight - height, height - minheight) / (body.side/2))))
-#     else:
-#         roll_range = macros.ROLL_BOUND
-# #    roll_range = min(macros.ROLL_BOUND, helpers.rtod(m.asin((min(maxheight - height, height - minheight) - temp) / (body.side/2))))
-#     roll = min(max(-1 * roll_range, roll), roll_range)
-        
-#     return(claws, pitch, roll, height)
+        # bound radius 
+        claws[i][1] = helpers.bound(claws[i][1], 0, body.legs[i].trolen+body.legs[i].femlen+body.legs[i].tiblen)
 
+        # update bigrad
+        bigrad = max(bigrad, claws[i][1])
 
+        # bound theta
+        claws[i][0] = helpers.degreesmod(claws[i][0])
+        claws[i][0] = helpers.bound(claws[i][0], body.legs[i].gamma-body.hip_wiggle, body.legs[i].gamma+body.hip_wiggle)
 
+        # return to cartesian coordinates and add leg offset back in
+        claws[i] = helpers.fromrad(claws[i])
+        claws[i][0] = claws[i][0] + xoff
+        claws[i][1] = claws[i][1] + yoff
 
+    trlen, flen, tilen = body.trolen, body.femlen, body.tiblen
 
-# # # # TEST CODE
+    # bound height
+    maxheight, minheight = m.sqrt(((flen+tilen)**2) - (bigrad-trlen)**2), body.zdist
+    height = helpers.bound(height, minheight, maxheight)
 
-# claws, body = make_standard_bot()
-# body.graphbody(claws, macros.DEFAULT_PITCH, macros.DEFAULT_ROLL, macros.DEFAULT_HEIGHT)
-# print("Done")
+    # bound pitch
+    pitch = helpers.bound(pitch, macros.PITCH_BOUND, macros.PITCH_BOUND*-1)
+    # check if height affects possible pitch and rebound accordingly
+    heightzone = m.sin(abs(pitch)) * (body.side/2)
+    if (height > maxheight-heightzone or height-heightzone < minheight):
+        pitchsign = pitch/abs(pitch)
+        pitch = pitchsign*m.asin(heightzone/(body.side/2))
+
+    # bound roll
+    roll = helpers.bound(roll, macros.ROLL_BOUND, macros.ROLL_BOUND*-1)
+    # check if height and pitch affect possible pitch and rebound accordingly
+    heightzone = heightzone - (m.sin(abs(pitch)) * (body.side/2))
+    if (height > maxheight-heightzone or height-heightzone < minheight):
+        rollsign = roll/abs(roll)
+        roll = rollsign*m.asin(heightzone/(body.side/2))
+
+    # bound zs
+    for z in zs:
+        helpers.bound(z, macros.MIN_Z, macros.MAX_Z)
+
+    return(claws, pitch, roll, height, zs)

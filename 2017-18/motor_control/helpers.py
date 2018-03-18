@@ -30,3 +30,15 @@ def torad(point):
 #   converts to cylindrical coordinates
 def fromrad(point):
     return np.array([point[1] * m.cos(dtor(point[0])), point[1] * m.sin(dtor(point[0]))])
+
+# bound(x, lower, upper)
+#   bounds x 
+def bound(x, lower, upper):
+	return (min(max(x, lower), upper))
+
+# degreesmod(theta)
+#   ensures 0 <= theta < 360 (uses degrees)
+def degreesmod(theta):
+	while(theta < 0):
+		theta = theta + 360
+	return (theta % 360)

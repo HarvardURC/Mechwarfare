@@ -18,6 +18,14 @@ class leg_state:
         self.home_x = macros.DEFSTATES[id_num][4]
         self.home_y = macros.DEFSTATES[id_num][5]
 
+    def reset(self, x, y, z, phase_offset, home_x, home_y):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.phase_offset = phase_offset
+        self.home_x = home_x
+        self.home_y = home_y
+
 class leg_data:
     def __init__(self, id_num, x, y, gamma, trolen=macros.TROLEN, femlen=macros.FEMLEN, tiblen=macros.TIBLEN):
         self.id_num = id_num

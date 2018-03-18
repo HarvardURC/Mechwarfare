@@ -43,7 +43,7 @@ SIDE = 7.86
 
 # DEFAULTS
 # Default robot height (centimeters)
-DEFAULT_HEIGHT = 8
+DEFAULT_HEIGHT = 12
 
 # Default claw distance from hip (centimeters)
 DEFAULT_RADIUS = 12
@@ -58,7 +58,7 @@ poly_rad = SIDE/(2 * m.sin(m.pi/NUMLEGS))          # polygon radius
 clawdist_from_center = poly_rad + DEFAULT_RADIUS   # claw distance from center of robot
 for i in range(NUMLEGS):
     HOMES.append([clawdist_from_center * m.cos(helpers.dtor(GAMMAS[i])), 
-        clawdist_from_center * m.sin(helpers.dtor(GAMMAS[i])), DEFAULT_HEIGHT])
+        clawdist_from_center * m.sin(helpers.dtor(GAMMAS[i])), -1 * DEFAULT_HEIGHT])
 
 # Default velocities for walking
 DEFAULT_VX = 1
@@ -77,6 +77,10 @@ DEFAULT_OMEGA = 40
 PITCH_BOUND = 10
 ROLL_BOUND = 10
 
+# Bounds on heights of claw
+MAX_Z = 0
+MIN_Z = -15
+
 
 
 
@@ -89,7 +93,7 @@ ROLL_BOUND = 10
 TIMESTEP = 0.05  
 
 # Length of full stride (seconds)
-STRIDELENGTH = 1. 
+STRIDELENGTH = .5
 
 # Fraction of idle beat leg is being lifted/lowered
 RAISEFRAC = 0.5  
@@ -101,10 +105,7 @@ RAISEH = 1.
 TOLERANCE = 0.01 
 
 # Fraction of stride that legs spend in the air
-PHASE_LIMIT = 1/float(NUMLEGS)
-
-# Maximum fraction of stride legs can spend in the air
-MAX_PHASE_LIMIT = 1/float(NUMLEGS)
+LIFT_PHASE = 1/float(NUMLEGS)
 
 # List of default leg state information
 DEFSTATES = []
@@ -112,7 +113,7 @@ for i in range(NUMLEGS):
 	DEFSTATES.append([
 		float(HOMES[i][0]),   # current x position
 		float(HOMES[i][1]),   # Current y position
-		0.,                   # Current z position
+		float(HOMES[i][2]),                   # Current z position
 		i/float(NUMLEGS),     # Phase offset
 		float(HOMES[i][0]),   # Home x position
 		float(HOMES[i][1])])   # Home y position
