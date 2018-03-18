@@ -1,13 +1,13 @@
 //Use existing packet check to reset watchdog
-//Add jammed state/ check to hopper/ gun control
+//Add jammed state/ check to hopper/ gun control  DONE (with more code needed)
 //Use PWM pin for gun motor
-//Add current state comments to every state
-//Add comments to everything else
-//Send idle packet to Pi
+//Add current state comments to every state DONE
+//Add comments to everything else DONE
+//Send idle packet to Pi DONE
 //No hardcoded numbers. Define at top.
 //Do all the Pi communication in one place
 //Don't name communications "leg"
-//Add manual aiming state and associated code
+//Add manual aiming state and associated code DONE
 //Add packets for gimbal control from Pi
 //Write the control loop for the camera to gimbal in a more standard form (regular PID?). Add optional low pass filter to sensor data
 //Timer interrupts for running state machine at constant frequency; decouple control code
@@ -68,6 +68,13 @@ int stateLeg = 0;
 //return condition for fire-idle
 bool donefiring() {
 }
+//needs to be filled in
+bool isjammed() {
+
+}
+void unjamcode() {
+
+}
 // needs code
 int gunState(int currState)
 {
@@ -82,7 +89,7 @@ int gunState(int currState)
       }
       return 0;
     case 1:
-    //load state
+      //load state
       //might need more complex code here for loading
       analogWrite(hoppermotor, HOPPER_MOTOR);
       //change number later
@@ -92,12 +99,23 @@ int gunState(int currState)
       }
       return 1;
     case 2:
-    //fire state
+      //fire state
       digitalWrite(gunmotor, HIGH);
       if (donefiring()) {
         return 0;
       }
+      if (isjammed()) {
+        return 3;
+      }
       return 2;
+    case 3:
+      unjamcode();
+      if (!isjammed()) {
+        return 1;
+      }
+      else {
+        return 2;
+      }
   }
 
 
@@ -108,23 +126,33 @@ void legCode()
 {
   //send remote control info to pi
   String baseString = "";
-  for (int i = 0; i < 16; i++) {
+  for (int i = 0; i < 15; i++) {
     baseString = baseString + String(channels[i]) + ", ";
   }
+  baseString = baseString + String(channels[15]);
   computer.print(baseString);
 }
-
+void idleCode() {
+  //send idle packet to pi
+  String baseString = "";
+  for (int i = 0; i < 15; i++) {
+    baseString = baseString + String(-1) + ", ";
+  }
+  baseString = baseString + String(-1);
+  computer.print(baseString);
+}
 int legState(int currState)
 {
   switch (currState) {
     case 0:
-    //legs idle
+      //legs idle
+      idleCode();
       if (channels[IDLE_SWITCH] > 0) {
         return 1;
       }
       return 0;
     case 1:
-    //legs active
+      //legs active
       legCode();
       if (channels[IDLE_SWITCH] == 0) {
         return 0;
@@ -144,7 +172,7 @@ uint16_t converttospd(float n) {
 //initialization and description for the sweep function
 int spdnow = 0;
 bool dir = true;
-
+//move by stepsize between the two bounds, produces sinusoidal motion patterns
 int spdstep(int i, int bound1, int bound2, int stepsize) {
   if (dir) {
     if (i >= bound2) {
@@ -168,8 +196,8 @@ int spdstep(int i, int bound1, int bound2, int stepsize) {
   }
 }
 /*
- * Sample usage of sweeper:
- * for (int i = 0; i < 16; i++) {
+   Sample usage of sweeper:
+   for (int i = 0; i < 16; i++) {
     gimbals[i] = 0;
   }
     spdnow = spdstep(spdnow, -100, 100, 1);
@@ -179,8 +207,9 @@ int spdstep(int i, int bound1, int bound2, int stepsize) {
     gimbals[1]=spdsend;
     // write the SBUS packet to an SBUS compatible servo
     x8r.write(gimbals);
- */
+*/
 //conversion of bytes from the Pi into -1 to 1 float values for internal calculations, with low precision near the center to avoid jittering
+//Bound is how far from the center to consider equal to center for jitter reduction purposes.
 float bytetospd(int i, int bound) {
   int j = 127;
   if (abs(i - j) < bound) {
@@ -199,6 +228,18 @@ float bytetospd(int i, int bound) {
 int bytesfound = 0;
 float spd[16];
 int convspds[16];
+void sweepCode() {
+  for (int i = 0; i < 16; i++) {
+    gimbals[i] = 0;
+  }
+  spdnow = spdstep(spdnow, -100, 100, 1);
+  float fltspd = ((float) spdnow) / 100.0;
+  int spdsend = converttospd(fltspd);
+  gimbals[0] = spdsend;
+  gimbals[1] = spdsend;
+  // write the SBUS packet to an SBUS compatible servo
+  x8r.write(gimbals);
+}
 void aimCode() {
   //If in aim state, then take in byte-based targeting data from computer, then convert to float, then convert to gimbal commands
   bytesfound = 0;
@@ -220,8 +261,8 @@ void aimCode() {
     }
   }
   /*
-   * Here is where we'd put PID calculations--the output should go into the spd array, or something of similar structure: an array with up to 16 elements, with float values between -1 and 1.
-   */
+     Here is where we'd put PID calculations--the output should go into the spd array, or something of similar structure: an array with up to 16 elements, with float values between -1 and 1.
+  */
   while (bytesfound >= 0) {
     convspds[bytesfound] = converttospd(spd[bytesfound]);
     bytesfound--;
@@ -246,18 +287,33 @@ int aimState(int currState)
   switch (currState) {
     //idle state
     case 0:
-      if (channels[IDLE_SWITCH] > 0) {
+      if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] > 0) {
         return 1;
+      }
+      if (channels[IDLE_SWITCH] > 0) {
+        return 2;
       }
       return 0;
     case 1:
-    //automatic state
+      //automatic state
       aimCode();
       if (channels[IDLE_SWITCH] == 0) {
         return 0;
       }
+      if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] == 0) {
+        return 2;
+      }
       return 1;
-     //NEED TO IMPLEMENT MANUAL STATE
+    case 2:
+      sweepCode();
+      if (channels[IDLE_SWITCH] == 0) {
+        return 0;
+      }
+      if (channels[AIM_CHANNEL] > 0) {
+        return 1;
+      }
+      return 2;
+
   }
 
 }
