@@ -38,10 +38,12 @@ def update_leg(state, vx, vy, omega, t, lift_phase):
 
     # If the leg is being lifted
     if phase < lift_phase:
+        state.home_off_x = -1 * (-vx + state.home_y * omega) * (macros.STRIDELENGTH * (1-lift_phase) / 2)
+        state.home_off_y = -1 * (-vy - state.home_x * omega) * (macros.STRIDELENGTH * (1-lift_phase) / 2)
 
         # Move it horizontally towards the home position
-        state.x += calculate_step(state.x, state.home_x, phase, lift_phase)
-        state.y += calculate_step(state.y, state.home_y, phase, lift_phase)
+        state.x += calculate_step(state.x, state.home_x + state.home_off_x, phase, lift_phase)
+        state.y += calculate_step(state.y, state.home_y + state.home_off_y, phase, lift_phase)
 
         # If it's being lifted
         if phase < lift_phase * macros.RAISEFRAC:
@@ -55,6 +57,7 @@ def update_leg(state, vx, vy, omega, t, lift_phase):
         # Otherwise, move it horizontally based on robot velocity
         state.x += (-vx + state.y * omega) * macros.TIMESTEP
         state.y += (-vy - state.x * omega) * macros.TIMESTEP
+
 
 
 def timestep(body, vx, vy, omega, t, lift_phase=macros.LIFT_PHASE):
@@ -71,6 +74,7 @@ def timestep(body, vx, vy, omega, t, lift_phase=macros.LIFT_PHASE):
         zs.append(body.legs[i].state.z)
 
     t += macros.TIMESTEP
+
 
     # Return formatted array of angles
     return(macros.TIMESTEP, ik.extract_angles(body, xys, macros.DEFAULT_PITCH, macros.DEFAULT_ROLL, macros.DEFAULT_HEIGHT, zs))
@@ -116,6 +120,6 @@ def caldoescode():
     plt.show()
 
 
-caldoescode()
+#caldoescode()
 
 

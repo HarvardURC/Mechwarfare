@@ -43,10 +43,10 @@ SIDE = 7.86
 
 # DEFAULTS
 # Default robot height (centimeters)
-DEFAULT_HEIGHT = 12
+DEFAULT_HEIGHT = 2
 
 # Default claw distance from hip (centimeters)
-DEFAULT_RADIUS = 12
+DEFAULT_RADIUS = 8
 
 # Default pitch and roll values (degrees)
 DEFAULT_PITCH = 0
@@ -93,13 +93,13 @@ MIN_Z = -15
 TIMESTEP = 0.05  
 
 # Length of full stride (seconds)
-STRIDELENGTH = .5
+STRIDELENGTH = 2
 
 # Fraction of idle beat leg is being lifted/lowered
 RAISEFRAC = 0.5  
 
 # Maximum height foot is raised (centimeters)
-RAISEH = 1.  
+RAISEH = 2.  
 
 # Phase tolerance for moving to goal
 TOLERANCE = 0.01 
@@ -108,12 +108,13 @@ TOLERANCE = 0.01
 LIFT_PHASE = 1/float(NUMLEGS)
 
 # List of default leg state information
+phases = [0, .5, .25, .75]
 DEFSTATES = []
 for i in range(NUMLEGS):
 	DEFSTATES.append([
 		float(HOMES[i][0]),   # current x position
 		float(HOMES[i][1]),   # Current y position
 		float(HOMES[i][2]),                   # Current z position
-		i/float(NUMLEGS),     # Phase offset
+		phases[i],     # Phase offset
 		float(HOMES[i][0]),   # Home x position
 		float(HOMES[i][1])])   # Home y position
