@@ -12,7 +12,7 @@ joints = [
 jids = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # dynamixel servo ids
 positions = None
 
-# default offsets (in units of 0.29 degrees)
+# default offsets (in units of 0.29 degrees) SET ALL OF THESE TO 512 AND REMOVE OFFSETS FROM DRIVERS
 offsets = {
             "Leg1_BodyUpper"    : 0,
             "Leg1_UpperMiddle"  : 0,

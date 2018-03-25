@@ -1,8 +1,8 @@
 import math as m
-import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-from matplotlib import collections as mc
+#import matplotlib as mpl
+#from mpl_toolkits.mplot3d import Axes3D
+#import matplotlib.pyplot as plt
+#from matplotlib import collections as mc
 import numpy as np
 import macros
 import helpers

@@ -1,4 +1,8 @@
 import os
+import ik
+import gait_alg
+from math import sin,cos
+from time import sleep
 
 # random setup stuff
 if os.name == 'nt':
@@ -43,6 +47,9 @@ COMM_TX_FAIL                = -1001                         # Communication Tx F
 IDS = None
 PORT_NUM = None
 
+# home position of the servos
+HOME = 512
+
 
 # takes a list of id numbers as a parameter and default offsets (same dimension)
 # returns -1 on failure
@@ -52,7 +59,7 @@ def init_motors(ids_list, offsets):
     IDS = ids_list
     
     PORT_NUM = dynamixel.portHandler(DEVICENAME)
-
+    print PORT_NUM
     # initialize PacketHandler structs
     dynamixel.packetHandler()
 
@@ -111,7 +118,7 @@ def set_target_positions(pos_list):
     for i in range(len(pos_list)):
         # write goal position
         
-        dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i])
+        dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i] + HOME)
         dxl_comm_result = dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION)
         dxl_error = dynamixel.getLastRxPacketError(PORT_NUM, PROTOCOL_VERSION)
         if dxl_comm_result != COMM_SUCCESS:
@@ -121,14 +128,39 @@ def set_target_positions(pos_list):
             print(dynamixel.getRxPacketError(PROTOCOL_VERSION, dxl_error))
             return -1
 
+def deg_to_dyn(angles):
+    for i in range(len(angles)):
+        angles[i] *= 1/.29
+        angles[i] = int(angles[i])
+    return(angles)
 
-from time import sleep
+def walk(vx, vy, omega, time=10):
+    t = 0
+    while (t < time):
+        sleeptime, angles = gait_alg.timestep(body, vx, vy, omega, t)
+        t += sleeptime
+        err = set_target_positions(deg_to_dyn(angles))
+        print(angles)
+        sleep(sleeptime)
 
-err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [0,90,90, 0,90,90, 0,90,90, 0,90,90])
-err = set_target_positions([300,300,300, 300,300,300, 300,300,300, 300,300,300])
-sleep(1)
-err = set_target_positions([400,400,400, 400,400,400, 400,400,400, 400,400,400])
-sleep(1)
-err = set_target_positions([500,500,500, 500,500,500, 500,500,500, 500,500,500])
-sleep(1)
-err = deinit_motors()
+
+err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [512]*12) 
+print("initiated motors")
+claws, body = ik.make_standard_bot()
+angles = ik.extract_angles(body, claws, 0, 0, 12)
+angles = deg_to_dyn(angles)
+#walk(0, 0, 5, 30)
+t = 0
+while(1):
+    set_target_positions(deg_to_dyn(ik.extract_angles(body, claws, 0*sin(10*t), 0*cos(10*t), 12+3*cos(20*t))))
+    sleep(.02)
+    t += .02
+    
+#err = set_target_positions([0, 30, 30, 0, 30, 30, 0, 30, 30, 0, 30, 30])
+#sleep(1)
+#err = set_target_positions([0]*12)
+#sleep(1)
+#err = set_target_positions([0, -30, -30, 0, -30, -30, 0, -30, -30, 0, -30, -30])
+#sleep(1)
+#err = set_target_positions([0]*12)
+#sleep(1)

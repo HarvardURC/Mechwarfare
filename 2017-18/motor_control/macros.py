@@ -43,7 +43,7 @@ SIDE = 7.86
 
 # DEFAULTS
 # Default robot height (centimeters)
-DEFAULT_HEIGHT = 2
+DEFAULT_HEIGHT = 12
 
 # Default claw distance from hip (centimeters)
 DEFAULT_RADIUS = 8
@@ -88,18 +88,21 @@ MIN_Z = -15
 # # # GAIT MACROS # # #
 # # # # # # # # # # # #
 
+# BOUNDS ON ANGLES
+
+
 # TIME CONTROLS
 # Length of time step (seconds)
-TIMESTEP = 0.05  
+TIMESTEP = 0.2  
 
 # Length of full stride (seconds)
-STRIDELENGTH = 2
+STRIDELENGTH = 4
 
 # Fraction of idle beat leg is being lifted/lowered
 RAISEFRAC = 0.5  
 
 # Maximum height foot is raised (centimeters)
-RAISEH = 2.  
+RAISEH = 5.  
 
 # Phase tolerance for moving to goal
 TOLERANCE = 0.01 

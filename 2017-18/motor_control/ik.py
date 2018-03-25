@@ -1,9 +1,9 @@
 import math as m
 import copy
-import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-from matplotlib import collections as mc
+#import matplotlib as mpl
+#from mpl_toolkits.mplot3d import Axes3D
+#import matplotlib.pyplot as plt
+#from matplotlib import collections as mc
 import numpy as np
 import macros
 import helpers
@@ -14,6 +14,11 @@ from objs import body_data
 # # # # # # # # # # # # # # #
 # # # # IK functions  # # # #
 # # # # # # # # # # # # # # #
+
+def fix_angles_2(theta):
+    if (abs(theta) >= 360):
+        theta = theta % 360
+    return(theta)
 
 # Leg IK
 # leg_ik(leg: leg_data object, claw: desired claw location in cylindrical coordinates in leg frame)
@@ -29,7 +34,11 @@ def leg_ik(leg, claw):
     h = claw[0] - leg.gamma
     e = helpers.rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2))
     k = helpers.rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen)))
-    return [h, e, -k]
+
+    # Cleanup
+    e -= 90
+    k -= 180
+    return [fix_angles_2(h), fix_angles_2(e), fix_angles_2(k)]
 
 
 # Body IK
@@ -40,8 +49,6 @@ def body_ik(body, claws, pitch, roll, height, zs):
     # error check inputs
 #    (claws, pitch, roll, height, zs) = body_ik_error_handler(body, claws, pitch, roll, height, zs)
 
-    # THIS IS JANK AS FUCK. DELETE AT EARLIEST CONVENIENCE.
-    height += 10
     # copy claws to prevent error propagation and add z coordinate
     hclaws = copy.copy(claws)
     for i in range(len(hclaws)):
@@ -63,8 +70,6 @@ def body_ik(body, claws, pitch, roll, height, zs):
     for i in range(len(zs)):
         if (zs[i] > 0):
             newclaws[i][2] = -1*(height-zs[i])
-
-#    print(newclaws)
 
     return newclaws
     
@@ -96,7 +101,7 @@ def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEML
 
 # extract_angles(body: body_data object, claws: list of claw positions, pitch: desired pitch in degrees, roll: desired roll in degrees)
 #   returns list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
-def extract_angles(body, claws, pitch, roll, height, zs=[0,0,0,0]):
+def extract_angles(body, claws, pitch=macros.DEFAULT_PITCH, roll=macros.DEFAULT_ROLL, height=macros.DEFAULT_HEIGHT, zs=[0,0,0,0]):
     newclaws = body_ik(body, claws, pitch, roll, height, zs)
     ret_angles = []
     for i in range(len(body.legs)):

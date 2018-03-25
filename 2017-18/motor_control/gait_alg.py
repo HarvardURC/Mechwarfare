@@ -6,8 +6,8 @@ import objs
 import ik
 import helpers
 
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+#from matplotlib import pyplot as plt
+#from mpl_toolkits.mplot3d import Axes3D
 
 
 # dt = 0.05  # Time step in seconds
