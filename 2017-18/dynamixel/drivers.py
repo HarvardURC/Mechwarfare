@@ -2,7 +2,7 @@ import os
 import ik
 import gait_alg
 from math import sin,cos
-from time import sleep
+from time import sleep, time
 
 # random setup stuff
 if os.name == 'nt':
@@ -153,5 +153,6 @@ angles = deg_to_dyn(angles)
 t = 0
 while(1):
     set_target_positions(deg_to_dyn(ik.extract_angles(body, claws, 0*sin(10*t), 0*cos(10*t), 12+3*cos(20*t))))
-    sleep(.02)
-    t += .02
+    bedtime = time()
+    sleep(.005)
+    t += time()-bedtime
