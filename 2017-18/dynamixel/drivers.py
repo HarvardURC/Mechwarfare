@@ -106,6 +106,19 @@ def deinit_motors():
     dynamixel.closePort(PORT_NUM)
 
 
+import threading
+
+
+def send_update(pos_list, i):
+    dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i] + HOME)
+    dxl_comm_result = dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION)
+    dxl_error = dynamixel.getLastRxPacketError(PORT_NUM, PROTOCOL_VERSION)
+    if dxl_comm_result != COMM_SUCCESS:
+        print(dynamixel.getTxRxResult(PROTOCOL_VERSION, dxl_comm_result))
+    elif dxl_error != 0:
+        print(dynamixel.getRxPacketError(PROTOCOL_VERSION, dxl_error))
+
+
 # takes a list of target positions
 # - pos_list must have the same dimension as ids_list from init_motors()
 # returns -1 on failure and prints error
@@ -117,16 +130,8 @@ def set_target_positions(pos_list):
 
     for i in range(len(pos_list)):
         # write goal position
+        threading.Thread(target=send_update, args=(pos_list, i))
         
-        dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i] + HOME)
-        dxl_comm_result = dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION)
-        dxl_error = dynamixel.getLastRxPacketError(PORT_NUM, PROTOCOL_VERSION)
-        if dxl_comm_result != COMM_SUCCESS:
-            print(dynamixel.getTxRxResult(PROTOCOL_VERSION, dxl_comm_result))
-            return -1
-        elif dxl_error != 0:
-            print(dynamixel.getRxPacketError(PROTOCOL_VERSION, dxl_error))
-            return -1
 
 def deg_to_dyn(angles):
     for i in range(len(angles)):
@@ -155,12 +160,3 @@ while(1):
     set_target_positions(deg_to_dyn(ik.extract_angles(body, claws, 0*sin(10*t), 0*cos(10*t), 12+3*cos(20*t))))
     sleep(.02)
     t += .02
-    
-#err = set_target_positions([0, 30, 30, 0, 30, 30, 0, 30, 30, 0, 30, 30])
-#sleep(1)
-#err = set_target_positions([0]*12)
-#sleep(1)
-#err = set_target_positions([0, -30, -30, 0, -30, -30, 0, -30, -30, 0, -30, -30])
-#sleep(1)
-#err = set_target_positions([0]*12)
-#sleep(1)
