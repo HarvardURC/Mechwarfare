@@ -1,6 +1,7 @@
 import os
 import ik
 import gait_alg
+import ctypes
 from math import sin,cos
 from time import sleep, time
 
@@ -46,6 +47,7 @@ COMM_TX_FAIL                = -1001                         # Communication Tx F
 # will be updated at runtime
 IDS = None
 PORT_NUM = None
+GROUP_NUM = None
 
 # home position of the servos
 HOME = 512
@@ -54,7 +56,7 @@ HOME = 512
 # takes a list of id numbers as a parameter and default offsets (same dimension)
 # returns -1 on failure
 def init_motors(ids_list, offsets):
-    global PORT_NUM, IDS
+    global PORT_NUM, GROUP_NUM, IDS
 
     IDS = ids_list
     
@@ -62,6 +64,8 @@ def init_motors(ids_list, offsets):
     print PORT_NUM
     # initialize PacketHandler structs
     dynamixel.packetHandler()
+    
+    GROUP_NUM = dynamixel.groupSyncWrite(port_num, PROTOCOL_VERSION, ADDR_MX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
 
     # open port
     if not dynamixel.openPort(PORT_NUM):
@@ -118,7 +122,11 @@ def set_target_positions(pos_list):
     for i in range(len(pos_list)):
         # write goal position
         
-        dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i] + HOME)
+        dxl_addparam_result = ctypes.c_ubyte(dynamixel.groupSyncWriteAddParam(GROUP_NUM, DXL_ID, pos_list[i], LEN_MX_GOAL_POSITION)).value
+        if dxl_addparam_result != 1:
+            print dx1_addparam_result
+        
+        """dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i] + HOME)
         dxl_comm_result = dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION)
         dxl_error = dynamixel.getLastRxPacketError(PORT_NUM, PROTOCOL_VERSION)
         if dxl_comm_result != COMM_SUCCESS:
@@ -126,7 +134,13 @@ def set_target_positions(pos_list):
             return -1
         elif dxl_error != 0:
             print(dynamixel.getRxPacketError(PROTOCOL_VERSION, dxl_error))
-            return -1
+            return -1"""
+
+    dynamixel.groupSyncWriteTxPacket(GROUP_NUM)
+    if dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION) != COMM_SUCCESS:
+        dynamixel.printTxRxResult(PROTOCOL_VERSION, dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION))
+
+    dynamixel.groupSyncWriteClearParam(GROUP_NUM)
 
 def deg_to_dyn(angles):
     for i in range(len(angles)):
