@@ -130,7 +130,7 @@ def set_target_positions(pos_list):
 
     for i in range(len(pos_list)):
         # write goal position
-        threading.Thread(target=send_update, args=(pos_list, i))
+        threading.Thread(target=send_update, args=(pos_list, i)).start()
         
 
 def deg_to_dyn(angles):
