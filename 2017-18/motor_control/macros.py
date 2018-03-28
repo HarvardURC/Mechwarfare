@@ -93,16 +93,16 @@ MIN_Z = -15
 
 # TIME CONTROLS
 # Length of time step (seconds)
-TIMESTEP = 0.2  
+TIMESTEP = 0.02  
 
 # Length of full stride (seconds)
-STRIDELENGTH = 4
+STRIDELENGTH = 0.5
 
 # Fraction of idle beat leg is being lifted/lowered
 RAISEFRAC = 0.5  
 
 # Maximum height foot is raised (centimeters)
-RAISEH = 5
+RAISEH = 2
 # Phase tolerance for moving to goal
 TOLERANCE = 0.01 
 
@@ -110,7 +110,7 @@ TOLERANCE = 0.01
 LIFT_PHASE = 1/float(NUMLEGS)
 
 # List of default leg state information
-phases = [0, .5, .25, .75]
+phases = [0, 0.5, 0, 0.5]
 DEFSTATES = []
 for i in range(NUMLEGS):
 	DEFSTATES.append([

@@ -165,12 +165,12 @@ print("initiated motors")
 claws, body = ik.make_standard_bot()
 angles = ik.extract_angles(body, claws, 0, 0, 12)
 angles = deg_to_dyn(angles)
-#walk(0, 0, 0, 100)
+walk(0, 0, 0, 100)
 t = 0
-while(1):
+"""while(1):
     bedtime = time()
-    target = ik.extract_angles(body, claws, 0*sin(3*t), 15*cos(3*t), 12+0*cos(3*t))
+    target = ik.extract_angles(body, claws, 30*sin(3*t), 30*cos(3*t), 12+0*cos(30*t))
     print("%.2f "*len(target)%tuple(target))
     set_target_positions(deg_to_dyn(target))
     sleep(.01)
-    t += time()-bedtime
+    t += time()-bedtime"""
