@@ -16,7 +16,13 @@ from objs import body_data
 # # # # # # # # # # # # # # #
 
 def fix_angles_2(theta):
-    return(theta % 180)
+    while(theta > 180):
+        theta += -360
+    while(theta < -180):
+        theta += 360
+    return(theta)
+    #return(np.sign(theta)*abs(theta) % 180)
+    #return(theta)
 
 # Leg IK
 # leg_ik(leg: leg_data object, claw: desired claw location in cylindrical coordinates in leg frame)

@@ -102,8 +102,7 @@ STRIDELENGTH = 4
 RAISEFRAC = 0.5  
 
 # Maximum height foot is raised (centimeters)
-RAISEH = 5.  
-
+RAISEH = 5
 # Phase tolerance for moving to goal
 TOLERANCE = 0.01 
 
