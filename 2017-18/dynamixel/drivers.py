@@ -99,7 +99,7 @@ def deinit_motors():
 
     for DXL_ID in IDS:
         dynamixel.write1ByteTxRx(PORT_NUM, PROTOCOL_VERSION, DXL_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
-        dxl_comm_result = dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION)
+        dxl_comm_result = dynamixel.getTxRxResult(PORT_NUM, PROTOCOL_VERSION)
         dxl_error = dynamixel.getLastRxPacketError(PORT_NUM, PROTOCOL_VERSION)
         if dxl_comm_result != COMM_SUCCESS:
             print(dynamixel.getTxRxResult(PROTOCOL_VERSION, dxl_comm_result))
@@ -124,7 +124,7 @@ def set_target_positions(pos_list):
     for i in range(len(pos_list)):
         # write goal position
         
-        dxl_addparam_result = ctypes.c_ubyte(dynamixel.groupSyncWriteAddParam(GROUP_NUM, DXL_ID, pos_list[i], LEN_MX_GOAL_POSITION)).value
+        dxl_addparam_result = ctypes.c_ubyte(dynamixel.groupSyncWriteAddParam(GROUP_NUM, IDS[i], pos_list[i], LEN_MX_GOAL_POSITION)).value
         if dxl_addparam_result != 1:
             print(dx1_addparam_result)
         
