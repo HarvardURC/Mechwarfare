@@ -61,11 +61,11 @@ def init_motors(ids_list, offsets):
     IDS = ids_list
     
     PORT_NUM = dynamixel.portHandler(DEVICENAME)
-    print PORT_NUM
+    print(PORT_NUM)
     # initialize PacketHandler structs
     dynamixel.packetHandler()
     
-    GROUP_NUM = dynamixel.groupSyncWrite(port_num, PROTOCOL_VERSION, ADDR_MX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
+    GROUP_NUM = dynamixel.groupSyncWrite(PORT_NUM, PROTOCOL_VERSION, ADDR_MX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
 
     # open port
     if not dynamixel.openPort(PORT_NUM):
@@ -124,7 +124,7 @@ def set_target_positions(pos_list):
         
         dxl_addparam_result = ctypes.c_ubyte(dynamixel.groupSyncWriteAddParam(GROUP_NUM, DXL_ID, pos_list[i], LEN_MX_GOAL_POSITION)).value
         if dxl_addparam_result != 1:
-            print dx1_addparam_result
+            print(dx1_addparam_result)
         
         """dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i] + HOME)
         dxl_comm_result = dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION)
