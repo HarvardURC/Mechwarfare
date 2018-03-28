@@ -34,6 +34,8 @@ ADDR_MX_TORQUE_ENABLE       = 24                            # Control table addr
 ADDR_MX_GOAL_POSITION       = 30
 ADDR_MX_PRESENT_POSITION    = 36
 
+LEN_MX_GOAL_POSITION        = 2
+
 TORQUE_ENABLE               = 1                             # Value for enabling the torque
 TORQUE_DISABLE              = 0                             # Value for disabling the torque
 
