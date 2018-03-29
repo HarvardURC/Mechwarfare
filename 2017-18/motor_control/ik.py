@@ -27,6 +27,7 @@ def fix_angles_2(theta):
 # Leg IK
 # leg_ik(leg: leg_data object, claw: desired claw location in cylindrical coordinates in leg frame)
 #   returns [h, e, k] list
+# If inputs are invalid, returns a list of length 4
 #     h is hip angle from body frame's x-axis
 #     e is elbow angle from trochanter
 #     k is knee angle from femur
@@ -34,15 +35,19 @@ def leg_ik(leg, claw):
     # Constants
     hyp = ((claw[1] - leg.trolen)**2 + claw[2]**2)**.5
 
-    # Inverse Kinematics
-    h = claw[0] - leg.gamma
-    e = helpers.rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2))
-    k = helpers.rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen)))
+    try:
+        # Inverse Kinematics
+        h = claw[0] - leg.gamma
+        e = helpers.rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2))
+        k = helpers.rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen)))
+    
+        # Cleanup
+        e -= 90
+        k -= 180
+        return [fix_angles_2(h), fix_angles_2(e), fix_angles_2(k)]
 
-    # Cleanup
-    e -= 90
-    k -= 180
-    return [fix_angles_2(h), fix_angles_2(e), fix_angles_2(k)]
+    except:
+        return [0, 1, 2, 3]
 
 
 # Body IK

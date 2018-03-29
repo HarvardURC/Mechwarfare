@@ -1,6 +1,6 @@
 import os
 import ik
-import gait_alg
+import gait_alg_test
 import ctypes
 from math import sin,cos
 from time import sleep, time
@@ -165,12 +165,38 @@ print("initiated motors")
 claws, body = ik.make_standard_bot()
 angles = ik.extract_angles(body, claws, 0, 0, 12)
 angles = deg_to_dyn(angles)
-walk(20, 0, -20, 100)
+#walk(-20, 0, 20, 100)
 t = 0
 while(1):
-    bedtime = time()
-    target = ik.extract_angles(body, claws, 30*sin(3*t), 30*cos(3*t), 12+3*cos(20*t))
-    print("%.2f "*len(target)%tuple(target))
-    set_target_positions(deg_to_dyn(target))
-    sleep(.01)
-    t += time()-bedtime
+    # read state
+    enable = 1
+    vx = 4 
+    vy = 0
+    omega = 0 
+    height = 12 
+    pitch = 0 
+    roll = 20 
+    home_wid = 9 
+    home_len = 9 
+    timestep = .02
+    stridelength = 1
+    raisefrac = .5
+    raiseh = 2
+    lift_phase = .25
+    phase0 = 0
+    phase1 = .25
+    phase2 = .5
+    phase3 = .75
+    return_home = 0
+
+
+    # call timestep function
+    sleeptime, angles = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega, 
+        height, pitch, roll, t, home_wid, home_len, timestep, stridelength, raisefrac, 
+        raiseh, lift_phase, [phase0, phase1, phase2, phase3])
+
+    # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
+    if (enable and len(angles) == 12):
+        err = set_target_positions(deg_to_dyn(angles))
+        t += sleeptime
+    sleep(sleeptime)
