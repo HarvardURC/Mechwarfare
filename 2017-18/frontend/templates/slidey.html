@@ -1,0 +1,161 @@
+<!-- templates/index.html -->  
+<html>  
+  <head>
+    <title>Flask Shop</title>
+  </head>
+  <body>
+    <h1>Tide Pod HQ</h1>
+       <img src="/static/tidepod.jpeg" alt="tidepod" width="300">
+    <div>
+    	enable
+  		<input type="checkBox" id="enable" onclick="handler()">
+	</div>
+	<div>
+    	gohome
+  		<input type="checkBox" id="gohome" onclick="handler()">
+	</div>
+    <div>
+    	vx
+  		<input type="range" min="-20" max="20" value="0" id="vx" oninput="handler()">
+  		<span id="vxdisp"></span>
+	</div>
+	<div>
+		vy
+  		<input type="range" min="-20" max="20" value="0" id="vy" oninput="handler()">
+  		<span id="vydisp"></span>
+	</div>
+	<div>
+		omega
+  		<input type="range" min="-100" max="100" value="0" id="omega" oninput="handler()">
+  		<span id="omegadisp"></span>
+	</div>
+	<div>
+		height
+  		<input type="range" min="0" max="20" value="12" id="height" oninput="handler()">
+  		<span id="heightdisp"></span>
+	</div>
+	<div>
+		omega
+  		<input type="range" min="-30" max="30" value="0" id="pitch" oninput="handler()">
+  		<span id="pitchdisp"></span>
+	</div>
+	<div>
+		omega
+  		<input type="range" min="-30" max="30" value="0" id="roll" oninput="handler()">
+  		<span id="rolldisp"></span>
+	</div>
+
+	<div>
+		homewidth
+  		<input type="number" min="4" max="15" value="9" id="homewidth" oninput="handler()">
+	</div>
+	<div>
+		homelength
+  		<input type="number" min="4" max="15" value="9" id="homelength" oninput="handler()">
+	</div>
+
+	<div>
+		timestep
+  		<input type="number" min="0.001" max="1" value="0.01" id="timestep" oninput="handler()">
+	</div>
+
+	<div>
+		stridelength
+  		<input type="number" min="0.1" max="10" value="1" id="stridelength" oninput="handler()">
+	</div>
+
+	<div>
+		raisefrac
+  		<input type="number" min="0.1" max="10" value="1" id="raisefrac" oninput="handler()">
+	</div>
+
+	<div>
+		raiseh
+  		<input type="number" min="0" max="10" value="2" id="raiseh" oninput="handler()">
+	</div>
+
+	<div>
+		liftphase
+  		<input type="number" min="0" max="10" value="2" id="liftphase" oninput="handler()">
+	</div>
+
+	<div>
+		phasefl
+  		<input type="number" min="0" max="1" value="0" id="phasefl" oninput="handler()">
+	</div>
+
+	<div>
+		phasebl
+  		<input type="number" min="0" max="1" value="0.5" id="phasebl" oninput="handler()">
+	</div>
+
+	<div>
+		phasebr
+  		<input type="number" min="0" max="1" value="0" id="phasebr" oninput="handler()">
+	</div>
+
+	<div>
+		phasefr
+  		<input type="number" min="0" max="1" value="0.5" id="phasefr" oninput="handler()">
+	</div>
+
+	<script>
+		function dostuff(dest, data) {
+		    var req = new XMLHttpRequest();
+		    req.open("POST", dest, true);
+		    req.send(data);
+		}
+
+		var enable = document.getElementById("enable")
+		var gohome = document.getElementById("gohome")
+		var vx = document.getElementById("vx")
+		var vy = document.getElementById("vy")
+		var omega = document.getElementById("omega")
+		var height = document.getElementById("height")
+		var pitch = document.getElementById("pitch")
+		var roll = document.getElementById("roll")
+		var homewidth = document.getElementById("homewidth")
+		var homelength = document.getElementById("homelength")
+		var timestep = document.getElementById("timestep")
+		var stridelength = document.getElementById("stridelength")
+		var raisefrac = document.getElementById("raisefrac")
+		var raiseh = document.getElementById("raiseh")
+		var liftphase = document.getElementById("liftphase")
+		var phasefl = document.getElementById("phasefl")
+		var phasebl = document.getElementById("phasebl")
+		var phasebr = document.getElementById("phasebr")
+		var phasefr = document.getElementById("phasefr")
+
+		var vxdisp = document.getElementById("vxdisp")
+		/*vx.addEventListener("input", function(){
+			dostuff("/handler",vx.value);
+			vxdisp.innerHTML=vx.value;
+		});*/
+		function handler() {
+			var obj = {
+				enable: enable.checked,
+				gohome: gohome.checked,
+				vx: vx.value,
+				vy: vy.value,
+				omega: omega.value,
+				height: height.value,
+				pitch: pitch.value,
+				roll: roll.value,
+				homewidth: homewidth.value,
+				homelength: homelength.value,
+				timestep: timestep.value,
+				stridelength: stridelength.value,
+				raisefrac: raisefrac.value,
+				raiseh: raiseh.value,
+				liftphase: liftphase.value,
+				phasefl: phasefl.value,
+				phasebl: phasebl.value,
+				phasebr: phasebr.value,
+				phasefr: phasefr.value
+			}
+			console.log("AaAAAaAAA")
+			dostuff("/handler",JSON.stringify(obj))
+		}
+	</script>
+  </body>
+</html>
