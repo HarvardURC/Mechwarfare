@@ -60,10 +60,8 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, t, h
         # Update leg states
         for i in range(len(body.legs)):
             body.legs[i].state.phase_offset = phases[i]
-            xsign = body.legs[i].state.home_x/abs(body.legs[i].state.home_x)
-            ysign = body.legs[i].state.home_y/abs(body.legs[i].state.home_y)
-            body.legs[i].state.home_x = xsign * home_len
-            body.legs[i].state.home_y = ysign * home_wid
+            body.legs[i].state.home_x = body.legs[i].state.xsign * home_len
+            body.legs[i].state.home_y = body.legs[i].state.ysign * home_wid
     
         # Update each leg
         for i in range(len(body.legs)):
@@ -82,9 +80,7 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, t, h
         zs = [0] * 4
         for i in range(len(body.legs)):
             if return_home:
-                xsign = body.legs[i].state.home_x/abs(body.legs[i].state.home_x)
-                ysign = body.legs[i].state.home_y/abs(body.legs[i].state.home_y)
-                xys.append([xsign * home_len, ysign * home_wid])
+                xys.append([body.legs[i].state.xsign * home_len, body.legs[i].state.ysign * home_wid])
             else:
                 xys.append([body.legs[i].state.x, body.legs[i].state.y])
 

@@ -102,6 +102,14 @@ def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEML
         # append appropriate data to claws and legs
         claws.append(np.array([(x_unit * (poly_rad + macros.DEFAULT_RADIUS)), (y_unit * (poly_rad + macros.DEFAULT_RADIUS))]))
         legs.append(leg_data(i, x_unit * poly_rad, y_unit * poly_rad, macros.GAMMAS[i], trolen, femlen, tiblen))
+        if (i == 0):
+            legs[i].state.xsign, legs[i].state.ysign = 1, 1
+        elif (i == 1):
+            legs[i].state.xsign, legs[i].state.ysign = -1, 1
+        elif (i == 2):
+            legs[i].state.xsgin, legs[i].state.ysign = -1, -1
+        else:
+            legs[i].state.xsgin, legs[i].state.ysign = 1, -1
 
     # create a body with the legs
     body = body_data(legs, side, zdist, trolen, femlen, tiblen)

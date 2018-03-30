@@ -8,7 +8,7 @@ def hello():
 
 @app.route('/handler', methods=['POST'])
 def slidey():
-	x = json.loads(request.data)
+	x = json.loads(request.data.decode('utf-8'))
 	print(x) #THIS IS THE OUTPUT DICTIONARY
 	return ""
 

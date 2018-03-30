@@ -5,6 +5,25 @@ import ctypes
 from math import sin,cos
 from time import sleep, time
 
+current_state = dict()
+
+# begin asynchronous bullshit
+from flask import Flask, request, render_template
+import json
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return render_template("slidey.html")
+
+@app.route('/handler', methods=['POST'])
+def slidey():
+    current_state = json.loads(request.data)
+    return""
+
+app.run()
+# end asynchronous bullshit
+
 # random setup stuff
 if os.name == 'nt':
     import msvcrt
@@ -165,29 +184,49 @@ print("initiated motors")
 claws, body = ik.make_standard_bot()
 angles = ik.extract_angles(body, claws, 0, 0, 12)
 angles = deg_to_dyn(angles)
-#walk(-20, 0, 20, 100)
 t = 0
 while(1):
     # read state
-    enable = 1
-    vx = 4 
-    vy = 0
-    omega = 0 
-    height = 12 
-    pitch = 0 
-    roll = 20 
-    home_wid = 9 
-    home_len = 9 
-    timestep = .02
-    stridelength = 1
-    raisefrac = .5
-    raiseh = 2
-    lift_phase = .25
-    phase0 = 0
-    phase1 = .25
-    phase2 = .5
-    phase3 = .75
-    return_home = 0
+    enable = current_state[enable]
+    vx = current_state[vx]
+    vy = current_state[vy]
+    omega = current_state[omega]
+    height = current_state[height]
+    pitch = current_state[pitch]
+    roll = current_state[roll]
+    home_wid = current_state[home_width]
+    home_len = current_state[home_length]
+    timestep = current_state[timestep]
+    stridelength = current_state[stridelength]
+    raisefrac = current_state[raisefrac]
+    raiseh = current_state[raiseh]
+    lift_phase = current_state[lift_phase]
+    phase0 = current_state[phase0]
+    phase1 = current_state[phase1]
+    phase2 = current_state[phase2]
+    phase3 = current_state[phase3]
+    return_home = current_state[return_home]
+
+
+#    enable = 1
+#    vx = 0
+#    vy = 0
+#    omega = 0
+#    height = 12
+#    pitch = 0
+#    roll = 0
+#    home_wid = 9
+#    home_len = 9
+#    timestep = .02
+#    stridelength = 1
+#    raisefrac = .5
+#    raiseh = 2
+#    lift_phase = .25
+#    phase0 = 0
+#    phase1 = .5
+#    phase2 = 0
+#    phase3 = .5
+#    return_home = 0
 
 
     # call timestep function

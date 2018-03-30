@@ -19,6 +19,8 @@ class leg_state:
         self.home_y = macros.DEFSTATES[id_num][5]
         self.home_off_x = 0
         self.home_off_y = 0
+        self.xsign = 1
+        self.ysign = 1
 
     def reset(self, x, y, z, phase_offset, home_x, home_y):
         self.x = x
