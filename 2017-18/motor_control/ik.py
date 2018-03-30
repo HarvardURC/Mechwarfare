@@ -107,9 +107,9 @@ def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEML
         elif (i == 1):
             legs[i].state.xsign, legs[i].state.ysign = -1, 1
         elif (i == 2):
-            legs[i].state.xsgin, legs[i].state.ysign = -1, -1
+            legs[i].state.xsign, legs[i].state.ysign = -1, -1
         else:
-            legs[i].state.xsgin, legs[i].state.ysign = 1, -1
+            legs[i].state.xsign, legs[i].state.ysign = 1, -1
 
     # create a body with the legs
     body = body_data(legs, side, zdist, trolen, femlen, tiblen)
