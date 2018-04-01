@@ -4,6 +4,9 @@
 # run `chmod 755 startup.sh` to make the script executable
 # include sudo password in a text file "password.txt"
 
+# wifi setup:
+# https://cdn-learn.adafruit.com/downloads/pdf/setting-up-a-raspberry-pi-as-a-wifi-access-point.pdf
+
 git pull
 sudo -S chmod 666 /dev/ttyUSB0 < ~/password.txt
 
