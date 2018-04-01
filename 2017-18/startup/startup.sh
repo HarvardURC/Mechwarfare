@@ -9,4 +9,5 @@ sudo -S chmod 666 /dev/ttyUSB0 < ~/password.txt
 
 # add more of these (backgrounded with &) if you're using multiple processes
 
-python3 ~/Mechwarfare/2017-18/server/server.py
+cd ~/Mechwarfare/2017-18/frontend
+python3 webtest.py
