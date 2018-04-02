@@ -114,6 +114,10 @@ TOLERANCE = 0.01
 # Fraction of stride that legs spend in the air
 LIFT_PHASE = 1/float(NUMLEGS)
 
+# Minimum velocities required for robot to walk
+MIN_V = 2
+MIN_OMEGA = 5
+
 # List of default leg state information
 phases = [0, 0.5, 0, 0.5]
 DEFSTATES = []

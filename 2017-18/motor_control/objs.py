@@ -17,6 +17,7 @@ class leg_state:
         self.phase_offset = macros.DEFSTATES[id_num][3]
         self.home_x = macros.DEFSTATES[id_num][4]
         self.home_y = macros.DEFSTATES[id_num][5]
+        self.yawhomes = [macros.DEFSTATES[id_num][4], macros.DEFSTATES[id_num][5]]
         self.home_off_x = 0
         self.home_off_y = 0
         self.xsign = 1

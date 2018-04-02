@@ -48,42 +48,40 @@ def update_leg(state, vx, vy, omega, t, lift_phase, timestep, stridelength, rais
 
 
 
-def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, t, home_wid, home_len, timestep, 
+def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw, t, home_wid, home_len, timestep, 
     stridelength, raisefrac, raiseh, lift_phase, phases):
     """Updates the states of every leg for a given robot body, given state and robot velocity"""
 
-    if (enable):
-        # Variables to assist with formatted return
-        xys = []
-        zs = []
+    # Update leg states
+    for i in range(len(body.legs)):
+        body.legs[i].state.phase_offset = phases[i]
+        body.legs[i].state.home_x = body.legs[i].state.xsign * home_len
+        body.legs[i].state.home_y = body.legs[i].state.ysign * home_wid
 
-        # Update leg states
-        for i in range(len(body.legs)):
-            body.legs[i].state.phase_offset = phases[i]
-            body.legs[i].state.home_x = body.legs[i].state.xsign * home_len
-            body.legs[i].state.home_y = body.legs[i].state.ysign * home_wid
-    
+    # Variables to track change in state
+    xys = []
+    zs = []
+    yawc, yaws = m.cos(helpers.dtor(yaw)), m.sin(helpers.dtor(yaw))
+    yawrot = [[yawc, -yaws], [yaws, yawc]]
+    for i in range(len(body.legs)):
+        body.legs[i].state.yawhomes = yawrot * [body.legs[i].state.home_x, body.legs[i].state.home_y]
+
+    # If walking is enabled and the robot is at the minimum required velocity
+    if (enable and ((m.sqrt(vx**2 + vy**2) > macros.MIN_V) or (omega > macros.MIN_OMEGA))):
         # Update each leg
         for i in range(len(body.legs)):
             update_leg(body.legs[i].state, vx, vy, helpers.dtor(omega), t, lift_phase, timestep, stridelength, raisefrac, raiseh)
             xys.append([body.legs[i].state.x, body.legs[i].state.y])
-            zs.append(body.legs[i].state.z)
-    
-        t += timestep
-    
-    
-        # Return formatted array of angles
-        return(timestep, ik.extract_angles(body, xys, pitch, roll, height, zs))
+            zs.append(body.legs[i].state.z)    
 
+    # Else the claws should be static
     else:
-        xys = []
-        zs = [0] * 4
         for i in range(len(body.legs)):
-            if return_home:
-                xys.append([body.legs[i].state.xsign * home_len, body.legs[i].state.ysign * home_wid])
-            else:
-                xys.append([body.legs[i].state.x, body.legs[i].state.y])
+            xys.append(body.legs[i].state.yawhomes)
+            zs.append(0)
 
-        return(timestep, ik.extract_angles(body, xys, pitch, roll, height, zs))
+    t += macros.TIMESTEP
 
+    # Return formatted array of angles
+    return(macros.TIMESTEP, ik.extract_angles(body, xys, pitch, roll, height, zs))
 
