@@ -80,6 +80,7 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw,
             xys.append(body.legs[i].state.yawhomes)
             zs.append(0)
 
+    # pretty sure this line is unnecessary; should be handled on the other side of the function call
     t += macros.TIMESTEP
 
     # Return formatted array of angles

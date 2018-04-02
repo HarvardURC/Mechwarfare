@@ -71,7 +71,8 @@ def timestep(body, vx, vy, omega, t, lift_phase=macros.LIFT_PHASE, pitch=macros.
         for i in range(len(body.legs)):
             xys.append(body.legs[i].state.yawhomes)
             zs.append(0)
-
+    
+    # pretty sure this line is unnecessary because it's handled on the other side of the function call
     t += macros.TIMESTEP
 
     # Return formatted array of angles
