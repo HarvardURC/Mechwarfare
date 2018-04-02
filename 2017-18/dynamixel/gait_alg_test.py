@@ -61,10 +61,10 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw,
     # Variables to track change in state
     xys = []
     zs = []
-    yawc, yaws = m.cos(helpers.dtor(yaw)), m.sin(helpers.dtor(yaw))
-    yawrot = [[yawc, -yaws], [yaws, yawc]]
-    for i in range(len(body.legs)):
-        body.legs[i].state.yawhomes = yawrot * [body.legs[i].state.home_x, body.legs[i].state.home_y]
+#    yawc, yaws = m.cos(helpers.dtor(yaw)), m.sin(helpers.dtor(yaw))
+#    for i in range(len(body.legs)):
+#        home_x, home_y = body.legs[i].state.home_x, body.legs[i].state.home_y
+#        body.legs[i].state.yawhomes = [home_x * yawc - home_y * yaws, home_x * yawc + home_y * yaws]
 
     # If walking is enabled and the robot is at the minimum required velocity
     if (enable and ((m.sqrt(vx**2 + vy**2) > macros.MIN_V) or (omega > macros.MIN_OMEGA))):

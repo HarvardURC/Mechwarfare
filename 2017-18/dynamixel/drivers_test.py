@@ -171,6 +171,7 @@ def update_robot(body, current_state, dt):
     height = float(current_state["height"])
     pitch = float(current_state["pitch"])
     roll = float(current_state["roll"])
+    yaw = float(current_state["yaw"])
     home_wid = float(current_state["homewidth"])
     home_len = float(current_state["homelength"])
 #    timestep = current_state[timestep]
@@ -186,7 +187,7 @@ def update_robot(body, current_state, dt):
 
     # call timestep function
     sleeptime, angles = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega, 
-        height, pitch, roll, t, home_wid, home_len, dt, stridelength, raisefrac, 
+        height, pitch, roll, yaw, t, home_wid, home_len, dt, stridelength, raisefrac, 
         raiseh, lift_phase, [phase0, phase1, phase2, phase3])
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length

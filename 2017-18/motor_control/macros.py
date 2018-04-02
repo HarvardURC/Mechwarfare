@@ -52,6 +52,9 @@ DEFAULT_RADIUS = 8
 DEFAULT_PITCH = 0
 DEFAULT_ROLL = 0
 
+# Default yaw value
+DEFAULT_YAW = 0
+
 # Default home positions of legs in body frame
 HOMES = []
 poly_rad = SIDE/(2 * m.sin(m.pi/NUMLEGS))          # polygon radius

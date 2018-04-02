@@ -54,9 +54,9 @@ def timestep(body, vx, vy, omega, t, lift_phase=macros.LIFT_PHASE, pitch=macros.
     xys = []
     zs = []
     yawc, yaws = m.cos(helpers.dtor(yaw)), m.sin(helpers.dtor(yaw))
-    yawrot = [[yawc, -yaws], [yaws, yawc]]
     for i in range(len(body.legs)):
-        body.legs[i].state.yawhomes = yawrot * [body.legs[i].state.home_x, body.legs[i].state.home_y]
+        home_x, home_y = body.legs[i].state.home_x, body.legs[i].state.home_y
+        body.legs[i].state.yawhomes = [home_x * yawc - home_y * yaws, home_x * yawc + home_y * yaws]
 
     # if the robot should be stepping
     if ((m.sqrt(vx**2 + vy**2) > macros.MIN_V) or (omega > macros.MIN_OMEGA)):
