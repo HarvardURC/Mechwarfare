@@ -38,12 +38,9 @@ def leg_ik(leg, claw):
     try:
         # Inverse Kinematics
         h = claw[0] - leg.gamma
-        e = helpers.rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2))
-        k = helpers.rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen)))
+        e = helpers.rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2)) - 90
+        k = helpers.rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen))) - 180
     
-        # Cleanup
-        e -= 90
-        k -= 180
         return [fix_angles_2(h), fix_angles_2(e), fix_angles_2(k)]
 
     except:

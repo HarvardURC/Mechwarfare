@@ -73,7 +73,7 @@ def timestep(body, vx, vy, omega, t, lift_phase=macros.LIFT_PHASE, pitch=macros.
             zs.append(0)
     
     # pretty sure this line is unnecessary because it's handled on the other side of the function call
-    t += macros.TIMESTEP
+    #t += macros.TIMESTEP
 
     # Return formatted array of angles
     return(macros.TIMESTEP, ik.extract_angles(body, xys, pitch, roll, height, zs))

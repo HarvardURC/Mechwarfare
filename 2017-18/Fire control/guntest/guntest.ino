@@ -1,5 +1,5 @@
 
-int gunmotor = 6;
+int gunmotor = A6;
 int laserpointer = 2;
 int hoppermotor = 9;
 int hopperdir = 8;
@@ -12,7 +12,7 @@ int lightsensor = 14;
 #define LIGHT_SENSOR 0
 #define HOPPER_MOTOR 255
 #define MANUAL_CHANNEL 0
-#define GUN_DIR 255
+#define GUN_DIR 100
 #define computer Serial
 void hopperDriver(int inst, int power) {
   switch (inst) {
@@ -34,10 +34,11 @@ void hopperDriver(int inst, int power) {
   }
 }
 bool donefiring() {
+  return true;
 }
 //needs to be filled in
 bool isjammed() {
-
+  return true;
 }
 void unjamcode() {
   hopperDriver(2, HOPPER_MOTOR);
@@ -100,10 +101,11 @@ int hol;
 void loop() {
   // put your main code here, to run repeatedly:
  if(computer.available()){
- int a = computer.read();
- analogWrite(gunmotor, GUN_DIR);
- delay(500);
- analogWrite(gunmotor, 0);
- delay(500);
+   int a = computer.read();
+   analogWrite(gunmotor, GUN_DIR);
+   delay(500);
+   analogWrite(gunmotor, 0);
+   delay(500);
+   computer.print("hi");
  }
 }

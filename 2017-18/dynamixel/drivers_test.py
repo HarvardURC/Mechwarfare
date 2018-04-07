@@ -165,6 +165,7 @@ def update_robot(body, current_state, dt):
     global t
     # read state
     enable = bool(current_state["enable"])
+    useradio = bool(current_state["useradio"])
     vx = float(current_state["vx"])
     vy = float(current_state["vy"])
     omega = float(current_state["omega"])
@@ -174,7 +175,7 @@ def update_robot(body, current_state, dt):
     yaw = float(current_state["yaw"])
     home_wid = float(current_state["homewidth"])
     home_len = float(current_state["homelength"])
-#    timestep = current_state[timestep]
+#   timestep = current_state[timestep]
     stridelength = float(current_state["stridelength"])
     raisefrac = float(current_state["raisefrac"])
     raiseh = float(current_state["raiseh"])

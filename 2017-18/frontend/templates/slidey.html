@@ -6,6 +6,10 @@
   <body>
     <h1>Tide Pod HQ</h1>
        <img src="/static/tidepod.jpeg" alt="tidepod" width="300">
+     <div>
+    	useradio
+  		<input type="checkBox" id="enable" onclick="handler()" checked>
+	</div>
     <div>
     	enable
   		<input type="checkBox" id="enable" onclick="handler()">
@@ -131,7 +135,7 @@
 		var phasebl = document.getElementById("phasebl")
 		var phasebr = document.getElementById("phasebr")
 		var phasefr = document.getElementById("phasefr")
-
+		var useradio = document.getElementById("useradio")
 		var vxdisp = document.getElementById("vxdisp")
 		/*vx.addEventListener("input", function(){
 			dostuff("/handler",vx.value);
@@ -141,13 +145,14 @@
 			var obj = {
 				enable: enable.checked,
 				gohome: gohome.checked,
+				useradio: useradio.checked,
 				vx: vx.value,
 				vy: vy.value,
 				omega: omega.value,
 				height: height.value,
 				pitch: pitch.value,
 				roll: roll.value,
-                                yaw: yaw.value,
+                yaw: yaw.value,
 				homewidth: homewidth.value,
 				homelength: homelength.value,
 				timestep: timestep.value,
@@ -160,7 +165,6 @@
 				phasebr: phasebr.value,
 				phasefr: phasefr.value
 			}
-			console.log("AaAAAaAAA")
 			dostuff("/handler",JSON.stringify(obj))
 		}
 	</script>
