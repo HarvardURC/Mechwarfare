@@ -27,6 +27,11 @@ def scale(num, max):
 def fucking_loop():
     global state
     if (state != "hi"):
+        update_robot(body, state, dt)
+        
+def fucking_teensy_loop():
+    global state
+    if (state != "hi"):
         if (bool(current_state["useradio"])):
             msg = ser.readline() # data might get backlogged here
                                  # but if you move it out, it'll error if serial isn't plugged in
@@ -41,8 +46,6 @@ def fucking_loop():
             state["yaw"] = scale(msg[8], YAW_MAX)
             # bool(msg[9]) # aim mode
             # bool(msg[10]) # enable/disable
-            
-        update_robot(body, state, dt)
 
 def start_server():
     global app
@@ -62,6 +65,7 @@ def slidey():
 
 sched = BackgroundScheduler()
 sched.add_job(fucking_loop, 'interval', seconds=dt)
+sched.add_job(fucking_teensy_loop, 'interval', seconds=dt)
 sched.start()
 
 start_server()
