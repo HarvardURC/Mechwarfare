@@ -1,3 +1,4 @@
+
 import os
 import ik
 import gait_alg_test
@@ -62,12 +63,12 @@ def init_motors(ids_list, offsets):
     global PORT_NUM, GROUP_NUM, IDS
 
     IDS = ids_list
-    
+
     PORT_NUM = dynamixel.portHandler(DEVICENAME)
     print(PORT_NUM)
     # initialize PacketHandler structs
     dynamixel.packetHandler()
-    
+
     GROUP_NUM = dynamixel.groupSyncWrite(PORT_NUM, PROTOCOL_VERSION, ADDR_MX_GOAL_POSITION, LEN_MX_GOAL_POSITION)
 
     # open port
@@ -124,11 +125,11 @@ def set_target_positions(pos_list):
 
     for i in range(len(pos_list)):
         # write goal position
-        
+
         dxl_addparam_result = ctypes.c_ubyte(dynamixel.groupSyncWriteAddParam(GROUP_NUM, IDS[i], pos_list[i] + HOME, LEN_MX_GOAL_POSITION)).value
         if dxl_addparam_result != 1:
             print(dx1_addparam_result)
-        
+
         """dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i] + HOME)
         dxl_comm_result = dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION)
         dxl_error = dynamixel.getLastRxPacketError(PORT_NUM, PROTOCOL_VERSION)
@@ -153,7 +154,7 @@ def deg_to_dyn(angles):
 
 
 def init_robot():
-    err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [512]*12) 
+    err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [512]*12)
     print("initiated motors")
     claws, body = ik.make_standard_bot()
     angles = ik.extract_angles(body, claws, 0, 0, 12)
@@ -165,7 +166,6 @@ def update_robot(body, current_state, dt):
     global t
     # read state
     enable = bool(current_state["enable"])
-    useradio = bool(current_state["useradio"])
     vx = float(current_state["vx"])
     vy = float(current_state["vy"])
     omega = float(current_state["omega"])
@@ -187,8 +187,8 @@ def update_robot(body, current_state, dt):
     return_home = bool(current_state["gohome"])
 
     # call timestep function
-    sleeptime, angles = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega, 
-        height, pitch, roll, yaw, t, home_wid, home_len, dt, stridelength, raisefrac, 
+    sleeptime, angles = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega,
+        height, pitch, roll, yaw, t, home_wid, home_len, dt, stridelength, raisefrac,
         raiseh, lift_phase, [phase0, phase1, phase2, phase3])
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
@@ -197,3 +197,4 @@ def update_robot(body, current_state, dt):
         if (enable):
             t += sleeptime
 #    sleep(sleeptime)
+
