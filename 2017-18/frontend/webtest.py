@@ -16,6 +16,9 @@ controller_range = 500
 
 V_MAX = 1
 OMEGA_MAX = 1
+PITCH_MAX = 1
+ROLL_MAX = 1
+YAW_MAX = 1
 
 def scale(num, max):
     # scale serial output based on the maximum
