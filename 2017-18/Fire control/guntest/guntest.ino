@@ -103,7 +103,8 @@ void loop() {
  if(computer.available()){
    int a = computer.read();
    analogWrite(gunmotor, GUN_DIR);
-   delay(500);
+   hopperDriver(1, HOPPER_MOTOR);
+   delay(0);
    analogWrite(gunmotor, 0);
    delay(500);
    computer.print("hi");

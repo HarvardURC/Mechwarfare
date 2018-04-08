@@ -26,14 +26,11 @@ uint16_t lostFrames = 0;
 uint16_t gimbals[3];
 
 //remote control channels
-#define IDLE_SWITCH 0
-#define GUN_CHANNEL 0
-#define GUN_COMMAND 0
-#define LEG_CHANNEL_START 0
-#define AIM_CHANNEL 0
-#define LIGHT_SENSOR 0
-#define HOPPER_MOTOR 0
-#define MANUAL_CHANNEL 0
+#define IDLE_SWITCH 11
+#define GUN_CHANNEL 5
+#define GUN_COMMAND 1
+#define AIM_CHANNEL 10
+#define HOPPER_MOTOR 255
 
 //Comms defines for comms with gun subsystems
 int gunmotor = 6;
@@ -94,7 +91,7 @@ int gunState(int currState)
       //might need more complex code here for loading
       analogWrite(hoppermotor, HOPPER_MOTOR);
       //change number later
-      if (analogRead(lightsensor) >= LIGHT_SENSOR) {
+      if (true) {
         //if gun is loaded, move to fire
         return 2;
       }
@@ -291,13 +288,14 @@ void aimCode() {
 }
 int aimState(int currState)
 {
+// 0 = sweep state, 1 = aim state, 2 = manual state
   switch (currState) {
     //idle state
     case 0:
       if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] > 0) {
         return 1;
       }
-      if (channels[IDLE_SWITCH] > 0 && channels[MANUAL_CHANNEL] > 0) {
+      if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] > 1) {
         return 3;
       }
       if (channels[IDLE_SWITCH] > 0) {
@@ -313,7 +311,7 @@ int aimState(int currState)
       if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] == 0) {
         return 2;
       }
-      if (channels[IDLE_SWITCH] > 0 && channels[MANUAL_CHANNEL] > 0) {
+      if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] > 0) {
         return 3;
       }
       return 1;
@@ -322,10 +320,10 @@ int aimState(int currState)
       if (channels[IDLE_SWITCH] == 0) {
         return 0;
       }
-      if (channels[IDLE_SWITCH] > 0 && channels[MANUAL_CHANNEL] > 0) {
+      if (channels[AIM_CHANNEL] > 1) {
         return 3;
       }
-      if (channels[AIM_CHANNEL] > 0) {
+      if (channels[AIM_CHANNEL] == 0) {
         return 1;
       }
       return 2;
@@ -334,10 +332,10 @@ int aimState(int currState)
       if (channels[IDLE_SWITCH] == 0) {
         return 0;
       }
-      if (channels[MANUAL_CHANNEL] == 0 && channels[AIM_CHANNEL] > 0) {
+      if (channels[AIM_CHANNEL] == 0) {
         return 1;
       }
-      if (channels[MANUAL_CHANNEL] == 0 && channels[AIM_CHANNEL] == 0) {
+      if (channels[AIM_CHANNEL] == 1) {
         return 2;
       }
       return 3;
