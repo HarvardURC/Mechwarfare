@@ -165,7 +165,6 @@ def update_robot(body, current_state, dt):
     global t
     # read state
     enable = bool(current_state["enable"])
-    useradio = bool(current_state["useradio"])
     vx = float(current_state["vx"])
     vy = float(current_state["vy"])
     omega = float(current_state["omega"])
