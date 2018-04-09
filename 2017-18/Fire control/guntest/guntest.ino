@@ -1,8 +1,8 @@
-
+#include <SoftPWM.h>
 int gunmotor = A6;
 int laserpointer = 2;
-int hoppermotor = 9;
-int hopperdir = 8;
+int hoppermotor = 7;
+int hopperdir = 6;
 int lightsensor = 14;
 #define IDLE_SWITCH 0
 #define GUN_CHANNEL 0
@@ -12,28 +12,28 @@ int lightsensor = 14;
 #define LIGHT_SENSOR 0
 #define HOPPER_MOTOR 255
 #define MANUAL_CHANNEL 0
-#define GUN_DIR 100
+#define GUN_DIR 255
 #define computer Serial
 void hopperDriver(int inst, int power) {
   switch (inst) {
     case 0:
       //brake
-      analogWrite(hoppermotor, 0);
+      SoftPWMSet(hoppermotor, 0);
       digitalWrite(hopperdir, LOW);
       break;
     case 1:
       //forward
-      analogWrite(hoppermotor, power);
+      SoftPWMSet(hoppermotor, power);
       digitalWrite(hopperdir, HIGH);
       break;
     case 2:
       //reverse
-      analogWrite(hoppermotor, power);
+      SoftPWMSet(hoppermotor, power);
       digitalWrite(hopperdir, LOW);
       break;
   }
 }
-bool donefiring() {
+bool donefiring() { 
   return true;
 }
 //needs to be filled in
@@ -96,17 +96,25 @@ void setup() {
   pinMode(hopperdir, OUTPUT);
   pinMode(lightsensor, INPUT);
   computer.begin(9600);
+  SoftPWMBegin(SOFTPWM_NORMAL);
 }
 int hol;
 void loop() {
   // put your main code here, to run repeatedly:
  if(computer.available()){
-   int a = computer.read();
-   analogWrite(gunmotor, GUN_DIR);
-   hopperDriver(1, HOPPER_MOTOR);
-   delay(0);
-   analogWrite(gunmotor, 0);
-   delay(500);
-   computer.print("hi");
+  int a = computer.read();
+ computer.print(a);
+ analogWrite(gunmotor, GUN_DIR);
+ delay(550);
+ hopperDriver(1, HOPPER_MOTOR);
+ analogWrite(gunmotor, 0);
+ delay(2500);
+ hopperDriver(0, HOPPER_MOTOR);
+ analogWrite(gunmotor, GUN_DIR);
+ delay(1700);
+ analogWrite(gunmotor, 0);
+ hopperDriver(2, HOPPER_MOTOR);
+ delay(500);
+ hopperDriver(0, HOPPER_MOTOR);
  }
 }
