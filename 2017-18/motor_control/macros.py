@@ -80,16 +80,25 @@ DEFAULT_OMEGA = 40
 # # # # IK MACROS # # # #
 # # # # # # # # # # # # #
 
-# BOUNDS
-# Bounds on pitch and roll: must fall within +/- these values (degrees)
-PITCH_BOUND = 10
-ROLL_BOUND = 10
-
 # Bounds on heights of claw
 MAX_Z = 0
 MIN_Z = -15
 
 
+
+# # # # # # # # # # # #
+# # # RADIO MACROS  # #
+# # # # # # # # # # # #
+
+# Bounds are absolute value bounds; maxes have corresponding mins elsewhere defined
+# Bounds on pitch, roll, and yaw
+PITCH_BOUND = 25
+ROLL_BOUND = 25
+YAW_BOUND = 20
+
+# Bounds on linear and angular velocities (minimums for movement below)
+V_MAX = 15
+OMEGA_MAX = 70
 
 
 # # # # # # # # # # # # 

@@ -4,21 +4,16 @@ from threading import Thread
 from apscheduler.schedulers.background import BackgroundScheduler
 from drivers_test import init_robot, update_robot
 import serial
+import macros
 
 
 dt = 0.05
 state = "hi"
 body = init_robot()
 
-ser = serial.Serial('/dev/cu.usbmodem3013661', 115200, timeout=1)
+ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1)
 offset = 1020
 controller_range = 500
-
-V_MAX = 1
-OMEGA_MAX = 1
-PITCH_MAX = 1
-ROLL_MAX = 1
-YAW_MAX = 1
 
 def scale(num, max):
     # scale serial output based on the maximum
@@ -26,24 +21,32 @@ def scale(num, max):
 
 def fucking_loop():
     global state
+    print(state)
     if (state != "hi"):
         update_robot(body, state, dt)
-        
+        print("vx: ", state["vx"])
+        print("vy: ", state["vy"])
+        print("omega: ", state["omega"])
+        print("pitch: ", state["pitch"])
+        print("roll: ", state["roll"])
+        print("yaw: ", state["yaw"])    
+
 def fucking_teensy_loop():
     global state
+    print("aaaa")
     if (state != "hi"):
         if (bool(current_state["useradio"])):
             msg = ser.readline() # data might get backlogged here
                                  # but if you move it out, it'll error if serial isn't plugged in
             msg = [int(i) for i in msg.split(',')]
 
-            state["vx"] = scale(msg[2], V_MAX)          # forward/backward trans
-            state["omega"] = scale(msg[3], OMEGA_MAX)   # stationary rotate
+            state["vx"] = scale(msg[2], macros.V_MAX)          # forward/backward trans
+            state["omega"] = scale(msg[3], macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire
-            state["vy"] = scale(msg[5], V_MAX)          # left/right trans
-            state["pitch"] = scale(msg[6], PITCH_MAX)
-            state["roll"] = scale(msg[7], ROLL_MAX)
-            state["yaw"] = scale(msg[8], YAW_MAX)
+            state["vy"] = scale(msg[5], macros.V_MAX)          # left/right trans
+            state["pitch"] = scale(msg[6], macros.PITCH_BOUND)
+            state["roll"] = scale(msg[7], macros.ROLL_BOUND)
+            state["yaw"] = scale(msg[8], macros.YAW_BOUND)
             # bool(msg[9]) # aim mode
             # bool(msg[10]) # enable/disable
 
@@ -59,6 +62,7 @@ def hello():
 
 @app.route('/handler', methods=['POST'])
 def slidey():
+    print("hiaaaaaa")
     global state
     state = json.loads(request.data.decode('utf-8'))
     return ""
