@@ -21,7 +21,6 @@ def scale(num, max):
 
 def fucking_loop():
     global state
-    print(state)
     if (state != "hi"):
         update_robot(body, state, dt)
         print("vx: ", state["vx"])
@@ -29,16 +28,16 @@ def fucking_loop():
         print("omega: ", state["omega"])
         print("pitch: ", state["pitch"])
         print("roll: ", state["roll"])
-        print("yaw: ", state["yaw"])    
+        print("yaw: ", state["yaw"]) 
+        print("\n\n")   
 
 def fucking_teensy_loop():
     global state
-    print("aaaa")
     if (state != "hi"):
-        if (bool(current_state["useradio"])):
-            msg = ser.readline() # data might get backlogged here
+        if (bool(state["useradio"])):
+            msg = ser.readline().decode('utf-8') # data might get backlogged here
                                  # but if you move it out, it'll error if serial isn't plugged in
-            msg = [int(i) for i in msg.split(',')]
+            msg = [int(i) for i in msg.split()]
 
             state["vx"] = scale(msg[2], macros.V_MAX)          # forward/backward trans
             state["omega"] = scale(msg[3], macros.OMEGA_MAX)   # stationary rotate
