@@ -5,6 +5,7 @@ import gait_alg_test
 import ctypes
 from math import sin,cos
 from time import sleep, time
+import macros
 
 
 # random setup stuff
@@ -161,6 +162,25 @@ def init_robot():
     angles = deg_to_dyn(angles)
     return(body)
 
+def check_angles(angles):
+    for i in range(len(angles)):
+        if (i % 3 = 0):
+            if (angles[i] < macros.HIP_MIN):
+                angles[i] = macros.HIP_MIN
+            else if (angles[i] > macros.HIP_MAX):
+                angles[i] = macros.HIP_MAX
+        else if (i % 3 = 1):
+            if (angles[i] < macros.KNEE_MIN):
+                angles[i] = macros.KNEE_MIN
+            else if (angles[i] > macros.KNEE_MAX):
+                angles[i] = macros.KNEE_MAX
+        else:
+            if (angles[i] < macros.ELB_MIN):
+                angles[i] = macros.ELB_MIN
+            else if (angles[i] > macros.ELB_MAX):
+                angles[i] = macros.ELB_MAX
+    return angles
+
 t = 0
 def update_robot(body, current_state, dt):
     global t
@@ -193,7 +213,7 @@ def update_robot(body, current_state, dt):
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
     if (len(angles) == 12):
-        err = set_target_positions(deg_to_dyn(angles))
+        err = set_target_positions(deg_to_dyn(check_angles(angles)))
         if (enable):
             t += sleeptime
 #    sleep(sleeptime)
