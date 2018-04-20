@@ -102,19 +102,19 @@ int hol;
 void loop() {
   // put your main code here, to run repeatedly:
  if(computer.available()){
-  int a = computer.read();
- computer.print(a);
- analogWrite(gunmotor, GUN_DIR);
- delay(550);
- hopperDriver(1, HOPPER_MOTOR);
- analogWrite(gunmotor, 0);
- delay(2500);
- hopperDriver(0, HOPPER_MOTOR);
- analogWrite(gunmotor, GUN_DIR);
- delay(1700);
- analogWrite(gunmotor, 0);
- hopperDriver(2, HOPPER_MOTOR);
- delay(500);
- hopperDriver(0, HOPPER_MOTOR);
+ int a = computer.read();
+    if(a=='f') {
+      hopperDriver(1, HOPPER_MOTOR);
+      analogWrite(gunmotor, GUN_DIR);
+      delay(150);
+      analogWrite(gunmotor, 0);
+      delay(200);
+      hopperDriver(0, 0);
+    } else {
+      hopperDriver(1, HOPPER_MOTOR);
+      delay(500);
+      hopperDriver(0,0)
+    }
+    computer.print(a);
  }
 }
