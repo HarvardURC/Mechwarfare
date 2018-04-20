@@ -164,20 +164,20 @@ def init_robot():
 
 def check_angles(angles):
     for i in range(len(angles)):
-        if (i % 3 = 0):
+        if (i % 3 == 0):
             if (angles[i] < macros.HIP_MIN):
                 angles[i] = macros.HIP_MIN
-            else if (angles[i] > macros.HIP_MAX):
+            elif (angles[i] > macros.HIP_MAX):
                 angles[i] = macros.HIP_MAX
-        else if (i % 3 = 1):
+        elif (i % 3 == 1):
             if (angles[i] < macros.KNEE_MIN):
                 angles[i] = macros.KNEE_MIN
-            else if (angles[i] > macros.KNEE_MAX):
+            elif (angles[i] > macros.KNEE_MAX):
                 angles[i] = macros.KNEE_MAX
         else:
             if (angles[i] < macros.ELB_MIN):
                 angles[i] = macros.ELB_MIN
-            else if (angles[i] > macros.ELB_MAX):
+            elif (angles[i] > macros.ELB_MAX):
                 angles[i] = macros.ELB_MAX
     return angles
 

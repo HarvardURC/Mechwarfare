@@ -16,6 +16,7 @@ class UDSClient:
     # create a new unix domain socket client
     def __init__(self, timeout=None):
         self.conn = socket(AF_UNIX, SOCK_STREAM)
+        print("initialized hlsockets")
         if timeout != None:
             self.conn.settimeout(timeout)
     
