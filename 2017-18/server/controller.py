@@ -1,7 +1,7 @@
 import math as m
 import numpy as np
 import ik
-import gait_alg
+import gait_alg_test as gait_alg
 import hlsockets
 from time import sleep
 
@@ -16,40 +16,10 @@ def reset(time=10):
     client.send(hlsockets.SERVO, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     sleep(time)
 
-# given body, list of claw positions, pitch, and roll, stands at pitch and roll for time seconds
-def stand(pitch=0, roll=0, height=12, time=10):
-    angles = ik.extract_angles(body, claws, pitch, roll, height)
-    client.send(hlsockets.SERVO, angles)
-    sleep(time)
-
-# stands on tippy toes
-def tippytoes():
-    angles = [0, -90, 0, 0, -90, 0, 0, -90, 0, 0, -90, 0]
-    for i in range(20):
-        client.send(hlsockets.SERVO, angles)
-        sleep(.025)
-    reset(1)
-
-# does the robot boogie for time seconds
-def wiggle(time=10):
-    for j in range(time):
-        for i in range(10):
-            client.send(hlsockets.SERVO, ik.extract_angles(body, claws, 20, 0, HEIGHT))
-            sleep(.025)
-        for i in range(10):
-            client.send(hlsockets.SERVO, ik.extract_angles(body, claws, -10, 20, HEIGHT))
-            sleep(.025)
-        for i in range(10):
-            client.send(hlsockets.SERVO, ik.extract_angles(body, claws, 20, 0, HEIGHT))
-            sleep(.025)
-        for i in range(10):
-            client.send(hlsockets.SERVO, ik.extract_angles(body, claws, -10, -20, HEIGHT))
-            sleep(.025)
-
-def walk(vx, vy, omega, time=10):
+def walk(vx, vy, omega, height=12, pitch=0, roll=0, yaw=0, time=10):
     t = 0
     while (t < time):
-        sleeptime, angles = gait_alg.timestep(body, vx, vy, omega, t)
+        sleeptime, angles = gait_alg.timestep(body, vx, vy, omega, height, pitch, roll, yaw, t)
         t += sleeptime
         client.send(hlsockets.SERVO, quick_fix_order(angles))
         sleep(sleeptime)
@@ -69,12 +39,32 @@ def test_leg_order():
 def quick_fix_order(angles):
     return(angles[3:] + angles[:3])
 
+def quick_fix_angles(angles):
+    for i in range(len(angles)):
+        if (i % 3 == 1):
+            angles[i] = angles[i]*-1
+    return angles
+
 
 client = hlsockets.UDSClient()
 client.open(hlsockets.CONTROLLER)
 reset(2)
+t = 0
 while True:
-#    for i in range(8):
-#        stand(height=i, time=.5)
-    walk(0,0,15)
+    vx = 0
+    vy = 0
+    omega = 0
+    height = 10
+    pitch = 0
+    roll = 0
+    yaw = 0
+    home_wid = 9
+    home_len = m.sin(t) + 9
+
+    sleeptime, angles = gait_alg.timestep(body, vx, vy, omega, height, pitch, roll, yaw, t, home_wid, home_len)
+    t += sleeptime
+    if (len(angles) == 12):
+        print(t)
+        client.send(hlsockets.SERVO, quick_fix_angles(quick_fix_order(angles)))
+    sleep(sleeptime)
 client.close()
