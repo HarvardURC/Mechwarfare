@@ -31,8 +31,10 @@
 
 
 // Defines for retrieving remote control signals
+//DOCUMENT ALL DEFINES
 
 volatile uint16_t state[8];
+//1 INDEX; ADD 1 TO LENGTH
 
 volatile unsigned long timers[8];
 
@@ -49,7 +51,7 @@ volatile unsigned long timers[8];
 #define IDLE_SWITCH 7
 #define GUN_CHANNEL 4
 #define SWITCH_BOUND 1200
-#define SWITCH_BOUND_JAM 1200
+#define SWITCH_BOUND_JAM 1200 //CHANGE NUMBER FOR 3 POS SWITCH
 #define JAM_CHANNEL 0
 
 
@@ -59,11 +61,11 @@ int laserpointer = 2;
 int hoppermotor = 9;
 int hopperdir = 8;
 
-#define HOPPER_MOTOR 255
-#define GUN_DIR 255
+#define HOPPER_MOTOR 255 //HOPPER_POWER
+#define GUN_DIR 255 //GUN_POWER
 
-#define IDLE_THRESHOLD 1000
-#define UPDATE_THRESHOLD 10
+#define UPDATE_THRESHOLD 10 //STATE_DELAY
+
 unsigned long idleTimer; //  hold milliseconds since last state update
 void resetIdleTimer()
 {
@@ -73,13 +75,13 @@ void resetIdleTimer()
 void setup() {
   // begin the SBUS communication
 
-  Serial.begin(9600);
+  Serial.begin(9600); //HAVE SERIAL RATE DEFINE
   pinMode(gunmotor, OUTPUT);
   pinMode(laserpointer, OUTPUT);
   pinMode(hoppermotor, OUTPUT);
   pinMode(hopperdir, OUTPUT);
   pinMode(lightsensor, INPUT);
-   pinMode(CH1,INPUT);
+  pinMode(CH1,INPUT);
   pinMode(CH2,INPUT);
   pinMode(CH3,INPUT);
   pinMode(CH4,INPUT);
@@ -98,7 +100,7 @@ void setup() {
 
   idleTimer = millis();
 }
-//Reads Pulse length manually -- basically softPWM
+//Reads Pulse length
 void interrupt1(){
     if(digitalReadFast(CH1) == 1){         
       timers[1] = micros();
@@ -196,7 +198,7 @@ int numReload = 200;
 int numUnjam = 200;
 int stateHold = 0;
 
-
+//HAVE THESE IN REAL UNITS, DOCUMENT, PUT AT TOP
 
 int gunState(int currState)
 {
@@ -220,6 +222,7 @@ int gunState(int currState)
       }
       if (stateHold < numCatchUp) {
         //if not yet reloaded, reload
+        //THIS NEEDS TO BE TWO STATES THAT EACH DO ONE THING
         hopperDriver(1, HOPPER_MOTOR);
       }
       else {
