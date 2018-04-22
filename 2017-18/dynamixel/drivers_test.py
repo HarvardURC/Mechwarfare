@@ -182,8 +182,10 @@ def check_angles(angles):
     return angles
 
 t = 0
+was_still = True
 def update_robot(body, current_state, dt):
     global t
+    global was_still
     # read state
     enable = bool(current_state["enable"])
     vx = float(current_state["vx"])
@@ -207,14 +209,12 @@ def update_robot(body, current_state, dt):
     return_home = bool(current_state["gohome"])
 
     # call timestep function
-    sleeptime, angles = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega,
+    sleeptime, angles, t, was_still = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega,
         height, pitch, roll, yaw, t, home_wid, home_len, dt, stridelength, raisefrac,
-        raiseh, lift_phase, [phase0, phase1, phase2, phase3])
+        raiseh, lift_phase, [phase0, phase1, phase2, phase3], was_still)
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
     if (len(angles) == 12):
         err = set_target_positions(deg_to_dyn(check_angles(angles)))
-        if (enable):
-            t += sleeptime
-#    sleep(sleeptime)
+    sleep(sleeptime)
 

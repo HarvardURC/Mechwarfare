@@ -10,6 +10,8 @@ from time import sleep
 angles = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 claws, body = ik.make_standard_bot()
 HEIGHT = 13
+t = 0
+was_still = True
 
 # default position (robot laying on ground, splayed out): stands for time seconds
 def reset(time=10):
@@ -45,26 +47,34 @@ def quick_fix_angles(angles):
             angles[i] = angles[i]*-1
     return angles
 
-
 client = hlsockets.UDSClient()
 client.open(hlsockets.CONTROLLER)
 reset(2)
-t = 0
 while True:
     vx = 0
     vy = 0
-    omega = 0
-    height = 10
+    omega = 5 * m.sin(.2 * t)
+    height = 8
     pitch = 0
     roll = 0
     yaw = 0
     home_wid = 9
-    home_len = m.sin(t) + 9
+    home_len = 9
 
-    sleeptime, angles = gait_alg.timestep(body, vx, vy, omega, height, pitch, roll, yaw, t, home_wid, home_len)
-    t += sleeptime
+    if (t < 4):
+        vx = 6
+    elif (t < 8):
+        vx = 0
+    else:
+        vx = 6
+
+    sleeptime, angles, t, was_still = gait_alg.timestep(body, vx, vy, omega, height, pitch, roll, yaw, t, home_wid, home_len, was_still)
     if (len(angles) == 12):
         print(t)
+        print("\n")
         client.send(hlsockets.SERVO, quick_fix_angles(quick_fix_order(angles)))
     sleep(sleeptime)
 client.close()
+
+
+

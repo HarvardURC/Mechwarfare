@@ -26,12 +26,12 @@ def update_leg(state, vx, vy, omega, t, lift_phase, timestep, stridelength, rais
 
     # If the leg is being lifted
     if phase < lift_phase:
-        state.home_off_x = -1 * (-vx + state.home_y * omega) * (stridelength * (1-lift_phase) / 2)
-        state.home_off_y = -1 * (-vy - state.home_x * omega) * (stridelength * (1-lift_phase) / 2)
+        state.home_off_x = -1 * (-vx + state.yawhomes[1] * omega) * (stridelength * (1-lift_phase) / 2)
+        state.home_off_y = -1 * (-vy - state.yawhomes[0] * omega) * (stridelength * (1-lift_phase) / 2)
 
         # Move it horizontally towards the home position
-        state.x += calculate_step(state.x, state.home_x + state.home_off_x, phase, lift_phase, timestep, stridelength)
-        state.y += calculate_step(state.y, state.home_y + state.home_off_y, phase, lift_phase, timestep, stridelength)
+        state.x += calculate_step(state.x, state.yawhomes[0] + state.home_off_x, phase, lift_phase, timestep, stridelength)
+        state.y += calculate_step(state.y, state.yawhomes[1] + state.home_off_y, phase, lift_phase, timestep, stridelength)
 
         # If it's being lifted
         if phase < lift_phase * raisefrac:
@@ -49,8 +49,9 @@ def update_leg(state, vx, vy, omega, t, lift_phase, timestep, stridelength, rais
 
 
 def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw, t, home_wid, home_len, timestep, 
-    stridelength, raisefrac, raiseh, lift_phase, phases):
+    stridelength, raisefrac, raiseh, lift_phase, phases, was_still):
     """Updates the states of every leg for a given robot body, given state and robot velocity"""
+    timestep = MACROS.timestep
 
     # Update leg states
     for i in range(len(body.legs)):
@@ -61,13 +62,19 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw,
     # Variables to track change in state
     xys = []
     zs = []
-#    yawc, yaws = m.cos(helpers.dtor(yaw)), m.sin(helpers.dtor(yaw))
-#    for i in range(len(body.legs)):
-#        home_x, home_y = body.legs[i].state.home_x, body.legs[i].state.home_y
-#        body.legs[i].state.yawhomes = [home_x * yawc - home_y * yaws, home_x * yawc + home_y * yaws]
+
+    # Manage yawing
+    yawc, yaws = m.cos(helpers.dtor(yaw)), m.sin(helpers.dtor(yaw))
+    for i in range(len(body.legs)):
+        home_x, home_y = body.legs[i].state.home_x, body.legs[i].state.home_y
+        body.legs[i].state.yawhomes = [home_x * yawc - home_y * yaws, home_x * yaws + home_y * yawc]
 
     # If walking is enabled and the robot is at the minimum required velocity
     if (enable and ((m.sqrt(vx**2 + vy**2) > macros.MIN_V) or (omega > macros.MIN_OMEGA))):
+        # If robot was still immediately before this timestep
+        if (was_still):
+            t = 0
+        was_still = False
         # Update each leg
         for i in range(len(body.legs)):
             update_leg(body.legs[i].state, vx, vy, helpers.dtor(omega), t, lift_phase, timestep, stridelength, raisefrac, raiseh)
@@ -76,13 +83,14 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw,
 
     # Else the claws should be static
     else:
+        was_still = True
         for i in range(len(body.legs)):
             xys.append(body.legs[i].state.yawhomes)
             zs.append(0)
 
-    # pretty sure this line is unnecessary; should be handled on the other side of the function call
-    t += macros.TIMESTEP
+    # Increment timestep
+    t += timestep
 
     # Return formatted array of angles
-    return(macros.TIMESTEP, ik.extract_angles(body, xys, pitch, roll, height, zs))
+    return(timestep, ik.extract_angles(body, xys, pitch, roll, height, zs), t, was_still)
 
