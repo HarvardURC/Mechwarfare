@@ -24,8 +24,8 @@ from ctypes import cdll
 #dxl_lib = cdll.LoadLibrary("./build/dxl_x86_c.dll")  # for windows 32bit
 #dxl_lib = cdll.LoadLibrary("./build/dxl_x64_c.dll")  # for windows 64bit
 #dxl_lib = cdll.LoadLibrary("./build/libdxl_x86_c.so")     # for linux 32bit
-dxl_lib = cdll.LoadLibrary("./build/libdxl_x64_c.so")     # for linux 64bit
-#dxl_lib = cdll.LoadLibrary("./build/libdxl_sbc_c.so")   # for SBC linux
+#dxl_lib = cdll.LoadLibrary("./build/libdxl_x64_c.so")     # for linux 64bit
+dxl_lib = cdll.LoadLibrary("./build/libdxl_sbc_c.so")   # for SBC linux
 #dxl_lib = cdll.LoadLibrary("./build/libdxl_mac_c.dylib")      # for Mac OS
 
 # port_handler
