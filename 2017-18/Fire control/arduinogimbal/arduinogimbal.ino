@@ -42,7 +42,7 @@ volatile unsigned long timers[9];
 
 
 //Comms defines for comms with gun subsystems
-int gunmotor = 6; 
+int gunmotor = A6; 
 int hoppermotor = 9;
 int hopperdir = 8;
 
@@ -205,7 +205,7 @@ int gunState(int currState)
         return 5;
       }
 
-      hopperDriver(0, HOPPER_POWER);
+      hopperDriver(1, HOPPER_POWER);
 
       analogWrite(gunmotor, 0);
 
@@ -317,7 +317,7 @@ void forwardChannels()
     baseString = baseString + String(state[i]) + ", ";
   }
   baseString = baseString + String(state[numChannels]);
-  computer.print(baseString);
+  computer.println(baseString);
 }
 
 
@@ -335,3 +335,4 @@ void loop() {
 
 
 }
+
