@@ -113,7 +113,7 @@ void loop() {
     } else {
       hopperDriver(1, HOPPER_MOTOR);
       delay(500);
-      hopperDriver(0,0)
+      hopperDriver(0,0);
     }
     computer.print(a);
  }
