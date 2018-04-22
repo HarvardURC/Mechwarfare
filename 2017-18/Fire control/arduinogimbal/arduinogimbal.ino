@@ -42,15 +42,14 @@ volatile unsigned long timers[9];
 
 
 //Comms defines for comms with gun subsystems
-int gunmotor = 6;
-int laserpointer = 2;
+int gunmotor = 6; 
 int hoppermotor = 9;
 int hopperdir = 8;
 
 #define HOPPER_POWER 255 //PWM POWER TO RUN HOPPER
 #define GUN_POWER 255 //PWM POWER TO RUN GUNMOTOR
 
-#define STATE_DELAY 10 //STATE_DELAY
+#define STATE_DELAY 10 //DELAY BETWEEN STATE UPDATES
 
 //times for state transitions
 //ALL NUM INTS ARE IN UNITS OF MS (REAL TIME IS THE NUMBER, DIVISION BY STATE_DELAY IS FOR NUMBER OF STATE UPDATES
@@ -72,7 +71,6 @@ void setup() {
 
   Serial.begin(SERIAL_RATE); //HAVE SERIAL RATE DEFINE
   pinMode(gunmotor, OUTPUT);
-  pinMode(laserpointer, OUTPUT);
   pinMode(hoppermotor, OUTPUT);
   pinMode(hopperdir, OUTPUT);
   pinMode(CH1, INPUT);
