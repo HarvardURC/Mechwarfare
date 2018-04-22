@@ -12,6 +12,8 @@
 //Write the control loop for the camera to gimbal in a more standard form (regular PID?). Add optional low pass filter to sensor data  DONE
 //Timer interrupts for running state machine at constant frequency; decouple control code  DONE
 
+//NOTE:  STATES NEED TO BE UPDATED FOR NEW PWM CODE
+
 //communication defines for comms with Pi and remote control
 #include <SBUS.h>
 SBUS x8r(Serial1);
@@ -21,6 +23,7 @@ SBUS x8r(Serial1);
 
 // channel, fail safe, and lost frames data
 float channels[16];
+int state[11];
 uint8_t failSafe;
 uint16_t lostFrames = 0;
 uint16_t gimbals[3];
@@ -38,7 +41,6 @@ uint16_t gimbals[3];
 #define LEG_CHANNEL_7 0
 #define LEG_CHANNEL_8 0
 #define HOPPER_MOTOR 255
-#define MANUAL_CHANNEL 0
 #define GUN_DIR 255
 #define JAM_CHANNEL 0
 #define JAM_COMMAND 255
@@ -79,10 +81,6 @@ void setup() {
   pinMode(LEG_CHANNEL_7, INPUT);
   pinMode(LEG_CHANNEL_8, INPUT);
 
-
-  // attach an interrupt to the serial 1 reciever pin
-  attachInterrupt(digitalPinToInterrupt(SERIAL1_PIN), resetIdleTimer, CHANGE);
-
   idleTimer = millis();
 }
 
@@ -122,6 +120,18 @@ int numReload = 200;
 int numUnjam = 200;
 int stateHold = 0;
 /*While fire button is help, alternate between running and not running gun.  When button is released, run hopper to ensure gun is loaded */
+
+
+/*
+  GENERAL STATE DIAGRAM:
+
+  IDLE STATE:  REMAIN IN UNTIL THE IDLE SWITCH IS FLIPPED, AT WHICH POINT TRANSITION TO LOAD STATE.  OTHERWISE DO NOTHING.
+  ALL BELOW STATES TRANSITION TO IDLE IF IDLE SWITCH IS FLIPPED:
+  QUIET LOAD STATE:  IF THE HOPPER HASN'T CAUGHT UP TO THE GUN (LOADED NEW ROUNDS) RUN THE HOPPER, OTHERWISE WAIT FOR GUN COMMAND TO TRANSITION TO ACTIVE FIRE
+  ACTIVE FIRE STATE: RUN GUNMOTOR AND HOPPER MOTOE, TRANSITIONING TO QUIET LOAD IF FIRE BUTTON RELEASED, TRANSITION TO UNJAM IF JAM COMMAND SENT OTHERWISE RUN GUNMOTOR AND HOPPER UNTIL TIME COMES FOR ACTIVE RELOAD
+  ACTIVE RELOAD: SHUT OFF GUN MOTOR TO ALLOW CATCHUP TIME FOR HOPPER, TRANSITION TO QUIET LOAD IF FIRE BUTTON RELEASED, TRANSITION TO UNJAM IF JAM COMMAND SENT, OTHERWISE KEEP GUNMOTOR OFF AND RUN HOPPER UNTIL TIME COMES FOR ACTIVE FIRE
+  UNJAM:  SHUT OFF GUN MOTOR, RUN HOPPER MOTOR BACKWARDS UNTIL TIME FOR UNJAM RUNS OUT, THEN GO TO QUIET LOAD
+*/
 int gunState(int currState)
 {
   switch (currState) {
@@ -129,7 +139,7 @@ int gunState(int currState)
     case 0:
       hopperDriver(0, 0);
       analogWrite(gunmotor, 0);
-      if (analogRead(IDLE_SWITCH) != 0) {
+      if (state[IDLE_SWITCH] != 0) {
         //if no longer idle
         stateHold = 0;
         return 1;
@@ -137,7 +147,7 @@ int gunState(int currState)
       return 0;
     case 1:
       //load state
-      if (analogRead(IDLE_SWITCH) == 0) {
+      if (state[IDLE_SWITCH] == 0) {
         //if idle
         stateHold = 0;
         return 0;
@@ -154,7 +164,7 @@ int gunState(int currState)
 
       stateHold++;
       //change number later
-      if (analogRead(GUN_CHANNEL) == GUN_COMMAND) {
+      if (state[GUN_CHANNEL] == GUN_COMMAND) {
         //move to fire
         stateHold = 0;
         return 2;
@@ -165,17 +175,17 @@ int gunState(int currState)
       analogWrite(gunmotor, GUN_DIR);
       hopperDriver(1, HOPPER_MOTOR);
       stateHold++;
-      if (analogRead(IDLE_SWITCH) == 0) {
+      if (state[IDLE_SWITCH] == 0) {
         //if idle
         stateHold = 0;
         return 0;
       }
-      if (analogRead(JAM_CHANNEL) == JAM_COMMAND) {
+      if (state[JAM_CHANNEL] == JAM_COMMAND) {
         //then unjam
         stateHold = 0;
         return 4;
       }
-      if (analogRead(GUN_CHANNEL) != GUN_COMMAND) {
+      if (state[GUN_CHANNEL] != GUN_COMMAND) {
         //then enter quiet load state
         stateHold = 0;
         return 1;
@@ -192,17 +202,17 @@ int gunState(int currState)
       analogWrite(gunmotor, 0);
       hopperDriver(1, HOPPER_MOTOR);
       stateHold++;
-      if (analogRead(IDLE_SWITCH) == 0) {
+      if (state[IDLE_SWITCH] == 0) {
         //if idle
         stateHold = 0;
         return 0;
       }
-      if (analogRead(JAM_CHANNEL) == JAM_COMMAND) {
+      if (state[JAM_CHANNEL] == JAM_COMMAND) {
         //then unjam
         stateHold = 0;
         return 4;
       }
-      if (analogRead(GUN_CHANNEL) != GUN_COMMAND) {
+      if (state[GUN_CHANNEL] != GUN_COMMAND) {
         //then enter quiet load state
         stateHold = 0;
         return 1;
@@ -217,7 +227,7 @@ int gunState(int currState)
       analogWrite(gunmotor, 0);
       hopperDriver(2, HOPPER_MOTOR);
       stateHold++;
-      if (analogRead(IDLE_SWITCH) == 0) {
+      if (state[IDLE_SWITCH] == 0) {
         //if idle
         stateHold = 0;
         return 0;
@@ -237,17 +247,12 @@ int gunState(int currState)
 
 void legCode()
 {
-  //send remote control info to pi
+  //send remote control info to pi, load in channel by channel
   String baseString = "";
-  baseString = baseString + String(analogRead(IDLE_SWITCH)) + ", ";
-  baseString = baseString + String(analogRead(LEG_CHANNEL_1)) + ", ";
-  baseString = baseString + String(analogRead(LEG_CHANNEL_2)) + ", ";
-  baseString = baseString + String(analogRead(LEG_CHANNEL_3)) + ", ";
-  baseString = baseString + String(analogRead(LEG_CHANNEL_4)) + ", ";
-  baseString = baseString + String(analogRead(LEG_CHANNEL_5)) + ", ";
-  baseString = baseString + String(analogRead(LEG_CHANNEL_6)) + ", ";
-  baseString = baseString + String(analogRead(LEG_CHANNEL_7)) + ", ";
-  baseString = baseString + String(analogRead(LEG_CHANNEL_8));
+  for (int i = 0; i < 10; i++){
+  baseString = baseString + String(state[i]) + ", ";
+  }
+  baseString = baseString + String(state[10]);
   computer.print(baseString);
 }
 
@@ -255,29 +260,14 @@ void legCode()
 
 
 void loop() {
+  //timed interrupt on idle state, leg state sent continuously
   if (millis() - idleTimer > UPDATE_THRESHOLD) {
-    // read from the remote controller
-    if (x8r.readCal(&channels[0], &failSafe, &lostFrames)) {
-      resetIdleTimer();
-      // detect whenever we send a command to fire the gun
-      stateGun = gunState(stateGun);
-      // ...
-      legCode();
-    }
-    else {
-      // if it's been too long since we've recieved data from the controller...
-      if (millis() - idleTimer > IDLE_THRESHOLD) {
-        // make everything idle
-        for (int i = 0; i < 16; i++) {
-          channels[i] = 0;
-        }
-        stateGun = gunState(0);
-        legCode();
+    resetIdleTimer();
+    // detect whenever we send a command to fire the gun
+    stateGun = gunState(stateGun);
+    legCode();
 
-
-      }
-    }
   }
-
+  
 
 }
