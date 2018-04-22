@@ -4,13 +4,13 @@
 //Add current state comments to every state DONE
 //Add comments to everything else DONE
 //Send idle packet to Pi DONE
-//No hardcoded numbers. Define at top.
+//No hardcoded numbers. Define at top. DONE
 //Do all the Pi communication in one place
 //Don't name communications "leg"
 //Add manual aiming state and associated code DONE
 //Add packets for gimbal control from Pi
-//Write the control loop for the camera to gimbal in a more standard form (regular PID?). Add optional low pass filter to sensor data
-//Timer interrupts for running state machine at constant frequency; decouple control code
+//Write the control loop for the camera to gimbal in a more standard form (regular PID?). Add optional low pass filter to sensor data  DONE
+//Timer interrupts for running state machine at constant frequency; decouple control code  DONE
 
 //communication defines for comms with Pi and remote control
 #include <SBUS.h>
@@ -26,19 +26,32 @@ uint16_t lostFrames = 0;
 uint16_t gimbals[3];
 
 //remote control channels
-#define IDLE_SWITCH 11
-#define GUN_CHANNEL 5
-#define GUN_COMMAND 1
-#define AIM_CHANNEL 10
+#define IDLE_SWITCH 0
+#define GUN_CHANNEL 0
+#define GUN_COMMAND 0
+#define LEG_CHANNEL_1 0
+#define LEG_CHANNEL_2 0
+#define LEG_CHANNEL_3 0
+#define LEG_CHANNEL_4 0
+#define LEG_CHANNEL_5 0
+#define LEG_CHANNEL_6 0
+#define LEG_CHANNEL_7 0
+#define LEG_CHANNEL_8 0
 #define HOPPER_MOTOR 255
+#define MANUAL_CHANNEL 0
+#define GUN_DIR 255
+#define JAM_CHANNEL 0
+#define JAM_COMMAND 255
 
 //Comms defines for comms with gun subsystems
 int gunmotor = 6;
 int laserpointer = 2;
 int hoppermotor = 9;
+int hopperdir = 8;
 int lightsensor = 14;
 
 #define IDLE_THRESHOLD 1000
+#define UPDATE_THRESHOLD 10
 unsigned long idleTimer; // number of milliseconds without recieving data from the controller
 void resetIdleTimer()
 {
@@ -52,7 +65,20 @@ void setup() {
   pinMode(gunmotor, OUTPUT);
   pinMode(laserpointer, OUTPUT);
   pinMode(hoppermotor, OUTPUT);
+  pinMode(hopperdir, OUTPUT);
   pinMode(lightsensor, INPUT);
+  pinMode(GUN_CHANNEL, INPUT);
+  pinMode(IDLE_SWITCH, INPUT);
+  pinMode(JAM_CHANNEL, INPUT);
+  pinMode(LEG_CHANNEL_1, INPUT);
+  pinMode(LEG_CHANNEL_2, INPUT);
+  pinMode(LEG_CHANNEL_3, INPUT);
+  pinMode(LEG_CHANNEL_4, INPUT);
+  pinMode(LEG_CHANNEL_5, INPUT);
+  pinMode(LEG_CHANNEL_6, INPUT);
+  pinMode(LEG_CHANNEL_7, INPUT);
+  pinMode(LEG_CHANNEL_8, INPUT);
+
 
   // attach an interrupt to the serial 1 reciever pin
   attachInterrupt(digitalPinToInterrupt(SERIAL1_PIN), resetIdleTimer, CHANGE);
@@ -60,304 +86,183 @@ void setup() {
   idleTimer = millis();
 }
 
-int stateAim = 0;
 int stateGun = 0;
 int stateLeg = 0;
 //return condition for fire-idle
-bool donefiring() {
-}
-//needs to be filled in
-bool isjammed() {
-
+void hopperDriver(int inst, int power) {
+  switch (inst) {
+    case 0:
+      //brake
+      analogWrite(hoppermotor, 0);
+      digitalWrite(hopperdir, LOW);
+      break;
+    case 1:
+      //forward
+      analogWrite(hoppermotor, power);
+      digitalWrite(hopperdir, HIGH);
+      break;
+    case 2:
+      //reverse
+      analogWrite(hoppermotor, power);
+      digitalWrite(hopperdir, LOW);
+      break;
+  }
 }
 void unjamcode() {
-
+  hopperDriver(2, HOPPER_MOTOR);
 }
+
+
 // needs code
+//int numCock = 150;
+//int numLoad = 350;
+int numCatchUp = 500;
+int numFire = 150;
+int numReload = 200;
+int numUnjam = 200;
+int stateHold = 0;
+/*While fire button is help, alternate between running and not running gun.  When button is released, run hopper to ensure gun is loaded */
 int gunState(int currState)
 {
   switch (currState) {
     //idle state for gun
     case 0:
-      analogWrite(hoppermotor, 0);
+      hopperDriver(0, 0);
       analogWrite(gunmotor, 0);
-      if (channels[GUN_CHANNEL] == GUN_COMMAND) {
-        //if remote control sends fire signal
+      if (analogRead(IDLE_SWITCH) != 0) {
+        //if no longer idle
+        stateHold = 0;
         return 1;
       }
       return 0;
     case 1:
       //load state
-      //might need more complex code here for loading
-      analogWrite(hoppermotor, HOPPER_MOTOR);
+      if (analogRead(IDLE_SWITCH) == 0) {
+        //if idle
+        stateHold = 0;
+        return 0;
+      }
+      if (stateHold < numCatchUp) {
+        //if not yet reloaded, reload
+        hopperDriver(1, HOPPER_MOTOR);
+      }
+      else {
+        //otherwise, wait for further commands
+        hopperDriver(0, HOPPER_MOTOR);
+      }
+      analogWrite(gunmotor, 0);
+
+      stateHold++;
       //change number later
-      if (true) {
-        //if gun is loaded, move to fire
+      if (analogRead(GUN_CHANNEL) == GUN_COMMAND) {
+        //move to fire
+        stateHold = 0;
         return 2;
       }
       return 1;
     case 2:
-      //fire state
-      analogWrite(gunmotor, 256);
-      if (donefiring()) {
+      //fire state, active gun
+      analogWrite(gunmotor, GUN_DIR);
+      hopperDriver(1, HOPPER_MOTOR);
+      stateHold++;
+      if (analogRead(IDLE_SWITCH) == 0) {
+        //if idle
+        stateHold = 0;
         return 0;
       }
-      if (isjammed()) {
-        return 3;
+      if (analogRead(JAM_CHANNEL) == JAM_COMMAND) {
+        //then unjam
+        stateHold = 0;
+        return 4;
       }
-      return 2;
-    case 3:
-      unjamcode();
-      if (!isjammed()) {
+      if (analogRead(GUN_CHANNEL) != GUN_COMMAND) {
+        //then enter quiet load state
+        stateHold = 0;
         return 1;
       }
-      else {
+      if (stateHold > numFire) {
+        //then enter active reload
+        stateHold = 0;
         return 3;
       }
+
+      return 2;
+    case 3:
+      //fire state, inactive gun
+      analogWrite(gunmotor, 0);
+      hopperDriver(1, HOPPER_MOTOR);
+      stateHold++;
+      if (analogRead(IDLE_SWITCH) == 0) {
+        //if idle
+        stateHold = 0;
+        return 0;
+      }
+      if (analogRead(JAM_CHANNEL) == JAM_COMMAND) {
+        //then unjam
+        stateHold = 0;
+        return 4;
+      }
+      if (analogRead(GUN_CHANNEL) != GUN_COMMAND) {
+        //then enter quiet load state
+        stateHold = 0;
+        return 1;
+      }
+      if (stateHold > numCatchUp) {
+        //then enter active fire
+        stateHold = 0;
+        return 2;
+      }
+      return 3;
+    case 4:
+      analogWrite(gunmotor, 0);
+      hopperDriver(2, HOPPER_MOTOR);
+      stateHold++;
+      if (analogRead(IDLE_SWITCH) == 0) {
+        //if idle
+        stateHold = 0;
+        return 0;
+      }
+      if (stateHold > numUnjam) {
+        //then enter quiet load state
+        stateHold = 0;
+        return 1;
+      }
+      return 4;
+
   }
 
 
 }
 
-//needs code
+
 void legCode()
 {
   //send remote control info to pi
   String baseString = "";
-  for (int i = 0; i < 15; i++) {
-    baseString = baseString + String(channels[i]) + ", ";
-  }
-  baseString = baseString + String(channels[15]);
+  baseString = baseString + String(analogRead(IDLE_SWITCH)) + ", ";
+  baseString = baseString + String(analogRead(LEG_CHANNEL_1)) + ", ";
+  baseString = baseString + String(analogRead(LEG_CHANNEL_2)) + ", ";
+  baseString = baseString + String(analogRead(LEG_CHANNEL_3)) + ", ";
+  baseString = baseString + String(analogRead(LEG_CHANNEL_4)) + ", ";
+  baseString = baseString + String(analogRead(LEG_CHANNEL_5)) + ", ";
+  baseString = baseString + String(analogRead(LEG_CHANNEL_6)) + ", ";
+  baseString = baseString + String(analogRead(LEG_CHANNEL_7)) + ", ";
+  baseString = baseString + String(analogRead(LEG_CHANNEL_8));
   computer.print(baseString);
 }
-void idleCode() {
-  //send idle packet to pi
-  String baseString = "";
-  for (int i = 0; i < 15; i++) {
-    baseString = baseString + String(-1) + ", ";
-  }
-  baseString = baseString + String(-1);
-  computer.print(baseString);
-}
-int legState(int currState)
-{
-  switch (currState) {
-    case 0:
-      //legs idle
-      idleCode();
-      if (channels[IDLE_SWITCH] > 0) {
-        return 1;
-      }
-      return 0;
-    case 1:
-      //legs active
-      legCode();
-      if (channels[IDLE_SWITCH] == 0) {
-        return 0;
-      }
-      return 1;
-  }
-}
-uint16_t converttospd(float n) {
-  //This is a janky hack that is annoying. Sad.
-  //conversion of within pi targeting data into gimbal ready data
-  float x = 1020.0 + 500.0 * n;
-  int y = (int) x;
-  uint16_t z = (uint16_t) y;
-  return z;
-}
 
-//initialization and description for the sweep function
-int spdnow = 0;
-bool dir = true;
-//move by stepsize between the two bounds, produces sinusoidal motion patterns
-int spdstep(int i, int bound1, int bound2, int stepsize) {
-  if (dir) {
-    if (i >= bound2) {
-      dir = false;
-      return i;
-    }
-    else {
-      i += stepsize;
-      return i;
-    }
-  }
-  else {
-    if (i <= bound1) {
-      dir = true;
-      return i;
-    }
-    else {
-      i -= stepsize;
-      return i;
-    }
-  }
-}
-/*
-   Sample usage of sweeper:
-   for (int i = 0; i < 16; i++) {
-    gimbals[i] = 0;
-  }
-    spdnow = spdstep(spdnow, -100, 100, 1);
-    float fltspd = ((float) spdnow) / 100.0;
-    int spdsend = converttospd(fltspd);
-    gimbals[0] = spdsend;
-    gimbals[1]=spdsend;
-    // write the SBUS packet to an SBUS compatible servo
-    x8r.write(gimbals);
-*/
-//conversion of bytes from the Pi into -1 to 1 float values for internal calculations, with low precision near the center to avoid jittering
-//Bound is how far from the center to consider equal to center for jitter reduction purposes.
-float bytetospd(int i, int bound) {
-  int j = 127;
-  if (abs(i - j) < bound) {
-    i = 127;
-  }
-  float newspd = (((float) i) - 127.0) / 127.0;
-  if (newspd > 1.0) {
-    newspd = 1.00;
-  }
-  if (newspd < -1.00) {
-    newspd = -1.00;
-  }
-  return newspd;
-}
 
-int bytesfound = 0;
-float spd[16];
-int convspds[16];
-void sweepCode() {
-  for (int i = 0; i < 16; i++) {
-    gimbals[i] = 0;
-  }
-  spdnow = spdstep(spdnow, -100, 100, 1);
-  float fltspd = ((float) spdnow) / 100.0;
-  int spdsend = converttospd(fltspd);
-  gimbals[0] = spdsend;
-  gimbals[1] = spdsend;
-  // write the SBUS packet to an SBUS compatible servo
-  x8r.write(gimbals);
-}
-void manualCode() {
-  for (int i = 0; i < 16; i++) {
-    gimbals[i] = channels[i];
-  }
-  x8r.write(gimbals);
-}
-void aimCode() {
-  //If in aim state, then take in byte-based targeting data from computer, then convert to float, then convert to gimbal commands
-  bytesfound = 0;
-  for (int i = 0; i < 16; i++) {
-    gimbals[i] = 0;
-    spd[i] = 0.0;
-    convspds[i] = 0;
-  }
-  while (bytesfound < 2) {
-    int center = 260 + bytesfound * 60;
-    if (computer.available()) {
-      spd[bytesfound] = bytetospd(computer.parseInt(), 10);
-      //computer.println(bytesfound);
-      //computer.println(spd[bytesfound]);
-      bytesfound++;
-    }
-    else {
-
-    }
-  }
-  /*
-     Here is where we'd put PID calculations--the output should go into the spd array, or something of similar structure: an array with up to 16 elements, with float values between -1 and 1.
-  */
-  while (bytesfound >= 0) {
-    convspds[bytesfound] = converttospd(spd[bytesfound]);
-    bytesfound--;
-  }
-  //write new data to the gimbals
-  for (int i = 0; i < 2; i++) {
-    gimbals[i] = convspds[i];
-  }
-  x8r.write(gimbals);
-  //computer.println(gimbals[0]);
-  //purging the input buffer
-  while (computer.available()) {
-    computer.read();
-  }
-  //computer.println(3);
-  //computer.println(gimbals[0]);
-  //computer.println(gimbals[1]);
-
-}
-int aimState(int currState)
-{
-// 0 = sweep state, 1 = aim state, 2 = manual state
-  switch (currState) {
-    //idle state
-    case 0:
-      if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] > 0) {
-        return 1;
-      }
-      if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] > 1) {
-        return 3;
-      }
-      if (channels[IDLE_SWITCH] > 0) {
-        return 2;
-      }
-      return 0;
-    case 1:
-      //automatic state
-      aimCode();
-      if (channels[IDLE_SWITCH] == 0) {
-        return 0;
-      }
-      if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] == 0) {
-        return 2;
-      }
-      if (channels[IDLE_SWITCH] > 0 && channels[AIM_CHANNEL] > 0) {
-        return 3;
-      }
-      return 1;
-    case 2:
-      sweepCode();
-      if (channels[IDLE_SWITCH] == 0) {
-        return 0;
-      }
-      if (channels[AIM_CHANNEL] > 1) {
-        return 3;
-      }
-      if (channels[AIM_CHANNEL] == 0) {
-        return 1;
-      }
-      return 2;
-    case 3:
-      manualCode();
-      if (channels[IDLE_SWITCH] == 0) {
-        return 0;
-      }
-      if (channels[AIM_CHANNEL] == 0) {
-        return 1;
-      }
-      if (channels[AIM_CHANNEL] == 1) {
-        return 2;
-      }
-      return 3;
-  }
-
-}
-//functions for converting target data packets into packets for gimbal commands
 
 
 void loop() {
-  // read from the remote controller
-  if (x8r.readCal(&channels[0], &failSafe, &lostFrames)) {
-    // detect whenever we send a command to fire the gun
-    if (channels [AIM_CHANNEL] >= 0) {
-      stateAim = aimState(stateAim);
-    }
-    if (channels[GUN_CHANNEL] == GUN_COMMAND) {
+  if (millis() - idleTimer > UPDATE_THRESHOLD) {
+    // read from the remote controller
+    if (x8r.readCal(&channels[0], &failSafe, &lostFrames)) {
+      resetIdleTimer();
+      // detect whenever we send a command to fire the gun
       stateGun = gunState(stateGun);
       // ...
-    }
-    if (channels[LEG_CHANNEL_START] >= 0) {
-      stateLeg = legState(stateLeg);
+      legCode();
     }
     else {
       // if it's been too long since we've recieved data from the controller...
@@ -366,13 +271,13 @@ void loop() {
         for (int i = 0; i < 16; i++) {
           channels[i] = 0;
         }
-        stateAim = aimState(0);
         stateGun = gunState(0);
-        stateLeg = legState(0);
+        legCode();
 
 
       }
     }
-
   }
+
+
 }
