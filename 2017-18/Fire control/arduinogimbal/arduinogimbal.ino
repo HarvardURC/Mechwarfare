@@ -250,7 +250,7 @@ int gunState(int currState)
         return 4;
       }
       if (state[GUN_CHANNEL] < SWITCH_BOUND) {
-        //then enter quiet load state
+        //then enter quiet load: catchup state
         stateHold = 0;
         return 1;
       }
@@ -277,7 +277,7 @@ int gunState(int currState)
         return 4;
       }
       if (state[GUN_CHANNEL] < SWITCH_BOUND) {
-        //then enter quiet load state
+        //then enter quiet load: catchup state
         stateHold = 0;
         return 1;
       }
@@ -297,7 +297,7 @@ int gunState(int currState)
         return 0;
       }
       if (stateHold > numUnjam) {
-        //then enter quiet load state
+        //then enter quiet load: catchup state
         stateHold = 0;
         return 1;
       }
