@@ -49,6 +49,7 @@ volatile unsigned long timers[9];
 #define IDLE_SWITCH 8
 #define GUN_CHANNEL 5
 #define SWITCH_BOUND 1200
+#define SWITCH_BOUND_JAM 1200
 #define JAM_CHANNEL 1
 
 
@@ -245,7 +246,7 @@ int gunState(int currState)
         stateHold = 0;
         return 0;
       }
-      if (state[JAM_CHANNEL] > SWITCH_BOUND) {
+      if (state[JAM_CHANNEL] > SWITCH_BOUND_JAM) {
         //then unjam
         stateHold = 0;
         return 4;
@@ -272,7 +273,7 @@ int gunState(int currState)
         stateHold = 0;
         return 0;
       }
-      if (state[JAM_CHANNEL] > SWITCH_BOUND) {
+      if (state[JAM_CHANNEL] > SWITCH_BOUND_JAM) {
         //then unjam
         stateHold = 0;
         return 4;
