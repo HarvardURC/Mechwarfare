@@ -32,9 +32,9 @@
 
 // Defines for retrieving remote control signals
 
-volatile uint16_t state[9];
+volatile uint16_t state[8];
 
-volatile unsigned long timers[9];
+volatile unsigned long timers[8];
 
 #define CH1 23
 #define CH2 22
@@ -46,11 +46,11 @@ volatile unsigned long timers[9];
 #define CH8 15
 
 //remote control channels
-#define IDLE_SWITCH 8
-#define GUN_CHANNEL 5
+#define IDLE_SWITCH 7
+#define GUN_CHANNEL 4
 #define SWITCH_BOUND 1200
 #define SWITCH_BOUND_JAM 1200
-#define JAM_CHANNEL 1
+#define JAM_CHANNEL 0
 
 
 //Comms defines for comms with gun subsystems
