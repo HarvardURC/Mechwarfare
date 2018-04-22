@@ -7,10 +7,10 @@
 # wifi setup:
 # https://cdn-learn.adafruit.com/downloads/pdf/setting-up-a-raspberry-pi-as-a-wifi-access-point.pdf
 
+cd ~/Mechwarfare/2017-18/frontend
 git pull
 sudo -S chmod 666 /dev/ttyUSB0 < ~/password.txt
 
 # add more of these (backgrounded with &) if you're using multiple processes
 
-cd ~/Mechwarfare/2017-18/frontend
 python3 webtest.py
