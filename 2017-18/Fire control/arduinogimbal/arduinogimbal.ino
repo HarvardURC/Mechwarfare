@@ -37,14 +37,14 @@ volatile unsigned long timers[9];
 #define IDLE_SWITCH 8
 #define GUN_CHANNEL 5
 #define SWITCH_BOUND 1200
-#define SWITCH_BOUND_JAM 1500 
+#define SWITCH_BOUND_JAM 1200 
 #define JAM_CHANNEL 1
 
 
 //Comms defines for comms with gun subsystems
 int gunmotor = A6; 
-int hoppermotor = 9;
-int hopperdir = 8;
+int hoppermotor = 6;
+int hopperdir = 7;
 
 #define HOPPER_POWER 255 //PWM POWER TO RUN HOPPER
 #define GUN_POWER 255 //PWM POWER TO RUN GUNMOTOR
@@ -202,6 +202,7 @@ int gunState(int currState)
       }
       if (stateHold > numCatchUp) {
         //if caught up, move to idle quiet load
+        stateHold = 0;
         return 5;
       }
 
