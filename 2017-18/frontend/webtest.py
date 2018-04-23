@@ -35,19 +35,18 @@ def fucking_teensy_loop():
     global state
     if (state != "hi"):
         if (bool(state["useradio"])):
-            msg = ser.readline().decode('utf-8') # data might get backlogged here
-                                 # but if you move it out, it'll error if serial isn't plugged in
-            msg = [int(i) for i in msg.split()]
-
-            state["vx"] = scale(msg[2], macros.V_MAX)          # forward/backward trans
-            state["omega"] = scale(msg[3], macros.OMEGA_MAX)   # stationary rotate
-            # msg[4] # fire
-            state["vy"] = scale(msg[5], macros.V_MAX)          # left/right trans
-            state["pitch"] = scale(msg[6], macros.PITCH_BOUND)
-            state["roll"] = scale(msg[7], macros.ROLL_BOUND)
-            state["yaw"] = scale(msg[8], macros.YAW_BOUND)
-            # bool(msg[9]) # aim mode
-            # bool(msg[10]) # enable/disable
+        	if ser.in_waiting() > 0:
+	            msg = ser.readline().decode('utf-8')
+	            msg = [int(i) for i in msg.split()]
+	            state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
+	            state["omega"] = scale(msg[4], macros.OMEGA_MAX)   # stationary rotate
+	            # msg[4] # fire
+	            state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
+	            state["pitch"] = scale(msg[7], macros.PITCH_BOUND)
+	            state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
+	            state["yaw"] = scale(msg[2], macros.YAW_BOUND)
+            	# bool(msg[9]) # aim mode
+            	# bool(msg[10]) # enable/disable
 
 def start_server():
     global app
