@@ -70,7 +70,7 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw,
         body.legs[i].state.yawhomes = [home_x * yawc - home_y * yaws, home_x * yaws + home_y * yawc]
 
     # If walking is enabled and the robot is at the minimum required velocity
-    if (enable and ((m.sqrt(vx**2 + vy**2) > macros.MIN_V) or (omega > macros.MIN_OMEGA))):
+    if (enable and ((m.sqrt(vx**2 + vy**2) > macros.MIN_V) or (abs(omega) > macros.MIN_OMEGA))):
         # If robot was still immediately before this timestep
         if (was_still):
             t = 0
