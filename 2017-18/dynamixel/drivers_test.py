@@ -164,16 +164,19 @@ def init_robot():
 
 def check_angles(angles):
     for i in range(len(angles)):
+        # if it's an hip
         if (i % 3 == 0):
             if (angles[i] < macros.HIP_MIN):
                 angles[i] = macros.HIP_MIN
             elif (angles[i] > macros.HIP_MAX):
                 angles[i] = macros.HIP_MAX
+        # if it's a knee
         elif (i % 3 == 1):
             if (angles[i] < macros.KNEE_MIN):
                 angles[i] = macros.KNEE_MIN
             elif (angles[i] > macros.KNEE_MAX):
                 angles[i] = macros.KNEE_MAX
+        # if it's an elbow
         else:
             if (angles[i] < macros.ELB_MIN):
                 angles[i] = macros.ELB_MIN
@@ -215,6 +218,6 @@ def update_robot(body, current_state, dt):
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
     if (len(angles) == 12):
-        err = set_target_positions(deg_to_dyn(check_angles(angles)))
+        err = set_target_positions(deg_to_dyn(angles))
     sleep(sleeptime)
 
