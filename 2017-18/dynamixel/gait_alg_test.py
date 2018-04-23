@@ -51,7 +51,7 @@ def update_leg(state, vx, vy, omega, t, lift_phase, timestep, stridelength, rais
 def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw, t, home_wid, home_len, timestep, 
     stridelength, raisefrac, raiseh, lift_phase, phases, was_still):
     """Updates the states of every leg for a given robot body, given state and robot velocity"""
-    timestep = MACROS.timestep
+    timestep = macros.TIMESTEP
 
     # Update leg states
     for i in range(len(body.legs)):

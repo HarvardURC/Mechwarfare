@@ -35,7 +35,7 @@ def fucking_teensy_loop():
     global state
     if (state != "hi"):
         if (bool(state["useradio"])):
-        	if ser.in_waiting() > 0:
+        	if (ser.in_waiting > 0):
 	            msg = ser.readline().decode('utf-8')
 	            msg = [int(i) for i in msg.split()]
 	            state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
