@@ -18,7 +18,7 @@ def fix_angles_2(theta):
 # leg_ik(leg: leg_data object, claw: desired claw location in cylindrical coordinates in leg frame)
 #   returns [h, e, k] list
 # If inputs are invalid, returns a list of length 4
-def leg_ik(leg, claw):
+def leg_ik(leg, claw, times={}):
     
     # Timing value
     tv_leg_ik = time()
@@ -32,16 +32,15 @@ def leg_ik(leg, claw):
         e = helpers.rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2)) - 90
         k = helpers.rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen))) - 180
 
-        # Timing print
-        print("Leg_ik time: ", (time() - tv_leg_ik))
+        times = helpers.dict_timer("Ik.leg_ik", times, time()-tv_leg_ik)
 
         return np.array([fix_angles_2(h), fix_angles_2(e), fix_angles_2(k)])
 
     except:
 
-        # Timing print
-        print("Leg_ik time: ", (time() - tv_leg_ik))
+        times = helpers.dict_timer("Ik.leg_ik", times, time()-tv_leg_ik)
 
+        print("Invalid parameters.  Leg ik failed.")
         return np.array([0, 1, 2, 3])
 
 
@@ -49,7 +48,7 @@ def leg_ik(leg, claw):
 # body_ik(legs: list of leg_data objects, claws: list of desired claw locations in floor plane,
 #      pitch: desired pitch of robot, roll: desired roll of robot)
 #   returns newclaws: list of desired claw positions in cylindrical coordinates in leg frame of rotated robot
-def body_ik(body, claws, pitch, roll, height, zs):
+def body_ik(body, claws, pitch, roll, height, zs, times={}):
 
     # Timing value
     tv_body_ik = time()
@@ -76,8 +75,7 @@ def body_ik(body, claws, pitch, roll, height, zs):
         if (zs[i] > 0):
             newclaws[i][2] = -1*(height-zs[i])
 
-    # Timing print
-    print("Body_ik time: ", (time() - tv_body_ik))
+    times = helpers.dict_timer("Ik.body_ik", times, time()-tv_body_ik) 
 
     return newclaws
     
@@ -122,20 +120,17 @@ def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEML
 
 # extract_angles(body: body_data object, claws: list of claw positions, pitch: desired pitch in degrees, roll: desired roll in degrees)
 #   returns list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
-def extract_angles(body, claws, pitch=macros.DEFAULT_PITCH, roll=macros.DEFAULT_ROLL, height=macros.DEFAULT_HEIGHT, zs=[0,0,0,0]):
+def extract_angles(body, claws, pitch=macros.DEFAULT_PITCH, roll=macros.DEFAULT_ROLL, height=macros.DEFAULT_HEIGHT, zs=[0,0,0,0], times={}):
 
-    # Timing print
-    print("\n Ik times")
     # Timing value
     tv_ea = time()
 
-    newclaws = body_ik(body, claws, pitch, roll, height, zs)
+    newclaws = body_ik(body, claws, pitch, roll, height, zs, times)
     ret_angles = np.array([])
     for i in range(len(body.legs)):
-        ret_angles = np.append(ret_angles, (leg_ik(body.legs[i], newclaws[i])))
+        ret_angles = np.append(ret_angles, (leg_ik(body.legs[i], newclaws[i], times)))
 
-    # Timing print
-    print("Extract_angles time: ", (time() - tv_ea))
+    times = helpers.dict_timer("Ik.extract_angles", times, time()-tv_ea)
 
     return ret_angles
 

@@ -42,3 +42,12 @@ def degreesmod(theta):
 	while(theta < 0):
 		theta = theta + 360
 	return (theta % 360)
+
+# dict_timer(key, d, val)
+#   aggregates times in dict
+def dict_timer(key, d, val):
+    if (key in d):
+        d[key] += val
+    else:
+        d[key] = val
+    return d

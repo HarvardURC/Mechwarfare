@@ -3,7 +3,7 @@ import math as m
 import copy, macros, objs, ik, helpers
 from time import time
 
-def calculate_step(cur, goal, phase, endphase, timestep, stridelength):
+def calculate_step(cur, goal, phase, endphase, timestep, stridelength, times={}):
     """Calculate the next step to reach a goal at a certain time"""
 
     # Timing value
@@ -14,14 +14,13 @@ def calculate_step(cur, goal, phase, endphase, timestep, stridelength):
         # If so, go to the goal right away
         return goal - cur
 
-    # Timing print
-    print("Calculate_step time: ", (time() - tv_cs))
+    times = helpers.dict_timer("GAT.calculate_step", times, time()-tv_cs)    
 
     # Otherwise, go at the speed that will reach the goal at the target time
     return (goal - cur) * timestep / (stridelength * (endphase - phase))
 
 
-def update_leg(state, vx, vy, omega, t, lift_phase, timestep, stridelength, raisefrac, raiseh):
+def update_leg(state, vx, vy, omega, t, lift_phase, timestep, stridelength, raisefrac, raiseh, times={}):
     """Updates the state of a leg at each timestep, given state and robot velocity"""
 
     # Timing value
@@ -36,33 +35,29 @@ def update_leg(state, vx, vy, omega, t, lift_phase, timestep, stridelength, rais
         state.home_offs[1] = -1 * (-vy - state.yawhomes[0] * omega) * (stridelength * (1-lift_phase) / 2)
 
         # Move it horizontally towards the home position
-        state.loc[0] += calculate_step(state.loc[0], state.yawhomes[0] + state.home_offs[0], phase, lift_phase, timestep, stridelength)
-        state.loc[1] += calculate_step(state.loc[1], state.yawhomes[1] + state.home_offs[1], phase, lift_phase, timestep, stridelength)
+        state.loc[0] += calculate_step(state.loc[0], state.yawhomes[0] + state.home_offs[0], phase, lift_phase, timestep, stridelength, times)
+        state.loc[1] += calculate_step(state.loc[1], state.yawhomes[1] + state.home_offs[1], phase, lift_phase, timestep, stridelength, times)
 
         # If it's being lifted
         if phase < lift_phase * raisefrac:
             # Lift it
-            state.loc[2] += calculate_step(state.loc[2], raiseh, phase, lift_phase * raisefrac, timestep, stridelength)
+            state.loc[2] += calculate_step(state.loc[2], raiseh, phase, lift_phase * raisefrac, timestep, stridelength, times)
         # If it's being lowered,
         elif phase > lift_phase * (1 - raisefrac):
             # Lower it
-            state.loc[2] += calculate_step(state.loc[2], 0, phase, lift_phase, timestep, stridelength)
+            state.loc[2] += calculate_step(state.loc[2], 0, phase, lift_phase, timestep, stridelength, times)
     else:
         # Otherwise, move it horizontally based on robot velocity
         state.loc[0] += (-vx + state.loc[1] * omega) * timestep
         state.loc[1] += (-vy - state.loc[0] * omega) * timestep
 
-    # Timing print
-    print("Update_leg time: ", (time() - tv_ul))
-
+    times = helpers.dict_timer("GAT.update_leg", times, time()-tv_ul)
 
 
 def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw, t, home_wid, home_len, timestep, 
     stridelength, raisefrac, raiseh, lift_phase, phases, was_still):
     """Updates the states of every leg for a given robot body, given state and robot velocity"""
 
-    # Timing print
-    print("\n gait_alg_test.py times")
     # Timing value
     tv_timestep = time()
 
@@ -97,7 +92,7 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw,
         was_still = False
         # Update each leg
         for i in range(len(body.legs)):
-            update_leg(body.legs[i].state, vx, vy, helpers.dtor(omega), t, lift_phase, timestep, stridelength, raisefrac, raiseh)
+            update_leg(body.legs[i].state, vx, vy, helpers.dtor(omega), t, lift_phase, timestep, stridelength, raisefrac, raiseh, times)
             xys.append([body.legs[i].state.loc[0], body.legs[i].state.loc[1]])
             zs.append(body.legs[i].state.loc[2])    
 
@@ -111,9 +106,10 @@ def timestep(body, enable, return_home, vx, vy, omega, height, pitch, roll, yaw,
     # Increment timestep
     t += timestep
 
-    # Timing print
-    print("Timestep time: ", (time() - tv_timestep))
+    times = helpers.dict_timer("GAT.timestep", times, time()-tv_timestep)
+
+    ret_angles = ik.extract_angles(body, xys, pitch, roll, height, zs, times)
 
     # Return formatted array of angles
-    return(timestep, ik.extract_angles(body, xys, pitch, roll, height, zs), t, was_still)
+    return(timestep, ret_angles, t, was_still, times)
 
