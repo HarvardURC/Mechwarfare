@@ -1,12 +1,10 @@
 
-import os
-import ik
-import gait_alg_test
-import ctypes
+import os, ik, gait_alg_test, ctypes, macros, helpers
 from math import sin,cos
 from time import sleep, time
-import macros
 
+# global to track times
+time = {}
 
 # random setup stuff
 if os.name == 'nt':
@@ -119,6 +117,7 @@ def deinit_motors():
 # - pos_list must have the same dimension as ids_list from init_motors()
 # returns -1 on failure and prints error
 def set_target_positions(pos_list):
+    global times
 
     if(len(pos_list) != len(IDS)):
         print("pos_list doesn't have the same dimension as ids_list")
@@ -143,12 +142,12 @@ def set_target_positions(pos_list):
 
     tv_gswtp = time()
     dynamixel.groupSyncWriteTxPacket(GROUP_NUM)
-    print("groupSyncWriteTxPacket time: ", (time() - tv_gswtp))
+    times = helpers.dict_timer("DT.groupSyncWriteTxPacket", times, time()-tv_gswtp)
     """if dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION) != COMM_SUCCESS:
         dynamixel.printTxRxResult(PROTOCOL_VERSION, dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION))"""
     tv_gswcp = time()
     dynamixel.groupSyncWriteClearParam(GROUP_NUM)
-    print("groupSyncWriteClearParam time: ", (time() - tv_gswcp))
+    times = helpers.dict_timer("DT.groupSyncWriteClearParam", times, time()-tv_gswcp)
 
 def deg_to_dyn(angles):
     for i in range(len(angles)):
@@ -158,14 +157,11 @@ def deg_to_dyn(angles):
 
 
 def init_robot():
-
-    # Timing print
-    print("\n\n Init_robot times")
     # Timing value
     tv_init = time()
 
     err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [512]*12)
-    print("initiated motors")
+#    print("initiated motors")
     claws, body = ik.make_standard_bot()
     angles = ik.extract_angles(body, claws, 0, 0, 12)
     angles = deg_to_dyn(angles)
@@ -176,7 +172,6 @@ def init_robot():
     return(body)
 
 def check_angles(angles):
-    tv_checkang = time()
     for i in range(angles.size):
         # if it's an hip
         if (i % 3 == 0):
@@ -196,19 +191,22 @@ def check_angles(angles):
                 angles[i] = macros.ELB_MIN
             elif (angles[i] > macros.ELB_MAX):
                 angles[i] = macros.ELB_MAX
-    print("Time for check_angles(): ", (time() - tv_checkang))
     return angles
+
+# Timing values
+ctr = 1
+# Number of iterations before times are printed (prints average times)
+num_iters = 10
 
 t = 0
 was_still = True
 def update_robot(body, current_state, dt):
     global t
     global was_still
+    global times
 
-    # Timing print
-    print("\n\nUpdate_robot times")
     # Timing value
-    tv_update = time()
+    tv_update_robot = time()
 
     # read state
     enable = bool(current_state["enable"])
@@ -233,18 +231,27 @@ def update_robot(body, current_state, dt):
     return_home = bool(current_state["gohome"])
 
     # call timestep function
-    sleeptime, angles, t, was_still = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega,
+    sleeptime, angles, t, was_still, times = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega,
         height, pitch, roll, yaw, t, home_wid, home_len, dt, stridelength, raisefrac,
-        raiseh, lift_phase, [phase0, phase1, phase2, phase3], was_still)
+        raiseh, lift_phase, [phase0, phase1, phase2, phase3], was_still, times)
 
-    print("Update_robot time: ", (time() - tv_update), "\n")
+    times = helpers.dict_timer("DT.update_robot", times, time()-tv_update_robot)
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
     if (angles.size == 12):
         # Timing print
-        print("\n\nServo command times")
         tv_stp = time()
         err = set_target_positions(deg_to_dyn(angles))
-        print("Set_target_positions time: ", (time() - tv_stp))
+        times = helpers.dict_timer("DT.set_target_positions", times, time()-tv_update_robot)
+
     sleep(sleeptime)
+    
+    if (ctr > num_iters):
+        ctr = 0
+        for k in times.keys():
+            print(k, "time: ", times[k]/num_iters)
+            times[k]=0
+        print("\n")
+
+    ctr += 1
 
