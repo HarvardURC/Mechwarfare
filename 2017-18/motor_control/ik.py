@@ -125,10 +125,16 @@ def extract_angles(body, claws, pitch=macros.DEFAULT_PITCH, roll=macros.DEFAULT_
     # Timing value
     tv_ea = time()
 
+#    newclaws = body_ik(body, claws, pitch, roll, height, zs, times)
+#    ret_angles = np.array([])
+#    for i in range(len(body.legs)):
+#        ret_angles = np.append(ret_angles, (leg_ik(body.legs[i], newclaws[i], times)))
+
     newclaws = body_ik(body, claws, pitch, roll, height, zs, times)
-    ret_angles = np.array([])
+    ret_angles = []
     for i in range(len(body.legs)):
-        ret_angles = np.append(ret_angles, (leg_ik(body.legs[i], newclaws[i], times)))
+        ret_anglesappend(leg_ik(body.legs[i], newclaws[i], times))
+
 
     times = helpers.dict_timer("Ik.extract_angles", times, time()-tv_ea)
 
