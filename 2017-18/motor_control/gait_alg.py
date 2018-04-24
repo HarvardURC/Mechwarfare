@@ -1,10 +1,6 @@
 import numpy as np
 import math as m
-import copy
-import macros
-import objs
-import ik
-import helpers
+import copy, macros, objs, ik, helpers
 
 def calculate_step(cur, goal, phase, endphase):
     """Calculate the next step to reach a goal at a certain time"""
@@ -25,25 +21,25 @@ def update_leg(state, vx, vy, omega, t, lift_phase):
 
     # If the leg is being lifted
     if phase < lift_phase:
-        state.home_off_x = -1 * (-vx + state.yawhomes[1] * omega) * (macros.STRIDELENGTH * (1-lift_phase) / 2)
-        state.home_off_y = -1 * (-vy - state.yawhomes[0] * omega) * (macros.STRIDELENGTH * (1-lift_phase) / 2)
+        state.home_offs[0] = -1 * (-vx + state.yawhomes[1] * omega) * (macros.STRIDELENGTH * (1-lift_phase) / 2)
+        state.home_offs[1] = -1 * (-vy - state.yawhomes[0] * omega) * (macros.STRIDELENGTH * (1-lift_phase) / 2)
 
         # Move it horizontally towards the home position
-        state.x += calculate_step(state.x, state.yawhomes[0] + state.home_off_x, phase, lift_phase)
-        state.y += calculate_step(state.y, state.yawhomes[1] + state.home_off_y, phase, lift_phase)
+        state.loc[0] += calculate_step(state.loc[0], state.yawhomes[0] + state.home_offs[0], phase, lift_phase)
+        state.loc[1] += calculate_step(state.loc[1], state.yawhomes[1] + state.home_offs[1], phase, lift_phase)
 
         # If it's being lifted
         if phase < lift_phase * macros.RAISEFRAC:
             # Lift it
-            state.z += calculate_step(state.z, macros.RAISEH, phase, lift_phase * macros.RAISEFRAC)
+            state.loc[2] += calculate_step(state.loc[2], macros.RAISEH, phase, lift_phase * macros.RAISEFRAC)
         # If it's being lowered,
         elif phase > lift_phase * (1 - macros.RAISEFRAC):
             # Lower it
-            state.z += calculate_step(state.z, 0, phase, lift_phase)
+            state.loc[2] += calculate_step(state.loc[2], 0, phase, lift_phase)
     else:
         # Otherwise, move it horizontally based on robot velocity
-        state.x += (-vx + state.y * omega) * macros.TIMESTEP
-        state.y += (-vy - state.x * omega) * macros.TIMESTEP
+        state.loc[0] += (-vx + state.loc[1] * omega) * macros.TIMESTEP
+        state.loc[1] += (-vy - state.loc[0] * omega) * macros.TIMESTEP
 
 
 
@@ -53,18 +49,19 @@ def timestep(body, vx, vy, omega, t, lift_phase=macros.LIFT_PHASE, pitch=macros.
 
     xys = []
     zs = []
-    yawc, yaws = m.cos(helpers.dtor(yaw)), m.sin(helpers.dtor(yaw))
-    for i in range(len(body.legs)):
-        home_x, home_y = body.legs[i].state.home_x, body.legs[i].state.home_y
-        body.legs[i].state.yawhomes = [home_x * yawc - home_y * yaws, home_x * yaws + home_y * yawc]
+
+#    yawc, yaws = m.cos(helpers.dtor(yaw)), m.sin(helpers.dtor(yaw))
+#    for i in range(len(body.legs)):
+#        home_x, home_y = body.legs[i].state.home_x, body.legs[i].state.home_y
+#        body.legs[i].state.yawhomes = [home_x * yawc - home_y * yaws, home_x * yaws + home_y * yawc]
 
     # if the robot should be stepping
     if ((m.sqrt(vx**2 + vy**2) > macros.MIN_V) or (omega > macros.MIN_OMEGA)):
         # Add to variables
         for i in range(len(body.legs)):
             update_leg(body.legs[i].state, vx, vy, helpers.dtor(omega), t, lift_phase)
-            xys.append([body.legs[i].state.x, body.legs[i].state.y])
-            zs.append(body.legs[i].state.z)
+            xys.append([body.legs[i].state.loc[0], body.legs[i].state.loc[1]])
+            zs.append(body.legs[i].state.loc[2])
 
     # else, if the claws should be static
     else:

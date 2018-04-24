@@ -8,6 +8,7 @@
 #
 #
 import math as m
+import numpy as np
 import helpers
 
 
@@ -62,11 +63,6 @@ clawdist_from_center = poly_rad + DEFAULT_RADIUS   # claw distance from center o
 for i in range(NUMLEGS):
     HOMES.append([clawdist_from_center * m.cos(helpers.dtor(GAMMAS[i])), 
         clawdist_from_center * m.sin(helpers.dtor(GAMMAS[i])), -1 * DEFAULT_HEIGHT])
-print(HOMES)
-"""h = -12
-w = 6
-l = 10
-HOMES = [[l,w,h],[-l,w,h],[-l,-w,h],[l,-w,h]]"""
 
 # Default velocities for walking
 DEFAULT_VX = 1
@@ -136,13 +132,13 @@ MIN_V = 2
 MIN_OMEGA = 5
 
 # List of default leg state information
-phases = [0, 0.5, 0, 0.5]
+phases = np.array([0, 0.5, 0, 0.5])
 DEFSTATES = []
 for i in range(NUMLEGS):
-	DEFSTATES.append([
-		float(HOMES[i][0]),   # current x position
-		float(HOMES[i][1]),   # Current y position
-		float(HOMES[i][2]),                   # Current z position
-		phases[i],     # Phase offset
-		float(HOMES[i][0]),   # Home x position
-		float(HOMES[i][1])])   # Home y position
+    DEFSTATES.append([
+        float(HOMES[i][0]),   # current x position
+        float(HOMES[i][1]),   # Current y position
+        float(HOMES[i][2]),                   # Current z position
+        phases[i],     # Phase offset
+        float(HOMES[i][0]),   # Home x position
+        float(HOMES[i][1])])   # Home y position

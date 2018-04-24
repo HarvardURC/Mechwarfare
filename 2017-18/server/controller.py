@@ -49,30 +49,20 @@ def quick_fix_angles(angles):
 
 client = hlsockets.UDSClient()
 client.open(hlsockets.CONTROLLER)
-reset(2)
 while True:
-    vx = 0
+    vx = 5
     vy = 0
-    omega = 5 * m.sin(.2 * t)
+    omega = 0
     height = 8
     pitch = 0
     roll = 0
-    yaw = 0
+    yaw = 20 * m.sin(t)
     home_wid = 9
     home_len = 9
 
-    if (t < 4):
-        vx = 6
-    elif (t < 8):
-        vx = 0
-    else:
-        vx = 6
-
     sleeptime, angles, t, was_still = gait_alg.timestep(body, vx, vy, omega, height, pitch, roll, yaw, t, home_wid, home_len, was_still)
-    if (len(angles) == 12):
-        print(t)
-        print("\n")
-        client.send(hlsockets.SERVO, quick_fix_angles(quick_fix_order(angles)))
+    if (angles.size == 12):
+        client.send(hlsockets.SERVO, quick_fix_angles(angles.tolist()))
     sleep(sleeptime)
 client.close()
 

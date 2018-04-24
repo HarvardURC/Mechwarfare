@@ -151,19 +151,30 @@ def deg_to_dyn(angles):
     for i in range(len(angles)):
         angles[i] *= 1/.29
         angles[i] = int(angles[i])
-    return(angles)
+    return(angles.tolist())
 
 
 def init_robot():
+
+    # Timing print
+    print("\n\n Init_robot times")
+    # Timing value
+    tv_init = time()
+
     err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [512]*12)
     print("initiated motors")
     claws, body = ik.make_standard_bot()
     angles = ik.extract_angles(body, claws, 0, 0, 12)
     angles = deg_to_dyn(angles)
+
+    # Timing print
+    print("Init_robot time: ," (time() - tv_init), "\n")
+
     return(body)
 
 def check_angles(angles):
-    for i in range(len(angles)):
+    tv_checkang = time()
+    for i in range(angles.size):
         # if it's an hip
         if (i % 3 == 0):
             if (angles[i] < macros.HIP_MIN):
@@ -182,6 +193,7 @@ def check_angles(angles):
                 angles[i] = macros.ELB_MIN
             elif (angles[i] > macros.ELB_MAX):
                 angles[i] = macros.ELB_MAX
+    print("Time for check_angles(): ", (time() - tv_checkang))
     return angles
 
 t = 0
@@ -189,6 +201,12 @@ was_still = True
 def update_robot(body, current_state, dt):
     global t
     global was_still
+
+    # Timing print
+    print("\n\nUpdate_robot times")
+    # Timing value
+    tv_update = time()
+
     # read state
     enable = bool(current_state["enable"])
     vx = float(current_state["vx"])
@@ -216,8 +234,10 @@ def update_robot(body, current_state, dt):
         height, pitch, roll, yaw, t, home_wid, home_len, dt, stridelength, raisefrac,
         raiseh, lift_phase, [phase0, phase1, phase2, phase3], was_still)
 
+    print("Update_robot time: ", (time() - tv_update), "\n")
+
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
-    if (len(angles) == 12):
+    if (angles.size == 12):
         err = set_target_positions(deg_to_dyn(angles))
     sleep(sleeptime)
 
