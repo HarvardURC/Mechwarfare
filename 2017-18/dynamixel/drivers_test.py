@@ -141,11 +141,14 @@ def set_target_positions(pos_list):
             print(dynamixel.getRxPacketError(PROTOCOL_VERSION, dxl_error))
             return -1"""
 
+    tv_gswtp = time()
     dynamixel.groupSyncWriteTxPacket(GROUP_NUM)
+    print("groupSyncWriteTxPacket time: ", (time() - tv_gswtp))
     """if dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION) != COMM_SUCCESS:
         dynamixel.printTxRxResult(PROTOCOL_VERSION, dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION))"""
-
+    tv_gswcp = time()
     dynamixel.groupSyncWriteClearParam(GROUP_NUM)
+    print("groupSyncWriteClearParam time: ", (time() - tv_gswcp))
 
 def deg_to_dyn(angles):
     for i in range(len(angles)):
@@ -238,6 +241,10 @@ def update_robot(body, current_state, dt):
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
     if (angles.size == 12):
+        # Timing print
+        print("\n\nServo command times")
+        tv_stp = time()
         err = set_target_positions(deg_to_dyn(angles))
+        print("Set_target_positions time: ", (time() - tv_stp))
     sleep(sleeptime)
 
