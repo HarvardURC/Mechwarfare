@@ -4,7 +4,7 @@ from math import sin,cos
 from time import sleep, time
 
 # global to track times
-time = {}
+times = {}
 
 # random setup stuff
 if os.name == 'nt':
