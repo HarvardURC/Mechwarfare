@@ -127,7 +127,7 @@ def set_target_positions(pos_list):
     for i in range(len(pos_list)):
         # write goal position
 
-        dxl_addparam_result = ctypes.c_ubyte(dynamixel.groupSyncWriteAddParam(GROUP_NUM, IDS[i], pos_list[i] + HOME, LEN_MX_GOAL_POSITION)).value
+        dxl_addparam_result = ctypes.c_ubyte(dynamixel.groupSyncWriteAddParam(GROUP_NUM, IDS[i], pos_list[i] + HOME, LEN_MX_GOAL_POSITION))
         if dxl_addparam_result != 1:
             print(dx1_addparam_result)
 
@@ -171,7 +171,7 @@ def init_robot():
     angles = deg_to_dyn(angles)
 
     # Timing print
-    print("Init_robot time: ," (time() - tv_init), "\n")
+    print("Init_robot time: ", (time() - tv_init), "\n")
 
     return(body)
 
