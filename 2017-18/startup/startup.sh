@@ -13,4 +13,5 @@ cd ~/Mechwarfare/2017-18/frontend
 git pull
 sudo -S chmod 666 /dev/ttyUSB0 < ~/password.txt
 
-python3 webtest.py
+# restart the server if it crashes
+while true; do python3 webtest.py; done
