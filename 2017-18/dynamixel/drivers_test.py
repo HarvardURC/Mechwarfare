@@ -196,7 +196,7 @@ def check_angles(angles):
 # Timing values
 ctr = 1
 # Number of iterations before times are printed (prints average times)
-num_iters = 10
+num_iters = 100
 
 t = 0
 was_still = True
