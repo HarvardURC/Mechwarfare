@@ -135,7 +135,9 @@ def extract_angles(body, claws, pitch=macros.DEFAULT_PITCH, roll=macros.DEFAULT_
     newclaws = body_ik(body, claws, pitch, roll, height, zs, times)
     ret_angles = []
     for i in range(len(body.legs)):
-        ret_angles = ret_angles + leg_ik(body.legs[i], newclaws[i], times))
+        toadd = leg_ik(body.legs[i], newclaws[i], times)
+        for j in toadd:
+            ret_angles.append(j)
 
 
     times = helpers.dict_timer("Ik.extract_angles", times, time()-tv_ea)

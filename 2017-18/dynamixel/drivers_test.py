@@ -131,9 +131,9 @@ def set_target_positions(pos_list):
     for i in range(len(pos_list)):
         # write goal position
 
-        dxl_addparam_result = ctypes.c_ubyte(dynamixel.groupSyncWriteAddParam(GROUP_NUM, IDS[i], pos_list[i] + HOME, LEN_MX_GOAL_POSITION))
+        dxl_addparam_result = dynamixel.groupSyncWriteAddParam(GROUP_NUM, IDS[i], pos_list[i] + HOME, LEN_MX_GOAL_POSITION)
         if dxl_addparam_result != 1:
-            print(dx1_addparam_result)
+            print(dxl_addparam_result)
 
         """dynamixel.write2ByteTxRx(PORT_NUM, PROTOCOL_VERSION, IDS[i], ADDR_MX_GOAL_POSITION, pos_list[i] + HOME)
         dxl_comm_result = dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION)
@@ -206,6 +206,7 @@ num_iters = 100
 t = 0
 was_still = True
 def update_robot(body, current_state, dt):
+    global ctr
     global t
     global was_still
     global times
@@ -243,7 +244,7 @@ def update_robot(body, current_state, dt):
     times = helpers.dict_timer("DT.update_robot", times, time()-tv_update_robot)
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
-    if (angles.size == 12):
+    if (len(angles) == 12):
         # Timing print
         tv_stp = time()
         err = set_target_positions(deg_to_dyn(angles))
