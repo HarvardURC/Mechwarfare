@@ -114,7 +114,7 @@ ELB_MAX = 135
 TIMESTEP = 0.02  
 
 # Length of full stride (seconds)
-STRIDELENGTH = 1
+STRIDELENGTH = 0.6
 
 # Fraction of idle beat leg is being lifted/lowered
 RAISEFRAC = 0.5  

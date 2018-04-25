@@ -9,13 +9,13 @@ from time import time
 import helpers
 
 
-dt = 0.05
+dt = macros.TIMESTEP
 state = "hi"
 body = init_robot()
 
-ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-offset = 1020
-controller_range = 500
+ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1)
+offset = (990+2014)/2
+controller_range = (2014-990)/2
 
 def scale(num, max):
     # scale serial output based on the maximum
@@ -24,12 +24,12 @@ def scale(num, max):
 def fucking_loop():
     global state
     if (state != "hi"):
-        tv_fl = time()
+        #tv_fl = time()
         update_robot(body, state, dt)
-        print("aaaaaa: ",time()-tv_fl)
-        #print("vx: ", state["vx"])
-        #print("vy: ", state["vy"])
-        #print("omega: ", state["omega"])
+        #print("aaaaaa: ",time()-tv_fl)
+        print("vx: ", state["vx"])
+        print("vy: ", state["vy"])
+        print("omega: ", state["omega"])
         #print("pitch: ", state["pitch"])
         #print("roll: ", state["roll"])
         #print("yaw: ", state["yaw"]) 
@@ -41,8 +41,8 @@ def fucking_teensy_loop():
         if (bool(state["useradio"])):
         	if (ser.in_waiting > 0):
 	            msg = ser.readline().decode('utf-8')
-	            msg = [int(i) for i in msg.split()]
-	            print(msg)
+	            msg = [int(i) for i in msg.split(', ')]
+	            #print(msg)
 	            state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
 	            state["omega"] = scale(msg[4], macros.OMEGA_MAX)   # stationary rotate
 	            # msg[4] # fire
