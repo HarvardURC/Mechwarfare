@@ -1,5 +1,10 @@
 
-import os, ik, gait_alg_test, ctypes, macros, helpers
+import os
+import ik
+import gait_alg_test
+import ctypes
+import macros
+import helpers
 from math import sin,cos
 from time import sleep, time
 
