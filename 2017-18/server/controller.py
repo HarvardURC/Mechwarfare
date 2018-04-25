@@ -1,9 +1,7 @@
 import math as m
 import numpy as np
-import ik
+import ik, macros, hlsockets, helpers
 import gait_alg_test as gait_alg
-import hlsockets
-import helpers
 from time import sleep, time
 
 # 0-2 are leg 1, 3-5 are leg 2, 6-8 are leg 3, 9-11 are leg4
@@ -49,6 +47,34 @@ def quick_fix_angles(angles):
             angles[i] = angles[i]*-1
     return angles
 
+def check_angles(angles):
+    for i in range(len(angles)):
+        # if it's an hip
+        if (i % 3 == 0):
+            if (angles[i] < macros.HIP_MIN):
+                print("a")
+                angles[i] = macros.HIP_MIN
+            elif (angles[i] > macros.HIP_MAX):
+                angles[i] = macros.HIP_MAX
+                print("b")
+        # if it's a knee
+        elif (i % 3 == 1):
+            if (angles[i] < macros.KNEE_MIN):
+                print("c")
+                angles[i] = macros.KNEE_MIN
+            elif (angles[i] > macros.KNEE_MAX):
+                angles[i] = macros.KNEE_MAX
+                print("d")
+        # if it's an elbow
+        else:
+            if (angles[i] < macros.ELB_MIN):
+                angles[i] = macros.ELB_MIN
+                print("e")
+            elif (angles[i] > macros.ELB_MAX):
+                angles[i] = macros.ELB_MAX
+                print("f")
+    return angles
+
 ctr = 1
 num_iters = 100
 
@@ -72,19 +98,19 @@ while True:
 
     times = helpers.dict_timer("Cont.update_robot", times, time()-tv_update_robot)
     
-    if (angles.size == 12):
+    if (len(angles) == 12):
         tv_servosend = time()
-        client.send(hlsockets.SERVO, quick_fix_angles(angles.tolist()))
+        client.send(hlsockets.SERVO, quick_fix_angles(angles))
         times = helpers.dict_timer("Cont.servosend", times, time()-tv_servosend)
 
     sleep(sleeptime)
 
-    if (ctr > num_iters):
-        ctr = 0
-        for k in times.keys():
-            print(k, "time: ", times[k]/num_iters)
-            times[k]=0
-        print("\n")
+    # if (ctr > num_iters):
+    #     ctr = 0
+    #     for k in times.keys():
+    #         print(k, "time: ", times[k]/num_iters)
+    #         times[k]=0
+    #     print("\n")
 
     ctr += 1
 
