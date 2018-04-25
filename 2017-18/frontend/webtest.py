@@ -23,13 +23,13 @@ def fucking_loop():
     global state
     if (state != "hi"):
         update_robot(body, state, dt)
-        print("vx: ", state["vx"])
-        print("vy: ", state["vy"])
-        print("omega: ", state["omega"])
-        print("pitch: ", state["pitch"])
-        print("roll: ", state["roll"])
-        print("yaw: ", state["yaw"]) 
-        print("\n\n")   
+        #print("vx: ", state["vx"])
+        #print("vy: ", state["vy"])
+        #print("omega: ", state["omega"])
+        #print("pitch: ", state["pitch"])
+        #print("roll: ", state["roll"])
+        #print("yaw: ", state["yaw"]) 
+        #print("\n\n")   
 
 def fucking_teensy_loop():
     global state
