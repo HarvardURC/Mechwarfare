@@ -153,7 +153,7 @@ def deg_to_dyn(angles):
     for i in range(len(angles)):
         angles[i] *= 1/.29
         angles[i] = int(angles[i])
-    return(angles.tolist())
+    return(angles)
 
 
 def init_robot():
