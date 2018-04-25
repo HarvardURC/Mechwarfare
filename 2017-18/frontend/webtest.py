@@ -61,7 +61,6 @@ def hello():
 
 @app.route('/handler', methods=['POST'])
 def slidey():
-    print("hiaaaaaa")
     global state
     state = json.loads(request.data.decode('utf-8'))
     return ""
