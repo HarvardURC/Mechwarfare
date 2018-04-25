@@ -249,8 +249,6 @@ def update_robot(body, current_state, dt):
         tv_stp = time()
         err = set_target_positions(deg_to_dyn(angles))
         times = helpers.dict_timer("DT.set_target_positions", times, time()-tv_update_robot)
-
-    sleep(sleeptime)
     
     if (ctr > num_iters):
         ctr = 0

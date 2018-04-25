@@ -5,6 +5,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from drivers_test import init_robot, update_robot
 import serial
 import macros
+from time import time
+import helpers
 
 
 dt = 0.05
@@ -22,7 +24,9 @@ def scale(num, max):
 def fucking_loop():
     global state
     if (state != "hi"):
+        tv_fl = time()
         update_robot(body, state, dt)
+        print("aaaaaa: ",time()-tv_fl)
         #print("vx: ", state["vx"])
         #print("vy: ", state["vy"])
         #print("omega: ", state["omega"])
