@@ -65,9 +65,9 @@ def body_ik(body, claws, pitch, roll, height, zs, times={}):
     # put leg offsets through rotation and subtract difference
     newclaws = []
     for i in range(len(body.legs)):
-        hcloaws[i] = np.append(hclaws[i], -1 * height)
+        claws[i] = np.append(claws[i], -1 * height)
         vec = rot * body.legs[i].off[np.newaxis].T 
-        newclaws.append(helpers.tocyl(hclaws[i] - np.squeeze(np.asarray(vec))))
+        newclaws.append(helpers.tocyl(claws[i] - np.squeeze(np.asarray(vec))))
 
     # incorporate leg lifts
     for i in range(len(zs)):
