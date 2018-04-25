@@ -54,9 +54,7 @@ def body_ik(body, claws, pitch, roll, height, zs, times={}):
     tv_body_ik = time()
     
     # copy claws to prevent error propagation and add z coordinate
-    hclaws = copy.copy(claws)
-    for i in range(len(hclaws)):
-        hclaws[i] = np.append(hclaws[i], -1 * height)
+#    hclaws = copy.copy(claws)
 
     # create rotation matrix
     pc, ps, rc, rs = m.cos(helpers.dtor(pitch)), m.sin(helpers.dtor(pitch)), m.cos(helpers.dtor(roll)), m.sin(helpers.dtor(roll))
@@ -67,6 +65,7 @@ def body_ik(body, claws, pitch, roll, height, zs, times={}):
     # put leg offsets through rotation and subtract difference
     newclaws = []
     for i in range(len(body.legs)):
+        hcloaws[i] = np.append(hclaws[i], -1 * height)
         vec = rot * body.legs[i].off[np.newaxis].T 
         newclaws.append(helpers.tocyl(hclaws[i] - np.squeeze(np.asarray(vec))))
 
