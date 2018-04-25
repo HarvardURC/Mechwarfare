@@ -180,22 +180,22 @@ def check_angles(angles):
     for i in range(angles.size):
         # if it's an hip
         if (i % 3 == 0):
-            if (angles[i] < macros.HIP_MIN):
-                angles[i] = macros.HIP_MIN
-            elif (angles[i] > macros.HIP_MAX):
-                angles[i] = macros.HIP_MAX
+            if (angles[i] < macros.SERVO_LIMITS["HIP_MIN"] - HOME):
+                angles[i] = macros.SERVO_LIMITS["HIP_MIN"] - HOME
+            elif (angles[i] > macros.SERVO_LIMITS["HIP_MAX"] - HOME):
+                angles[i] = macros.SERVO_LIMITS["HIP_MAX"] - HOME
         # if it's a knee
         elif (i % 3 == 1):
-            if (angles[i] < macros.KNEE_MIN):
-                angles[i] = macros.KNEE_MIN
-            elif (angles[i] > macros.KNEE_MAX):
-                angles[i] = macros.KNEE_MAX
+            if (angles[i] < macros.SERVO_LIMITS["KNEE_MIN"] - HOME):
+                angles[i] = macros.SERVO_LIMITS["KNEE_MIN"] - HOME
+            elif (angles[i] > macros.SERVO_LIMITS["KNEE_MAX"] - HOME):
+                angles[i] = macros.SERVO_LIMITS["KNEE_MAX"] - HOME
         # if it's an elbow
         else:
-            if (angles[i] < macros.ELB_MIN):
-                angles[i] = macros.ELB_MIN
-            elif (angles[i] > macros.ELB_MAX):
-                angles[i] = macros.ELB_MAX
+            if (angles[i] < macros.SERVO_LIMITS["ELB_MIN"] - HOME):
+                angles[i] = macros.SERVO_LIMITS["ELB_MIN"] - HOME
+            elif (angles[i] > macros.SERVO_LIMITS["ELB_MAX"] - HOME):
+                angles[i] = macros.VSERVO_LIMITS["ELB_MAX"] - HOME
     return angles
 
 # Timing values
@@ -247,7 +247,7 @@ def update_robot(body, current_state, dt):
     if (len(angles) == 12):
         # Timing print
         tv_stp = time()
-        err = set_target_positions(deg_to_dyn(angles))
+        err = set_target_positions(check_angles(deg_to_dyn(angles)))
         times = helpers.dict_timer("DT.set_target_positions", times, time()-tv_update_robot)
     
     if (ctr > num_iters):

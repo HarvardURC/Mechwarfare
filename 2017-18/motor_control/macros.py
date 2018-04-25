@@ -102,12 +102,12 @@ OMEGA_MAX = 70
 # # # # # # # # # # # #
 
 # BOUNDS ON ANGLES
-HIP_MIN = 95
-HIP_MAX = 185
-KNEE_MIN = 63
-KNEE_MAX = 212
-ELB_MIN = 9
-ELB_MAX = 135
+SERVO_LIMITS = {"HIP_MIN": 95, "HIP_MAX": 185, "KNEE_MIN": 63, "KNEE_MAX": 212, "ELB_MIN": 9, "ELB_MAX": 135} 
+# convert bounds in degrees to bounds in dynamixel units and cast to int
+for k in SERVO_LIMITS.keys():
+    SERVO_LIMITS[k] *= 1/.29
+    SERVO_LIMITS[k] = int(SERVO_LIMITS[k])
+
 
 # TIME CONTROLS
 # Length of time step (seconds)
