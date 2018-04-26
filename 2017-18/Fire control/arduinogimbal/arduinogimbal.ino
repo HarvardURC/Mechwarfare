@@ -54,7 +54,7 @@ int hopperdir = 7;
 //times for state transitions
 //ALL NUM INTS ARE IN UNITS OF MS (REAL TIME IS THE NUMBER, DIVISION BY STATE_DELAY IS FOR NUMBER OF STATE UPDATES
 int numCatchUp = 500 / STATE_DELAY; //TIME FOR HOPPER TO CATCH UP TO GUN (WHEN WE TRANSITION TO QUIET LOAD FROM ACTIVE FIRE)
-int numFire = 150 / STATE_DELAY; //TIME FOR GUN TO ACTIVELY FIRE
+int numFire = 100 / STATE_DELAY; //TIME FOR GUN TO ACTIVELY FIRE
 int numReload = 200 / STATE_DELAY; //TIME FOR GUN TO ACTIVELY RELOAD
 int numUnjam = 200 / STATE_DELAY; //TIME FOR GUN TO UNJAM
 
@@ -199,7 +199,7 @@ int gunState(int currState)
         //if idle
         stateHold = 0;
         return 0;
-      }
+      } 
       if (stateHold > numCatchUp) {
         //if caught up, move to idle quiet load
         stateHold = 0;
@@ -267,7 +267,7 @@ int gunState(int currState)
       analogWrite(gunmotor, 0);
       hopperDriver(1, HOPPER_POWER);
       stateHold++;
-      if (state[IDLE_SWITCH] == 0) {
+      if (state[IDLE_SWITCH] < SWITCH_BOUND) {
         //if idle
         stateHold = 0;
         return 0;
@@ -289,16 +289,19 @@ int gunState(int currState)
       }
       return 3;
     case 4:
+      computer.println("Unjam");
       analogWrite(gunmotor, 0);
       hopperDriver(2, HOPPER_POWER);
       stateHold++;
-      if (state[IDLE_SWITCH] > SWITCH_BOUND) {
+      if (state[IDLE_SWITCH] < SWITCH_BOUND) {
         //if idle
+        computer.println("idle");
         stateHold = 0;
         return 0;
       }
       if (stateHold > numUnjam) {
         //then enter quiet load: catchup state
+        computer.println("done unjam");
         stateHold = 0;
         return 1;
       }
@@ -318,7 +321,7 @@ void forwardChannels()
     baseString = baseString + String(state[i]) + ", ";
   }
   baseString = baseString + String(state[numChannels]);
-  computer.println(baseString);
+  //computer.println(baseString);
 }
 
 
