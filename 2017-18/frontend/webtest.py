@@ -66,7 +66,7 @@ def fucking_teensy_loop():
     	if (ser.in_waiting > 0):
             msg = ser.readline().decode('utf-8')
             msg = [int(i) for i in msg.split(', ')]
-            #print(msg)
+            print(msg)
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
             state["omega"] = scale(msg[4], macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire

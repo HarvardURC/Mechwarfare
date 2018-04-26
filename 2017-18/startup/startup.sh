@@ -20,4 +20,4 @@ sudo -S chmod 666 /dev/ttyUSB0 < ~/password.txt
 echo ok >> log.txt
 
 # restart the server if it crashes
-while true; do python3 webtest.py; date >> log.txt; echo reboot >> log.txt;  done
+while true; do python3 webtest.py < /dev/pts/0; date >> log.txt; echo reboot >> log.txt;  done
