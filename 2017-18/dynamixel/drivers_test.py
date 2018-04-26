@@ -177,7 +177,7 @@ def init_robot():
     return(body)
 
 def check_angles(angles):
-    for i in range(angles.size):
+    for i in range(len(angles)):
         # if it's an hip
         if (i % 3 == 0):
             if (angles[i] < macros.SERVO_LIMITS["HIP_MIN"] - HOME):
