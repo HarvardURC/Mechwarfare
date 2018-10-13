@@ -1,7 +1,5 @@
 # UDS Client/Server code
 
-Disclaimer: not all of the symlinks in the directory point to files that exist yet
-
 The general architecture of our robot is a central forwarding server that connects various `UDSClient`s (you can think of these as [microservices](https://en.wikipedia.org/wiki/Microservices)). These are modular components that communicate over Unix domain sockets (a form of interprocess communication), so that each component can be developed in parallel, the failure of one component does not immediately cause others to fail (at worst, they will block waiting for its output), and we can easily swap out different components with the same interface but different functionality (most notably, connecting to physical servos vs. connecting to virtual servos in a V-REP simulation). 
 
 There is obviously overhead involved in serializing Python objects over a socket (and funnelling these through a single, central server), but this is not the bottleneck for our robot's performance so it's okay. (There is also the benefit that we get around Python's global interpreter lock because each UDSClient is running in a different process, but it's unclear and rather unimportant whether this is a net benefit for performance.)
