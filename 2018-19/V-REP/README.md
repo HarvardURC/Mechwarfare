@@ -1,5 +1,7 @@
 # V-REP / Python interface
 
+## Preliminaries
+
 Useful links:
 
 [V-REP download (pro^edu)](http://www.coppeliarobotics.com/downloads.html)
@@ -24,7 +26,7 @@ You need `remoteApi.dll`, `remoteApi.dylib`, or `remoteApi.so` from `[V-REP inst
 
 We access the V-REP scene `simserver.ttt` with Python as a remote API client in `simclient.py`.
 
----
+## Files
 
 ### hlsockets.py
 
