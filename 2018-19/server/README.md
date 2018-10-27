@@ -29,8 +29,6 @@ start `simserver.ttt` simulation
 
 ## Files
 
-Disclaimer: this list has not been updated for this year yet
-
 ### clienttemplate.py 
 a template for UDSClients
 
