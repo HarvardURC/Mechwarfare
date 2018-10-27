@@ -1,7 +1,7 @@
 import math as m
 import numpy as np
 import ik, macros, hlsockets, helpers
-import gait_alg_test as gait_alg
+import gait_alg
 from time import sleep, time
 
 # 0-2 are leg 1, 3-5 are leg 2, 6-8 are leg 3, 9-11 are leg4
