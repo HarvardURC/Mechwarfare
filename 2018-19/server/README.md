@@ -21,7 +21,7 @@ In `/server/` working directory:
 
 `python3 server.py`
 
-start `mech.ttt` simulation
+start `simserver.ttt` simulation
 
 `python3 simclient.py`
 
@@ -29,7 +29,14 @@ start `mech.ttt` simulation
 
 ## Files
 
-Disclaimer: this list has not been updated for this year yet
+### clienttemplate.py 
+a template for UDSClients
+
+### controller.py
+the client for converting controller input to SERVO instructions
+
+### hlsockets.py 
+the class definition of UDSClient, a collection of objects to simplify network code
 
 ### server.py 
 the central routing server
@@ -37,11 +44,8 @@ the central routing server
 ### simclient.py
 symlink to the client forwarding SERVO messages to V-REP
 
-### clienttemplate.py 
-a template for UDSClients
+### simserver.ttt
+symlink to the V-REP simulation file
 
-### controller.py
-symlink to the client for converting controller input to SERVO instructions
-
-### hlsockets.py 
-the class definition of UDSClient, a collection of objects to simplify network code
+### teensy.py
+client to read teensy input from the serial port
