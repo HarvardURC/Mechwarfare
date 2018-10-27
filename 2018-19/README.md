@@ -1,6 +1,8 @@
 
 # Mechwarfare 2018-19
 
+## Directories
+
 ### V-REP
 * V-REP simulation file
 * V-REP/Python interface code

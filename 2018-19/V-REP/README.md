@@ -1,5 +1,7 @@
 # V-REP / Python interface
 
+## Preliminaries
+
 Useful links:
 
 [V-REP download (pro^edu)](http://www.coppeliarobotics.com/downloads.html)
@@ -20,8 +22,34 @@ Useful links:
 
 ---
 
-You need `remoteApi.dll`, `remoteApi.dylib`, or `remoteApi.so` from `[V-REP install] > programming > remoteApi > lib > lib` in your working directory in order to interface with Python.
+You need `remoteApi.dll`, `remoteApi.dylib`, or `remoteApi.so` from `[V-REP install] > programming > remoteApi > lib > lib` in your working directory in order to interface with Python. (These correspond to Windows, macOS, and Linux respectively.)
 
-We access the V-REP scene `test.ttt` with Python as a remote API client in `test.py`.
+We access the V-REP scene `simserver.ttt` with Python as a remote API client in `simclient.py`.
 
+## Files
 
+### hlsockets.py
+
+The class definition of UDSClient
+
+### remoteApi.dylib
+
+The dynamic library for the V-REP remote C API (for macOS)
+
+### simclient.py
+
+A UDSClient that receives servo instructions and forwards them to V-REP
+
+### simserver.ttt
+
+V-REP simulation file with:
+* (currently) the 2017-18 robot design
+* an environment script that opens V-REP to remote control
+
+### vrep.py
+
+V-REP Python/C interface. Do not change this file.
+
+### vrepConst.py
+
+Constants for the V-REP Python/C interface. Do not change this file.
