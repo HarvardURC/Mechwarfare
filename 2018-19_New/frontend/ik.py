@@ -83,9 +83,8 @@ def body_ik(body, claws, pitch, roll, height, zs, times={}):
 # Other
 
 # make_standard_bot()
-#   creates a bot with equidistant claws at distance RAD from hip with macros.NUMLEGS legs (and sides)
 def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEMLEN, tiblen=macros.TIBLEN, zdist=macros.ZDIST):
-
+    """Creates a bot with equidistant claws at distance RAD from hip with macros.NUMLEGS legs (and sides)"""
     # Timing value
     tv_msb = time()
 
