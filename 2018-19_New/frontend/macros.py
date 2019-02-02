@@ -1,22 +1,14 @@
 #
-#
-#
-#
 #  MACROS FOR ROBOTICS MOTOR FUNCTIONS
-#
-#
-#
 #
 import math as m
 import numpy as np
 import helpers
 
 
-
 # # # # # # # # # # # # 
 # # GENERAL MACROS  # #
 # # # # # # # # # # # #
-
 
 # ROBOT DIMENSIONS
 # Number of legs (If this is changed, changes will not propagate to DEFSTATES)
@@ -71,8 +63,6 @@ DEFAULT_OMEGA = 40
 
 DEFAULT_PAN = 0
 DEFAULT_TILT = 0
-
-
 
 
 # # # # # # # # # # # # #
