@@ -160,7 +160,7 @@ def deg_to_dyn(angles):
         angles[i] = int(angles[i])
     return(angles)
 
-
+# initialize the robot
 def init_robot():
     # Timing value
     tv_init = time()
@@ -249,7 +249,7 @@ def update_robot(body, current_state, dt):
         tv_stp = time()
         err = set_target_positions(check_angles(deg_to_dyn(angles)))
         times = helpers.dict_timer("DT.set_target_positions", times, time()-tv_update_robot)
-    
+
     if (ctr > num_iters):
         ctr = 0
         for k in times.keys():
@@ -258,4 +258,3 @@ def update_robot(body, current_state, dt):
         print("\n")
 
     ctr += 1
-

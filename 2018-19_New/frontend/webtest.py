@@ -8,6 +8,7 @@ import macros
 from time import time
 import helpers
 
+# Global variable to keep track of the state of the robot
 state = {
     "enable":True,
     "gohome":False,
@@ -32,10 +33,11 @@ state = {
     "phasefr":macros.phases[3],
     "useradio": True
 }
+
 body = init_robot()
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1)
+    ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1) # opens serial port to communicate with teensy
 except:
     ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1)
 
@@ -57,8 +59,8 @@ def fucking_loop():
         #print("omega: ", state["omega"])
         #print("pitch: ", state["pitch"])
         #print("roll: ", state["roll"])
-        #print("yaw: ", state["yaw"]) 
-        #print("\n\n")   
+        #print("yaw: ", state["yaw"])
+        #print("\n\n")
 
 def fucking_teensy_loop():
     global state
@@ -81,7 +83,7 @@ def fucking_teensy_loop():
 def start_server():
     global app
     app.run()
-   
+
 app = Flask(__name__)
 
 @app.route("/")
