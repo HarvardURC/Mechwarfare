@@ -4,8 +4,15 @@ import copy, macros, helpers
 from objs import leg_data, body_data
 from time import time
 
-
-# IK functions
+"""
+ IK functions
+ This file contains:
+ fix_angles_2(theta);
+ leg_ik(leg, claw, times)
+ body_ik(body, claws, pitch, roll, height, zs, times)
+ make_standard_bot(side, trolen, femlen, tiblen, zdist)
+ extract_angles(body, claws, pitch, roll, height, zs, times)
+"""
 
 def fix_angles_2(theta):
     while(theta > 180):
