@@ -1,6 +1,19 @@
 import math as m
 import numpy as np
 
+"""
+ This file contains:
+ rtod(x)
+ dtor(x)
+ tocyl(point)
+ fromcyl(point)
+ torad(point)
+ fromrad(point)
+ bound(x, lower, upper)
+ degreesmod(theta)
+ dict_timer(key, d, val)
+"""
+
 # rtod(x: number in radians)
 #   converts x from radians to degrees
 def rtod(x):
