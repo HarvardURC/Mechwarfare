@@ -1,4 +1,3 @@
-
 import os
 import ik
 import gait_alg_test
@@ -33,7 +32,7 @@ os.sys.path.append('../dynamixel_functions_py')             # Path setting
 import dynamixel_functions as dynamixel                     # Uses Dynamixel SDK library
 
 DEVICENAME          = "/dev/ttyUSB0".encode('utf-8')
-BAUDRATE            = 57600
+BAUDRATE            = 57600                                 # 
 PROTOCOL_VERSION    = 1
 
 ADDR_MX_TORQUE_ENABLE       = 24                            # Control table address is different in Dynamixel model
