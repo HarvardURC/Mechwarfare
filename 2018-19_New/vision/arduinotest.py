@@ -1,16 +1,18 @@
 import serial
 import time
 #port='/dev/ttyACM0'  #two ports here, port 1 Jevois port 2 arduino
-port2='COM3' #replace here
-baud=115200 #baud rate for jevois
-constbound=1000  #bounds for image--constbound is jevois struct, x and ybounds are pixel sizes
+port2='COM3'        # replace here
+baud=115200         # baud rate for jevois
+constbound=1000     # bounds for image--constbound is jevois struct, x and ybounds are pixel sizes
 xbound=320.
 ybound=260.
-currpos=0 #which target variable is being set: 0: x set, 1: y set, 3: movement completed
+currpos=0           # which target variable is being set: 0: x set, 1: y set, 3: movement completed
+
 #ser=serial.Serial(port, baud, timeout=0)
 ser2=serial.Serial(port2, 9600, timeout=0)
 dir=True
 dir2=True
+
 def spdstep(i, dir3):
     j=i
     tempdir=dir3
