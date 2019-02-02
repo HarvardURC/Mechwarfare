@@ -2,6 +2,13 @@ import math as m
 import numpy as np
 import macros, helpers
 
+"""
+    This file contains:
+    class leg_state
+    class leg_data
+    class body_data
+"""
+
 
 # General object classes
 class leg_state:
