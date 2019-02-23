@@ -34,22 +34,38 @@ def leg_ik(leg, claw, times={}):
 
     # Constants
     hyp = ((claw[1] - leg.trolen)**2 + claw[2]**2)**.5
-
+#    print("Claw1:", claw[1])
+#    print("Claw2:", claw[2])
+#    print("Hyp: ", hyp)
+#    print(claw[0])
+#    print("Trye one")
+#    print((claw[1] - leg.trolen)/hyp)
+#    print("Try two")
+#    print((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp))
+#    print("Try three")
+#    print((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen))
     try:
         # Inverse Kinematics
+#        print("H next")
         h = claw[0] - leg.gamma
+#        print("part1 next")
+#        part1 = m.asin((claw[1] - leg.trolen)/hyp)
+#        print("part2 next")
+#        part2 = m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp))
+#        print("e next")
+#        e = helpers.rtod(part1 + part2 - (m.pi/2)) - 90
         e = helpers.rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2)) - 90
+#        print("k next")
         k = helpers.rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen))) - 180
 
         times = helpers.dict_timer("Ik.leg_ik", times, time()-tv_leg_ik)
-
+#        print("Leg success")
         return np.array([fix_angles_2(h), fix_angles_2(e), fix_angles_2(k)])
 
-    except:
-
+    except Exception as e:
         times = helpers.dict_timer("Ik.leg_ik", times, time()-tv_leg_ik)
-
         print("Invalid parameters.  Leg ik failed.")
+        #print(e)
         return np.array([0, 1, 2, 3])
 
 
@@ -82,6 +98,8 @@ def body_ik(body, claws, pitch, roll, height, zs, times={}):
 
     # incorporate leg lifts
     for i in range(len(zs)):
+#        print("Zs:", zs[i])
+#        print("Height:", height)
         if (zs[i] > 0):
             newclaws[i][2] = -1*(height-zs[i])
 

@@ -148,8 +148,8 @@ def set_target_positions(pos_list):
     tv_gswtp = time()
     dynamixel.groupSyncWriteTxPacket(GROUP_NUM)
     times = helpers.dict_timer("DT.groupSyncWriteTxPacket", times, time()-tv_gswtp)
-    """if dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION) != COMM_SUCCESS:
-        dynamixel.printTxRxResult(PROTOCOL_VERSION, dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION))"""
+#    if dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION) != COMM_SUCCESS:
+#        dynamixel.printTxRxResult(PROTOCOL_VERSION, dynamixel.getLastTxRxResult(PORT_NUM, PROTOCOL_VERSION))
     tv_gswcp = time()
     dynamixel.groupSyncWriteClearParam(GROUP_NUM)
     times = helpers.dict_timer("DT.groupSyncWriteClearParam", times, time()-tv_gswcp)
@@ -168,6 +168,7 @@ def init_robot():
     err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [512]*12)
 #    print("initiated motors")
     claws, body = ik.make_standard_bot()
+    print("Claws", claws)
     angles = ik.extract_angles(body, claws, 0, 0, 12)
     angles = deg_to_dyn(angles)
 
@@ -247,7 +248,9 @@ def update_robot(body, current_state, dt):
     if (len(angles) == 12):
         # Timing print
         tv_stp = time()
+#        print(check_angles(deg_to_dyn(angles)))
         err = set_target_positions(check_angles(deg_to_dyn(angles)))
+#        err = set_target_positions([0]*12)
         times = helpers.dict_timer("DT.set_target_positions", times, time()-tv_update_robot)
 
     if (ctr > num_iters):

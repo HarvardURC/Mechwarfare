@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from drivers_test import init_robot, update_robot
 import serial
 import macros
-from time import time
+from time import time, sleep
 import helpers
 
 # Global variable to keep track of the state of the robot
@@ -39,6 +39,7 @@ body = init_robot()
 try:
     ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1) # opens serial port to communicate with teensy
 except:
+    print("except")
     ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1)
 
 offset = (990+2014)/2
@@ -52,6 +53,7 @@ def fucking_loop():
     global state
     if state["enable"]:
         #tv_fl = time()
+#        print("Update Robot")
         update_robot(body, state, state["timestep"])
         #print("aaaaaa: ",time()-tv_fl)
         #print("vx: ", state["vx"])
@@ -64,21 +66,29 @@ def fucking_loop():
 
 def fucking_teensy_loop():
     global state
+#    print("Loop is running")
     if (bool(state["useradio"])):
-    	if (ser.in_waiting > 0):
+#        print("Inside of state")
+        ser.write("a\n".encode())
+        sleep(0.01)
+        if (ser.in_waiting > 0):
             msg = ser.readline().decode('utf-8')
-            msg = [int(i) for i in msg.split(', ')]
-            print(msg)
+#            print("Inside of teensy loop")
+#            print(msg)
+            msg = msg[:-2]
+            msg = [int(i) for i in msg.split(',')]
+#            print(msg)
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
-            state["omega"] = scale(msg[4], macros.OMEGA_MAX)   # stationary rotate
+#state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
+            state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire
             state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
             state["pitch"] = scale(msg[7], macros.PITCH_BOUND)
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
             state["yaw"] = scale(msg[2], macros.YAW_BOUND)
-            state["enable"] = msg[8] > offset
-        	# bool(msg[9]) # aim mode
-        	# bool(msg[10]) # enable/disable
+           # state["enable"] = msg[8] > offset
+            # bool(msg[9]) # aim mode
+            # bool(msg[10]) # enable/disable
 
 def start_server():
     global app
@@ -95,7 +105,7 @@ def slidey():
     global state
     state = json.loads(request.data.decode('utf-8'))
     return ""
-
+                         
 sched = BackgroundScheduler()
 sched.add_job(fucking_loop, 'interval', seconds=state["timestep"])
 sched.add_job(fucking_teensy_loop, 'interval', seconds=state["timestep"])
