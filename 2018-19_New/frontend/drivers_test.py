@@ -32,7 +32,7 @@ os.sys.path.append('../dynamixel_functions_py')             # Path setting
 
 import dynamixel_functions as dynamixel                     # Uses Dynamixel SDK library
 
-DEVICENAME          = "/dev/ttyUSB0".encode('utf-8')
+DEVICENAME          = "/dev/ttyUSB1".encode('utf-8')
 BAUDRATE            = 57600
 PROTOCOL_VERSION    = 1
 
@@ -165,7 +165,7 @@ def init_robot():
     # Timing value
     tv_init = time()
 
-    err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14], [512]*12)
+    err = init_motors([3,4,5, 6,7,8, 9,10,11, 12,13,14, 15,16], [512]*12)
 #    print("initiated motors")
     claws, body = ik.make_standard_bot()
     print("Claws", claws)
@@ -224,6 +224,8 @@ def update_robot(body, current_state, dt):
     pitch = float(current_state["pitch"])
     roll = float(current_state["roll"])
     yaw = float(current_state["yaw"])
+    pan = float(current_state["pan"])
+    tilt = float(current_state["tilt"])
     home_wid = float(current_state["homewidth"])
     home_len = float(current_state["homelength"])
 #   timestep = current_state[timestep]
@@ -241,11 +243,12 @@ def update_robot(body, current_state, dt):
     sleeptime, angles, t, was_still, times = gait_alg_test.timestep(body, enable, return_home, vx, vy, omega,
         height, pitch, roll, yaw, t, home_wid, home_len, dt, stridelength, raisefrac,
         raiseh, lift_phase, [phase0, phase1, phase2, phase3], was_still, times)
-
+    angles.append(pan);
+    angles.append(tilt);
     times = helpers.dict_timer("DT.update_robot", times, time()-tv_update_robot)
 
     # update servos accordingly: error check is that when given impossible values IK returns array of angles of incorrect length
-    if (len(angles) == 12):
+    if (len(angles) == 14):
         # Timing print
         tv_stp = time()
 #        print(check_angles(deg_to_dyn(angles)))

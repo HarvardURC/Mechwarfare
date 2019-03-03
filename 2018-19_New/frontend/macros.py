@@ -85,6 +85,9 @@ PITCH_BOUND = 25
 ROLL_BOUND = 25
 YAW_BOUND = 20
 
+PAN_BOUND = 45
+TILT_BOUND = 20
+
 # Bounds on linear and angular velocities (minimums for movement below)
 V_MAX = 50
 OMEGA_MAX = 70
