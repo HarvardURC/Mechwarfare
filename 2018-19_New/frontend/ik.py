@@ -15,18 +15,23 @@ from time import time
 """
 
 def fix_angles_2(theta):
+    """Change theta to between -180 and +180
+    """
     while(theta > 180):
-        theta += -360
+        theta -= 360
     while(theta < -180):
         theta += 360
-    return(theta)
+    return theta
 
 # Leg IK
 def leg_ik(leg, claw, times={}):
-    """ 
-    leg_ik(leg: leg_data object, claw: desired claw location in cylindrical coordinates in leg frame)
-    returns [h, e, k] list
-    If inputs are invalid, returns a list of length 4 
+    """
+    Takes:
+        leg: leg data object
+        claw: desired claw location in cylindrical coordinates in leg frame
+    Returns:
+        [h, e, k] list
+        If inputs are invalid, returns a list of length 4 
     """
 
     # Timing value
@@ -72,10 +77,16 @@ def leg_ik(leg, claw, times={}):
 # Body IK
 def body_ik(body, claws, pitch, roll, height, zs, times={}):
     """
-    body_ik(legs: list of leg_data objects, claws: list of desired claw locations in floor plane,
-    pitch: desired pitch of robot, roll: desired roll of robot)
-    returns newclaws: list of desired claw positions in cylindrical coordinates in leg frame of rotated robot
-    
+    Takes:
+        body: body.legs contains the list of leg data objects
+        claws: list of desired claw locations in floor plane
+        pitch: desired pitch of robot
+        roll: desired roll of robot
+        height: desired height of robot
+        zs: (Don't really know)
+        times: (Don't really know)
+    Returns:
+        newclaws: list of desired claw positions in cylindrical coordinates in leg frame of rotated robot
     """
     # Timing value
     tv_body_ik = time()
@@ -113,8 +124,7 @@ def body_ik(body, claws, pitch, roll, height, zs, times={}):
 
 # make_standard_bot()
 def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEMLEN, tiblen=macros.TIBLEN, zdist=macros.ZDIST):
-    """
-    Creates a bot with equidistant claws at distance RAD from hip with macros.NUMLEGS legs (and sides)
+    """Creates a bot with equidistant claws at distance RAD from hip with macros.NUMLEGS legs (and sides)
     """
     # Timing value
     tv_msb = time()
@@ -148,13 +158,21 @@ def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEML
     return(claws, body)
 
 def extract_angles(body, claws, pitch=macros.DEFAULT_PITCH, roll=macros.DEFAULT_ROLL, height=macros.DEFAULT_HEIGHT, zs=[0,0,0,0], times={}):
-    """   
-    extract_angles(body: body_data object, claws: list of claw positions, pitch: desired pitch in degrees, roll: desired roll in degrees)
-    returns list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
+    """
+    Takes:
+        body: body_data object
+        claws: list of claw positions
+        pitch: desired pitch in degrees
+        roll: desired roll in degrees
+        height: desired height
+        zs: (Don't really know)
+        times: (Don't really know)
+    Returns:
+        list of angles [h1, e1, k1, h2, e2, k2, h3, e3, k3, h4, e4, k4]
     """
     # Timing value
     tv_ea = time()
-
+  
     # Returns np.array
 #    newclaws = body_ik(body, claws, pitch, roll, height, zs, times)
 #    ret_angles = np.array([])

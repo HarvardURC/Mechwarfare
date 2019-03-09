@@ -32,7 +32,7 @@ os.sys.path.append('../dynamixel_functions_py')             # Path setting
 
 import dynamixel_functions as dynamixel                     # Uses Dynamixel SDK library
 
-DEVICENAME          = "/dev/ttyUSB1".encode('utf-8')
+DEVICENAME          = "/dev/ttyUSB1".encode('utf-8') # Could be "/dev/ttyUSB0"
 BAUDRATE            = 57600
 PROTOCOL_VERSION    = 1
 
@@ -251,9 +251,7 @@ def update_robot(body, current_state, dt):
     if (len(angles) == 14):
         # Timing print
         tv_stp = time()
-#        print(check_angles(deg_to_dyn(angles)))
         err = set_target_positions(check_angles(deg_to_dyn(angles)))
-#        err = set_target_positions([0]*12)
         times = helpers.dict_timer("DT.set_target_positions", times, time()-tv_update_robot)
 
     if (ctr > num_iters):

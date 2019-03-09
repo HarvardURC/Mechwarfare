@@ -64,10 +64,11 @@ def scale(num, max):
     return max * float(num - OFFSET) / float(CONTROLLER_RANGE)
 
 def update_robot_loop():
+    '''Update robot if 'enable' is toggled on
+    '''
     global state
     if state["enable"]:
         #tv_fl = time()
-#        print("Update Robot")
         update_robot(body, state, state["timestep"])
         #print("aaaaaa: ",time()-tv_fl)
         #print("vx: ", state["vx"])
@@ -79,21 +80,19 @@ def update_robot_loop():
         #print("\n\n")
 
 def read_message_loop():
+    '''Read message from teensy, decode and scale inputs and update the state
+    '''
     global state
-#    print("Loop is running")
     if (bool(state["useradio"])):
-#        print("Inside of state")
-        ser.write("a\n".encode())
+        ser.write("a\n".encode()) # Need to send message to read message from teensy (Don't know why, but worthwhile to find out)
         #sleep(0.001)
         if (ser.in_waiting > 0):
             msg = ser.readline().decode('utf-8')
             #msgStable = serJ.readline().decode('utf-8')
             #msgStable = [int(i) for i in msgStable.split(',')]
-#            print("Inside of teensy loop")
-#            print(msg)
             msg = msg[:-2]
+            print(msg)
             msg = [int(i) for i in msg.split(',')]
-#            print(msg)
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
             #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
             state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
@@ -104,25 +103,24 @@ def read_message_loop():
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
             state["yaw"] = scale(msg[5], macros.YAW_BOUND)
             
-            # Switch case for manual
-            #if (!state["usestable"]):
-            if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
-                state["pan"] = float(state["pan"] + 2)
-            elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
-                state["pan"] = float(state["pan"] - 2)
-            if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND):
-                state["tilt"] = float(state["tilt"] + 2)
-            elif (msg[1] < 1400 and state["tilt"] > -macros.TILT_BOUND):
-                state["tilt"] = float(state["tilt"] - 2)
-            # Switch case for automatic
-            #else:
-            #    if(msgStable[0] and state["pan"] < macros.PAN_BOUND):
-#                    state["pan"] = float(state["pan"] + 2)
-#                elif(!msgStable[0] and state["pan"] > -macros.PAN_BOUND) :
-#                    state["pan"] = float(state["pan"] - 2)
-#                if (msgStable and state["tilt"] < macros.TILT_BOUND):
-#                    state["tilt"] = float(state["tilt"] + 2)
-#                elif 
+            if msg[5] > OFFSET-200: # Manual Control
+                if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
+                    state["pan"] = float(state["pan"] + 2)
+                elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
+                    state["pan"] = float(state["pan"] - 2)
+                if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] + 2)
+                elif (msg[1] < 1400 and state["tilt"] > -macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] - 2)
+            else: # Automatic Control using JeVois
+                if(msgStable[1] > 0 and state["pan"] < macros.PAN_BOUND):
+                    state["pan"] = float(state["pan"] + 2)
+                elif(msgStable[1] < 0 and state["pan"] > -macros.PAN_BOUND) :
+                    state["pan"] = float(state["pan"] - 2)
+                if (msgStable[2] < 0 and state["tilt"] < macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] + 2)
+                elif (msgStable[2] > 0 and state["tilt"] < macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] + 2)
             
             
             #state["pan"] = scale(msg[4], macros.PAN_BOUND)
@@ -155,7 +153,7 @@ sched.start()
 while True:
     sleep(0.01)
 
-#start_server()
+#start_server() # This was giving error
 
 #serverthread = Thread(target=start_server, daemon=True)
 #serverthread.start()
