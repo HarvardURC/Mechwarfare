@@ -8,7 +8,7 @@
        <img src="/static/tidepod.jpeg" alt="tidepod" width="300">
      <div>
     	useradio
-  		<input type="checkBox" id="useradio" onclick="handler()" checked>
+  		<input type="checkBox" id="useradio" onclick="handler()">
 	</div>
     <div>
     	enable
@@ -52,6 +52,16 @@
 		yaw
   		<input type="range" min="-30" max="30" value="0" id="yaw" oninput="handler()">
   		<span id="rolldisp"></span>
+	</div>
+        <div>
+		pan
+  		<input type="range" min="-30" max="30" value="0" id="pan" oninput="handler()">
+  		<span id="pandisp"></span>
+	</div>
+	<div>
+		tilt
+  		<input type="range" min="-30" max="30" value="0" id="tilt" oninput="handler()">
+  		<span id="tiltdisp"></span>
 	</div>
 
 	<div>
@@ -124,6 +134,8 @@
 		var pitch = document.getElementById("pitch")
 		var roll = document.getElementById("roll")
 		var yaw = document.getElementById("yaw")
+                var pan = document.getElementById("pan")
+                var tilt = document.getElementById("tilt")
 		var homewidth = document.getElementById("homewidth")
 		var homelength = document.getElementById("homelength")
 		var timestep = document.getElementById("timestep")
@@ -153,6 +165,8 @@
 				pitch: pitch.value,
 				roll: roll.value,
                 		yaw: yaw.value,
+                                pan: pan.value,
+                                tilt: tilt.value,
 				homewidth: homewidth.value,
 				homelength: homelength.value,
 				timestep: timestep.value,

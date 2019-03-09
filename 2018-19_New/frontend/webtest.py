@@ -40,15 +40,15 @@ state = {
 body = init_robot()
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1) # opens serial port to communicate with teensy
+    ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1) # opens serial port to communicate with teensy
 except:
     print("except")
     ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1)
-    
+#    
 #try:
-#    serJ = serial.Serial('/dev/tty/ACM2', 38400, timeout=1)
+#    serJ = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
 #except:
-#    serJ = serial.Serial('/dev/tty/ACM3',38400, timeout=1)
+#    serJ = serial.Serial('/dev/ttyACM3',115200, timeout=1)
 
 OFFSET = (990+2014)/2
 CONTROLLER_RANGE = (2014-990)/2
@@ -88,10 +88,10 @@ def read_message_loop():
         #sleep(0.001)
         if (ser.in_waiting > 0):
             msg = ser.readline().decode('utf-8')
-            #msgStable = serJ.readline().decode('utf-8')
-            #msgStable = [int(i) for i in msgStable.split(',')]
+#            msgStable = serJ.readline().decode('utf-8')
+#            msgStable = [int(i) for i in msgStable[3:].split(' ')]
             msg = msg[:-2]
-            print(msg)
+            #print(msg)
             msg = [int(i) for i in msg.split(',')]
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
             #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
@@ -103,7 +103,7 @@ def read_message_loop():
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
             state["yaw"] = scale(msg[5], macros.YAW_BOUND)
             
-            if msg[5] > OFFSET-200: # Manual Control
+            if True: # Manual Control
                 if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
                     state["pan"] = float(state["pan"] + 2)
                 elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
@@ -113,14 +113,14 @@ def read_message_loop():
                 elif (msg[1] < 1400 and state["tilt"] > -macros.TILT_BOUND):
                     state["tilt"] = float(state["tilt"] - 2)
             else: # Automatic Control using JeVois
-                if(msgStable[1] > 0 and state["pan"] < macros.PAN_BOUND):
+                if(msgStable[0] > 10 and state["pan"] < macros.PAN_BOUND):
                     state["pan"] = float(state["pan"] + 2)
-                elif(msgStable[1] < 0 and state["pan"] > -macros.PAN_BOUND) :
+                elif(msgStable[0] < -10 and state["pan"] > -macros.PAN_BOUND) :
                     state["pan"] = float(state["pan"] - 2)
-                if (msgStable[2] < 0 and state["tilt"] < macros.TILT_BOUND):
+                if (msgStable[1] < -10 and state["tilt"] < macros.TILT_BOUND):
                     state["tilt"] = float(state["tilt"] + 2)
-                elif (msgStable[2] > 0 and state["tilt"] < macros.TILT_BOUND):
-                    state["tilt"] = float(state["tilt"] + 2)
+                elif (msgStable[1] > 10 and state["tilt"] > -macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] - 2)
             
             
             #state["pan"] = scale(msg[4], macros.PAN_BOUND)
@@ -143,6 +143,8 @@ def hello():
 def slidey():
     global state
     state = json.loads(request.data.decode('utf-8'))
+    print("pan: ", state["pan"])
+    print("tilt: ", state["tilt"])
     return ""                                                                                                                                                                                                                                                
                          
 sched = BackgroundScheduler()
@@ -150,10 +152,10 @@ sched.add_job(update_robot_loop, 'interval', seconds=state["timestep"])
 sched.add_job(read_message_loop, 'interval', seconds=state["timestep"])                                                            
 sched.start()
 
-while True:
-    sleep(0.01)
+#while True:
+#    sleep(0.01)
 
-#start_server() # This was giving error
+start_server() # This was giving error
 
 #serverthread = Thread(target=start_server, daemon=True)
 #serverthread.start()
