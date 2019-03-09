@@ -58,7 +58,7 @@ def scale(num, max):
      Takes:
          num: controller input number
          max: max value of output
-    Returns:
+     Returns:
          controller input scaled between 0 and max
     '''
     return max * float(num - OFFSET) / float(CONTROLLER_RANGE)
