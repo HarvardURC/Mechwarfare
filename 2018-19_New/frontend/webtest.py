@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from drivers_test import init_robot, update_robot
 import serial
 import macros
-from time import time
+from time import time, sleep
 import helpers
 
 # Global variable to keep track of the state of the robot
@@ -13,6 +13,8 @@ state = {
     "enable":True,
     "gohome":False,
     "vx":0.,
+    "pan" : 0.,
+    "tilt" : 0., 
     "vy":0.,
     "vz":0.,
     "omega":0.,
@@ -31,24 +33,39 @@ state = {
     "phasebl":macros.phases[1],
     "phasebr":macros.phases[2],
     "phasefr":macros.phases[3],
-    "useradio": True
+    "useradio": True,
+    "usestable" : False
 }
 
 body = init_robot()
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1) # opens serial port to communicate with teensy
+    ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1) # opens serial port to communicate with teensy
 except:
+    print("except")
     ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1)
+#    
+#try:
+#    serJ = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+#except:
+#    serJ = serial.Serial('/dev/ttyACM3',115200, timeout=1)
 
-offset = (990+2014)/2
-controller_range = (2014-990)/2
+OFFSET = (990+2014)/2
+CONTROLLER_RANGE = (2014-990)/2
 
 def scale(num, max):
-    # scale serial output based on the maximum
-    return max * float(num - offset) / float(controller_range)
+    '''
+     Takes:
+         num: controller input number
+         max: max value of output
+     Returns:
+         controller input scaled between 0 and max
+    '''
+    return max * float(num - OFFSET) / float(CONTROLLER_RANGE)
 
-def fucking_loop():
+def update_robot_loop():
+    '''Update robot if 'enable' is toggled on
+    '''
     global state
     if state["enable"]:
         #tv_fl = time()
@@ -62,26 +79,58 @@ def fucking_loop():
         #print("yaw: ", state["yaw"])
         #print("\n\n")
 
-def fucking_teensy_loop():
+def read_message_loop():
+    '''Read message from teensy, decode and scale inputs and update the state
+    '''
     global state
     if (bool(state["useradio"])):
-    	if (ser.in_waiting > 0):
+        ser.write("a\n".encode()) # Need to send message to read message from teensy (Don't know why, but worthwhile to find out)
+        #sleep(0.001)
+        if (ser.in_waiting > 0):
             msg = ser.readline().decode('utf-8')
-            msg = [int(i) for i in msg.split(', ')]
-            print(msg)
+#            msgStable = serJ.readline().decode('utf-8')
+#            msgStable = [int(i) for i in msgStable[3:].split(' ')]
+            msg = msg[:-2]
+            #print(msg)
+            msg = [int(i) for i in msg.split(',')]
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
-            state["omega"] = scale(msg[4], macros.OMEGA_MAX)   # stationary rotate
+            #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
+            state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire
-            state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
-            state["pitch"] = scale(msg[7], macros.PITCH_BOUND)
+            state["vy"] = scale( msg[6], macros.V_MAX)          # left/right trans
+            #state["pitch"] = scale(msg[7], macros.PITCH_BOUND) #wire pulled out
+            state["pitch"] = scale(1500, macros.OMEGA_MAX)
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
-            state["yaw"] = scale(msg[2], macros.YAW_BOUND)
-            state["enable"] = msg[8] > offset
-        	# bool(msg[9]) # aim mode
-        	# bool(msg[10]) # enable/disable
+            state["yaw"] = scale(msg[5], macros.YAW_BOUND)
+            
+            if True: # Manual Control
+                if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
+                    state["pan"] = float(state["pan"] + 2)
+                elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
+                    state["pan"] = float(state["pan"] - 2)
+                if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] + 2)
+                elif (msg[1] < 1400 and state["tilt"] > -macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] - 2)
+            else: # Automatic Control using JeVois
+                if(msgStable[0] > 10 and state["pan"] < macros.PAN_BOUND):
+                    state["pan"] = float(state["pan"] + 2)
+                elif(msgStable[0] < -10 and state["pan"] > -macros.PAN_BOUND) :
+                    state["pan"] = float(state["pan"] - 2)
+                if (msgStable[1] < -10 and state["tilt"] < macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] + 2)
+                elif (msgStable[1] > 10 and state["tilt"] > -macros.TILT_BOUND):
+                    state["tilt"] = float(state["tilt"] - 2)
+            
+            
+            #state["pan"] = scale(msg[4], macros.PAN_BOUND)
+           # state["enable"] = msg[8] > OFFSET
+            # bool(msg[9]) # aim mode
+            # bool(msg[10]) # enable/disable
 
 def start_server():
     global app
+    print("In start server")
     app.run()
 
 app = Flask(__name__)
@@ -94,14 +143,20 @@ def hello():
 def slidey():
     global state
     state = json.loads(request.data.decode('utf-8'))
-    return ""
-
+    print("pan: ", state["pan"])
+    print("tilt: ", state["tilt"])
+    return ""                                                                                                                                                                                                                                                
+                         
 sched = BackgroundScheduler()
-sched.add_job(fucking_loop, 'interval', seconds=state["timestep"])
-sched.add_job(fucking_teensy_loop, 'interval', seconds=state["timestep"])
+sched.add_job(update_robot_loop, 'interval', seconds=state["timestep"])
+sched.add_job(read_message_loop, 'interval', seconds=state["timestep"])                                                            
 sched.start()
 
-start_server()
+#while True:
+#    sleep(0.01)
+
+start_server() # This was giving error
 
 #serverthread = Thread(target=start_server, daemon=True)
 #serverthread.start()
+                                                                              

@@ -4,7 +4,7 @@ from helper import (getch, enable_torque, write_goal, read_pos, disable_torque)
 from dynamixel_sdk import *
 from shared_constants import *
 
-DXL_ID                      = 2 # Set this to the ID of the servo that we are controlling
+DXL_ID                      = 15 # Set this to the ID of the servo that we are controlling
 
 
 def main():

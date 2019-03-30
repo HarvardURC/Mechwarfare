@@ -37,6 +37,7 @@ volatile unsigned long timers[9];
 #define IDLE_SWITCH 8
 #define GUN_CHANNEL 5
 #define SWITCH_BOUND 1200
+#define GUN_BOUND 1800
 #define SWITCH_BOUND_JAM 1200
 #define JAM_CHANNEL 1
 
@@ -46,7 +47,7 @@ int gunmotor = A6;
 int hoppermotor = 6;
 int hopperdir = 7;
 
-#define HOPPER_POWER 255 //PWM POWER TO RUN HOPPER
+#define HOPPER_POWER 65 //PWM POWER TO RUN HOPPER
 #define GUN_POWER 255 //PWM POWER TO RUN GUNMOTOR
 
 #define STATE_DELAY 10 //DELAY BETWEEN STATE UPDATES
@@ -182,6 +183,8 @@ void hopperDriver(int inst, int power) {
 
 int gunState(int currState)
 {
+  Serial.println(currState);
+  Serial.println(state[GUN_CHANNEL]);
   switch (currState) {
     //idle state for gun
     case 0:
@@ -212,7 +215,7 @@ int gunState(int currState)
 
       stateHold++;
 
-      if (state[GUN_CHANNEL] > SWITCH_BOUND) {
+      if (state[GUN_CHANNEL] > GUN_BOUND) {
         //move to fire
         stateHold = 0;
         return 2;
@@ -229,7 +232,7 @@ int gunState(int currState)
       analogWrite(gunmotor, 0);
       stateHold++;
 
-      if (state[GUN_CHANNEL] > SWITCH_BOUND) {
+      if (state[GUN_CHANNEL] > GUN_BOUND) {
         //move to fire
         stateHold = 0;
         return 2;
@@ -250,7 +253,7 @@ int gunState(int currState)
         stateHold = 0;
         return 4;
       }
-      if (state[GUN_CHANNEL] < SWITCH_BOUND) {
+      if (state[GUN_CHANNEL] < GUN_BOUND) {
         //then enter quiet load: catchup state
         stateHold = 0;
         return 1;
@@ -277,7 +280,7 @@ int gunState(int currState)
         stateHold = 0;
         return 4;
       }
-      if (state[GUN_CHANNEL] < SWITCH_BOUND) {
+      if (state[GUN_CHANNEL] < GUN_BOUND) {
         //then enter quiet load: catchup state
         stateHold = 0;
         return 1;

@@ -172,7 +172,7 @@ def init_robot():
     angles = deg_to_dyn(angles)
 
     # Timing print
-    print("Init_robot time: ", (time() - tv_init), "\n")
+    #print("Init_robot time: ", (time() - tv_init), "\n")
 
     return(body)
 
@@ -253,9 +253,9 @@ def update_robot(body, current_state, dt):
     if (ctr > num_iters):
         ctr = 0
         for k in times.keys():
-            print(k, "time: ", times[k]/num_iters)
+            #print(k, "time: ", times[k]/num_iters)
             times[k]=0
-        print("\n")
+       # print("\n")
 
     ctr += 1
 

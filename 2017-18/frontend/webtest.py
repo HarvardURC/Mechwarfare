@@ -49,8 +49,9 @@ def scale(num, max):
 def fucking_loop():
     global state
     if state["enable"]:
+        i = 1
         #tv_fl = time()
-        update_robot(body, state, state["timestep"])
+#        update_robot(body, state, state["timestep"])
         #print("aaaaaa: ",time()-tv_fl)
         #print("vx: ", state["vx"])
         #print("vy: ", state["vy"])
@@ -62,19 +63,22 @@ def fucking_loop():
 
 def fucking_teensy_loop():
     global state
+    #print(bool(state["useradio"]));
+    #print("\n"); 
     if (bool(state["useradio"])):
-    	if (ser.in_waiting > 0):
+#        print(ser.in_waiting)
+        if (ser.in_waiting > 0):
             msg = ser.readline().decode('utf-8')
-            msg = [int(i) for i in msg.split(', ')]
+#            msg = [int(i) for i in msg.split(', ')]
             print(msg)
-            state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
-            state["omega"] = scale(msg[4], macros.OMEGA_MAX)   # stationary rotate
-            # msg[4] # fire
-            state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
-            state["pitch"] = scale(msg[7], macros.PITCH_BOUND)
-            state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
-            state["yaw"] = scale(msg[2], macros.YAW_BOUND)
-            state["enable"] = msg[8] > offset
+#            state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
+#            state["omega"] = scale(msg[4], macros.OMEGA_MAX)   # stationary rotate
+#            # msg[4] # fire
+#            state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
+#            state["pitch"] = scale(msg[7], macros.PITCH_BOUND)
+#            state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
+#            state["yaw"] = scale(msg[2], macros.YAW_BOUND)
+#            state["enable"] = msg[8] > offset
         	# bool(msg[9]) # aim mode
         	# bool(msg[10]) # enable/disable
 
