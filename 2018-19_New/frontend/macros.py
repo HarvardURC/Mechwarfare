@@ -6,7 +6,7 @@ import numpy as np
 import helpers
 
 
-# # # # # # # # # # # # 
+# # # # # # # # # # # #
 # # GENERAL MACROS  # #
 # # # # # # # # # # # #
 
@@ -53,7 +53,7 @@ HOMES = []
 poly_rad = SIDE/(2 * m.sin(m.pi/NUMLEGS))          # polygon radius
 clawdist_from_center = poly_rad + DEFAULT_RADIUS   # claw distance from center of robot
 for i in range(NUMLEGS):
-    HOMES.append([clawdist_from_center * m.cos(helpers.dtor(GAMMAS[i])), 
+    HOMES.append([clawdist_from_center * m.cos(helpers.dtor(GAMMAS[i])),
         clawdist_from_center * m.sin(helpers.dtor(GAMMAS[i])), -1 * DEFAULT_HEIGHT])
 
 # Default velocities for walking
@@ -90,12 +90,12 @@ V_MAX = 50
 OMEGA_MAX = 70
 
 
-# # # # # # # # # # # # 
+# # # # # # # # # # # #
 # # # GAIT MACROS # # #
 # # # # # # # # # # # #
 
 # BOUNDS ON ANGLES
-SERVO_LIMITS = {"HIP_MIN": 95, "HIP_MAX": 185, "KNEE_MIN": 63, "KNEE_MAX": 212, "ELB_MIN": 9, "ELB_MAX": 135} 
+SERVO_LIMITS = {"HIP_MIN": 95, "HIP_MAX": 185, "KNEE_MIN": 63, "KNEE_MAX": 212, "ELB_MIN": 9, "ELB_MAX": 135}
 # convert bounds in degrees to bounds in dynamixel units and cast to int
 for k in SERVO_LIMITS.keys():
     SERVO_LIMITS[k] *= 1/.29
@@ -104,18 +104,18 @@ for k in SERVO_LIMITS.keys():
 
 # TIME CONTROLS
 # Length of time step (seconds)
-TIMESTEP = 0.02  
+TIMESTEP = 0.02
 
 # Length of full stride (seconds)
 STRIDELENGTH = 0.6
 
 # Fraction of idle beat leg is being lifted/lowered
-RAISEFRAC = 0.5  
+RAISEFRAC = 0.5
 
 # Maximum height foot is raised (centimeters)
 RAISEH = 2
 # Phase tolerance for moving to goal
-TOLERANCE = 0.01 
+TOLERANCE = 0.01
 
 # Fraction of stride that legs spend in the air
 LIFT_PHASE = 1/float(NUMLEGS)

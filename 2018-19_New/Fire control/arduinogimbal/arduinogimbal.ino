@@ -37,12 +37,12 @@ volatile unsigned long timers[9];
 #define IDLE_SWITCH 8
 #define GUN_CHANNEL 5
 #define SWITCH_BOUND 1200
-#define SWITCH_BOUND_JAM 1200 
+#define SWITCH_BOUND_JAM 1200
 #define JAM_CHANNEL 1
 
 
 //Comms defines for comms with gun subsystems
-int gunmotor = A6; 
+int gunmotor = A6;
 int hoppermotor = 6;
 int hopperdir = 7;
 
@@ -199,7 +199,7 @@ int gunState(int currState)
         //if idle
         stateHold = 0;
         return 0;
-      } 
+      }
       if (stateHold > numCatchUp) {
         //if caught up, move to idle quiet load
         stateHold = 0;
@@ -211,7 +211,7 @@ int gunState(int currState)
       analogWrite(gunmotor, 0);
 
       stateHold++;
-     
+
       if (state[GUN_CHANNEL] > SWITCH_BOUND) {
         //move to fire
         stateHold = 0;
@@ -321,7 +321,7 @@ void forwardChannels()
     baseString = baseString + String(state[i]) + ", ";
   }
   baseString = baseString + String(state[numChannels]);
-  //computer.println(baseString);
+  computer.println(baseString);
 }
 
 
@@ -339,4 +339,3 @@ void loop() {
 
 
 }
-
