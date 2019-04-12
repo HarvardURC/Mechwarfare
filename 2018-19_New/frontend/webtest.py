@@ -13,8 +13,8 @@ state = {
     "enable":True,
     "gohome":False,
     "vx":0.,
-    "pan" : 0.,
-    "tilt" : 0., 
+    "pan":0.,
+    "tilt":-30., 
     "vy":0.,
     "vz":0.,
     "omega":0.,
@@ -25,6 +25,7 @@ state = {
     "homewidth":12.0,
     "homelength":9.0,
     "timestep":macros.TIMESTEP,
+    "teensytime":0.01,
     "stridelength":macros.STRIDELENGTH,
     "raisefrac":macros.RAISEFRAC,
     "raiseh":macros.RAISEH,
@@ -33,23 +34,28 @@ state = {
     "phasebl":macros.phases[1],
     "phasebr":macros.phases[2],
     "phasefr":macros.phases[3],
-    "useradio": True,
-    "usestable" : False
+    "useradio":True,
+    "usestable":False
 }
 
+# Initiate robot
 body = init_robot()
 
+# Serial port from the teensy
+
 try:
-    ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1) # opens serial port to communicate with teensy
+    ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1) # 38400 opens serial port to communicate with teensy
 except:
-    print("except")
-    ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1)
-#    
+    print("serial failed")
+    ser = serial.Serial('/dev/ttyACM2', 38400, timeout=1)
+    
+## Serial port from the JeVois
 #try:
 #    serJ = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
 #except:
 #    serJ = serial.Serial('/dev/ttyACM3',115200, timeout=1)
 
+# Offset average for values from teensy
 OFFSET = (990+2014)/2
 CONTROLLER_RANGE = (2014-990)/2
 
@@ -67,37 +73,32 @@ def update_robot_loop():
     '''Update robot if 'enable' is toggled on
     '''
     global state
-    if state["enable"]:
-        #tv_fl = time()
+    if(state["enable"]):
         update_robot(body, state, state["timestep"])
-        #print("aaaaaa: ",time()-tv_fl)
-        #print("vx: ", state["vx"])
-        #print("vy: ", state["vy"])
-        #print("omega: ", state["omega"])
-        #print("pitch: ", state["pitch"])
-        #print("roll: ", state["roll"])
-        #print("yaw: ", state["yaw"])
-        #print("\n\n")
+
 
 def read_message_loop():
     '''Read message from teensy, decode and scale inputs and update the state
     '''
     global state
     if (bool(state["useradio"])):
+#        print("In useradio")
         ser.write("a\n".encode()) # Need to send message to read message from teensy (Don't know why, but worthwhile to find out)
-        #sleep(0.001)
+#            print("wrote")
+#        sleep(0.001)
         if (ser.in_waiting > 0):
+#                print("can serial")
             msg = ser.readline().decode('utf-8')
-#            msgStable = serJ.readline().decode('utf-8')
-#            msgStable = [int(i) for i in msgStable[3:].split(' ')]
+#                print(msg)
             msg = msg[:-2]
-            #print(msg)
+#            print(msg)
             msg = [int(i) for i in msg.split(',')]
+            print(msg)
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
             #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
             state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire
-            state["vy"] = scale( msg[6], macros.V_MAX)          # left/right trans
+            state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
             #state["pitch"] = scale(msg[7], macros.PITCH_BOUND) #wire pulled out
             state["pitch"] = scale(1500, macros.OMEGA_MAX)
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
@@ -108,29 +109,29 @@ def read_message_loop():
                     state["pan"] = float(state["pan"] + 2)
                 elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
                     state["pan"] = float(state["pan"] - 2)
-                if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND):
+                if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND_UPPER):
                     state["tilt"] = float(state["tilt"] + 2)
-                elif (msg[1] < 1400 and state["tilt"] > -macros.TILT_BOUND):
+                elif (msg[1] < 1400 and state["tilt"] > macros.TILT_BOUND_LOWER):
                     state["tilt"] = float(state["tilt"] - 2)
-            else: # Automatic Control using JeVois
-                if(msgStable[0] > 10 and state["pan"] < macros.PAN_BOUND):
-                    state["pan"] = float(state["pan"] + 2)
-                elif(msgStable[0] < -10 and state["pan"] > -macros.PAN_BOUND) :
-                    state["pan"] = float(state["pan"] - 2)
-                if (msgStable[1] < -10 and state["tilt"] < macros.TILT_BOUND):
-                    state["tilt"] = float(state["tilt"] + 2)
-                elif (msgStable[1] > 10 and state["tilt"] > -macros.TILT_BOUND):
-                    state["tilt"] = float(state["tilt"] - 2)
-            
-            
-            #state["pan"] = scale(msg[4], macros.PAN_BOUND)
-           # state["enable"] = msg[8] > OFFSET
-            # bool(msg[9]) # aim mode
-            # bool(msg[10]) # enable/disable
+            else:
+                # Automatic Control using JeVois
+                print("Nada")
+#                # Parse the JeVois line
+#                msgStable = serJ.readline().decode('utf-8')
+#                msgStable = [int(i) for i in msgStable[4:].split(' ')]
+#                
+#                # Track marker with larger area                                                                                                                                                                                                                                    
+#                if(msgStable[0] > 5 and state["pan"] < macros.PAN_BOUND):
+#                    state["pan"] = float(state["pan"] + 2)
+#                elif(msgStable[0] < -5 and state["pan"] > -macros.PAN_BOUND):
+#                    state["pan"] = float(state["pan"] - 2)
+#                if (msgStable[1] < -5 and state["tilt"] < macros.TILT_BOUND_UPPER):
+#                    state["tilt"] = float(state["tilt"] + 2)
+#                elif (msgStable[1] > 5 and state["tilt"] > macros.TILT_BOUND_LOWER):
+#                    state["tilt"] = float(state["tilt"] - 2)
 
 def start_server():
     global app
-    print("In start server")
     app.run()
 
 app = Flask(__name__)
@@ -143,20 +144,15 @@ def hello():
 def slidey():
     global state
     state = json.loads(request.data.decode('utf-8'))
-    print("pan: ", state["pan"])
-    print("tilt: ", state["tilt"])
     return ""                                                                                                                                                                                                                                                
-                         
+
+# Run update robot and read message at the same time
 sched = BackgroundScheduler()
 sched.add_job(update_robot_loop, 'interval', seconds=state["timestep"])
-sched.add_job(read_message_loop, 'interval', seconds=state["timestep"])                                                            
+sched.add_job(read_message_loop, 'interval', seconds=state["teensytime"])                                                            
 sched.start()
-
-#while True:
-#    sleep(0.01)
 
 start_server() # This was giving error
 
-#serverthread = Thread(target=start_server, daemon=True)
-#serverthread.start()
+
                                                                               
