@@ -14,7 +14,7 @@ state = {
     "gohome":False,
     "vx":0.,
     "pan":0.,
-    "tilt":-30., 
+    "tilt":-45., #this was previously -30 for manual control
     "vy":0.,
     "vz":0.,
     "omega":0.,
@@ -37,6 +37,7 @@ state = {
     "useradio":True,
     "usestable":False
 }
+manual_tilt=False
 
 # Initiate robot
 body = init_robot()
@@ -50,10 +51,10 @@ except:
     ser = serial.Serial('/dev/ttyACM2', 38400, timeout=1)
     
 ## Serial port from the JeVois
-#try:
-#    serJ = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
-#except:
-#    serJ = serial.Serial('/dev/ttyACM3',115200, timeout=1)
+try:
+    serJ = serial.Serial('/dev/ttyACM1', 115200, timeout=1)
+except:
+    serJ = serial.Serial('/dev/ttyACM3',115200, timeout=1)
 
 # Offset average for values from teensy
 OFFSET = (990+2014)/2
@@ -93,7 +94,7 @@ def read_message_loop():
             msg = msg[:-2]
 #            print(msg)
             msg = [int(i) for i in msg.split(',')]
-            print(msg)
+#            print(msg)
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
             #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
             state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
@@ -104,7 +105,7 @@ def read_message_loop():
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
             state["yaw"] = scale(msg[5], macros.YAW_BOUND)
             
-            if True: # Manual Control
+            if manual_tilt: # Manual Control
                 if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
                     state["pan"] = float(state["pan"] + 2)
                 elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
@@ -113,22 +114,25 @@ def read_message_loop():
                     state["tilt"] = float(state["tilt"] + 2)
                 elif (msg[1] < 1400 and state["tilt"] > macros.TILT_BOUND_LOWER):
                     state["tilt"] = float(state["tilt"] - 2)
-            else:
-                # Automatic Control using JeVois
-                print("Nada")
-#                # Parse the JeVois line
-#                msgStable = serJ.readline().decode('utf-8')
-#                msgStable = [int(i) for i in msgStable[4:].split(' ')]
-#                
-#                # Track marker with larger area                                                                                                                                                                                                                                    
-#                if(msgStable[0] > 5 and state["pan"] < macros.PAN_BOUND):
-#                    state["pan"] = float(state["pan"] + 2)
-#                elif(msgStable[0] < -5 and state["pan"] > -macros.PAN_BOUND):
-#                    state["pan"] = float(state["pan"] - 2)
-#                if (msgStable[1] < -5 and state["tilt"] < macros.TILT_BOUND_UPPER):
-#                    state["tilt"] = float(state["tilt"] + 2)
-#                elif (msgStable[1] > 5 and state["tilt"] > macros.TILT_BOUND_LOWER):
-#                    state["tilt"] = float(state["tilt"] - 2)
+            # Automatic Control using JeVois
+            # Parse the JeVois line
+#        print(serJ.in_waiting)
+        if not manual_tilt and serJ.in_waiting > 0:
+#            print("in_waiting")
+            msgStable = serJ.readline().decode('utf-8')
+            msgStable = [int(i) for i in msgStable[4:].split(' ')]
+            print(msgStable)
+            # Track marker                                                                                                                                                                                                                                 
+            if(msgStable[1] > 5):
+                state["pan"] = float(state["pan"] + 2)
+            elif(msgStable[1] < -5 and msg):
+                state["pan"] = float(state["pan"] - 2)
+            if (msgStable[2] < -50):
+                state["tilt"] = float(state["tilt"] + 0.1)
+                print("tilt up")
+            elif (msgStable[2] > 50):
+                state["tilt"] = float(state["tilt"] - 0.1)
+                print("tilt down")
 
 def start_server():
     global app

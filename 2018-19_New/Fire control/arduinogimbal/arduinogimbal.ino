@@ -183,8 +183,8 @@ void hopperDriver(int inst, int power) {
 
 int gunState(int currState)
 {
-  Serial.println(currState);
-  Serial.println(state[GUN_CHANNEL]);
+  //Serial.println(currState);
+  //Serial.println(state[GUN_CHANNEL]);
   switch (currState) {
     //idle state for gun
     case 0:
