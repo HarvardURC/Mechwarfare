@@ -48,13 +48,13 @@ try:
     ser = serial.Serial('/dev/teensy', 38400, timeout=1) # 38400 opens serial port to communicate with teensy
 except:
     print("serial failed")
-    ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1)
+    ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1)
     
 ## Serial port from the JeVois
 try:
     serJ = serial.Serial('/dev/jevois', 115200, timeout=1)
 except:
-    serJ = serial.Serial('/dev/ttyACM0',115200, timeout=1)
+    serJ = serial.Serial('/dev/ttyACM1',115200, timeout=1)
 
 # Offset average for values from teensy
 OFFSET = (990+2014)/2
