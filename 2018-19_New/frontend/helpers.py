@@ -47,14 +47,14 @@ def fromrad(point):
 # bound(x, lower, upper)
 #   bounds x 
 def bound(x, lower, upper):
-	return (min(max(x, lower), upper))
+    return (min(max(x, lower), upper))
 
 # degreesmod(theta)
 #   ensures 0 <= theta < 360 (uses degrees)
 def degreesmod(theta):
-	while(theta < 0):
-		theta = theta + 360
-	return (theta % 360)
+    while(theta < 0):
+        theta = theta + 360
+    return (theta % 360)
 
 # dict_timer(key, d, val)
 #   aggregates times in dict

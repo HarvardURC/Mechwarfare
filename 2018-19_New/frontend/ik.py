@@ -15,7 +15,7 @@ from time import time
 """
 
 def fix_angles_2(theta):
-    """Change theta to between -180 and +180
+    """wrap theta to between -180 and +180
     """
     while(theta > 180):
         theta -= 360
@@ -39,39 +39,19 @@ def leg_ik(leg, claw, times={}):
 
     # Constants
     hyp = ((claw[1] - leg.trolen)**2 + claw[2]**2)**.5
-#    print("Claw1:", claw[1])
-#    print("Claw2:", claw[2])
-#    print("Hyp: ", hyp)
-#    print(claw[0])
-#    print("Trye one")
-#    print((claw[1] - leg.trolen)/hyp)
-#    print("Try two")
-#    print((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp))
-#    print("Try three")
-#    print((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen))
     try:
         # Inverse Kinematics
-#        print("H next")
         h = claw[0] - leg.gamma
-#        print("part1 next")
-#        part1 = m.asin((claw[1] - leg.trolen)/hyp)
-#        print("part2 next")
-#        part2 = m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp))
-#        print("e next")
-#        e = helpers.rtod(part1 + part2 - (m.pi/2)) - 90
         e = helpers.rtod(m.asin((claw[1] - leg.trolen)/hyp) + m.acos((leg.tiblen**2 - leg.femlen**2 - hyp**2)/(-2 * leg.femlen * hyp)) - (m.pi/2)) - 90
-#        print("k next")
         k = helpers.rtod(m.pi - m.acos((hyp**2 - leg.tiblen**2 - leg.femlen**2)/(-2 * leg.tiblen * leg.femlen))) - 180
 
         times = helpers.dict_timer("Ik.leg_ik", times, time()-tv_leg_ik)
-#        print("Leg success")
         return np.array([fix_angles_2(h), fix_angles_2(e), fix_angles_2(k)])
 
     except Exception as e:
         times = helpers.dict_timer("Ik.leg_ik", times, time()-tv_leg_ik)
         print("Invalid parameters.  Leg ik failed.")
-        #print(e)
-        return np.array([0, 1, 2, 3])
+        return np.array([0, 1, 2, 3]) # Arbitray list of 4 to indicate ik failure
 
 
 # Body IK
@@ -109,8 +89,6 @@ def body_ik(body, claws, pitch, roll, height, zs, times={}):
 
     # incorporate leg lifts
     for i in range(len(zs)):
-#        print("Zs:", zs[i])
-#        print("Height:", height)
         if (zs[i] > 0):
             newclaws[i][2] = -1*(height-zs[i])
 
@@ -118,11 +96,8 @@ def body_ik(body, claws, pitch, roll, height, zs, times={}):
 
     return newclaws
     
-    
-
 # Other
 
-# make_standard_bot()
 def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEMLEN, tiblen=macros.TIBLEN, zdist=macros.ZDIST):
     """Creates a bot with equidistant claws at distance RAD from hip with macros.NUMLEGS legs (and sides)
     """
@@ -155,7 +130,7 @@ def make_standard_bot(side=macros.SIDE, trolen=macros.TROLEN, femlen=macros.FEML
     # Timing print
     print("Make_standard_bot time: ", (time() - tv_msb))
 
-    return(claws, body)
+    return claws, body
 
 def extract_angles(body, claws, pitch=macros.DEFAULT_PITCH, roll=macros.DEFAULT_ROLL, height=macros.DEFAULT_HEIGHT, zs=[0,0,0,0], times={}):
     """
