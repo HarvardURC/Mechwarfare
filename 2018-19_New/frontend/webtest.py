@@ -14,7 +14,7 @@ state = {
     "gohome":False,
     "vx":0.,
     "pan" : 0.,
-    "tilt" : 0., 
+    "tilt" : 0.,
     "vy":0.,
     "vz":0.,
     "omega":0.,
@@ -44,7 +44,7 @@ try:
 except:
     print("except")
     ser = serial.Serial('/dev/ttyACM1', 38400, timeout=1)
-#    
+#
 #try:
 #    serJ = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
 #except:
@@ -94,19 +94,19 @@ def read_message_loop():
             #print(msg)
             msg = [int(i) for i in msg.split(',')]
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
-            #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
+            #state["omega"] = scale(msg[4], macros.OMEGA_MAX)
             state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire
-            state["vy"] = scale( msg[6], macros.V_MAX)          # left/right trans
+            state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
             #state["pitch"] = scale(msg[7], macros.PITCH_BOUND) #wire pulled out
             state["pitch"] = scale(1500, macros.OMEGA_MAX)
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
             state["yaw"] = scale(msg[5], macros.YAW_BOUND)
-            
+
             if True: # Manual Control
-                if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
+                if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND):
                     state["pan"] = float(state["pan"] + 2)
-                elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
+                elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND):
                     state["pan"] = float(state["pan"] - 2)
                 if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND):
                     state["tilt"] = float(state["tilt"] + 2)
@@ -121,8 +121,8 @@ def read_message_loop():
                     state["tilt"] = float(state["tilt"] + 2)
                 elif (msgStable[1] > 10 and state["tilt"] > -macros.TILT_BOUND):
                     state["tilt"] = float(state["tilt"] - 2)
-            
-            
+
+
             #state["pan"] = scale(msg[4], macros.PAN_BOUND)
            # state["enable"] = msg[8] > OFFSET
             # bool(msg[9]) # aim mode
@@ -145,11 +145,11 @@ def slidey():
     state = json.loads(request.data.decode('utf-8'))
     print("pan: ", state["pan"])
     print("tilt: ", state["tilt"])
-    return ""                                                                                                                                                                                                                                                
-                         
+    return ""
+
 sched = BackgroundScheduler()
 sched.add_job(update_robot_loop, 'interval', seconds=state["timestep"])
-sched.add_job(read_message_loop, 'interval', seconds=state["timestep"])                                                            
+sched.add_job(read_message_loop, 'interval', seconds=state["timestep"])
 sched.start()
 
 #while True:
@@ -159,4 +159,3 @@ start_server() # This was giving error
 
 #serverthread = Thread(target=start_server, daemon=True)
 #serverthread.start()
-                                                                              

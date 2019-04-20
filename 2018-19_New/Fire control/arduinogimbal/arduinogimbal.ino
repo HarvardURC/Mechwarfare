@@ -47,6 +47,9 @@ int gunmotor = A6;
 int hoppermotor = 6;
 int hopperdir = 7;
 
+#define HOW_OFTEN_SEND 5
+long counter = 0;
+
 #define HOPPER_POWER 65 //PWM POWER TO RUN HOPPER
 #define GUN_POWER 255 //PWM POWER TO RUN GUNMOTOR
 
@@ -183,8 +186,8 @@ void hopperDriver(int inst, int power) {
 
 int gunState(int currState)
 {
-  Serial.println(currState);
-  Serial.println(state[GUN_CHANNEL]);
+  //Serial.println(currState);
+  //Serial.println(state[GUN_CHANNEL]);
   switch (currState) {
     //idle state for gun
     case 0:
@@ -292,19 +295,19 @@ int gunState(int currState)
       }
       return 3;
     case 4:
-      computer.println("Unjam");
+      //computer.println("Unjam");
       analogWrite(gunmotor, 0);
       hopperDriver(2, HOPPER_POWER);
       stateHold++;
       if (state[IDLE_SWITCH] < SWITCH_BOUND) {
         //if idle
-        computer.println("idle");
+        //computer.println("idle");
         stateHold = 0;
         return 0;
       }
       if (stateHold > numUnjam) {
         //then enter quiet load: catchup state
-        computer.println("done unjam");
+        //computer.println("done unjam");
         stateHold = 0;
         return 1;
       }
@@ -324,6 +327,10 @@ void forwardChannels()
     baseString = baseString + String(state[i]) + ", ";
   }
   baseString = baseString + String(state[numChannels]);
+  while(computer.available() > 0){//Buffer memory must always be clean !
+    char read = computer.read();
+    delay(1);//wait until next_char
+  }
   computer.println(baseString);
 }
 
@@ -336,7 +343,9 @@ void loop() {
 
     resetIdleTimer();
     stateGun = gunState(stateGun);
-    forwardChannels();
+    if(counter++ % HOW_OFTEN_SEND == 0) {
+      forwardChannels();
+    }
 
   }
 
