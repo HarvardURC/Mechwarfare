@@ -3,7 +3,7 @@ from helper import (getch, enable_torque, write_goal, read_pos, disable_torque)
 from dynamixel_sdk import *
 from shared_constants import *
 
-DXL_ID                      = 5  # Set this to the ID of the servo that we are controlling
+DXL_ID                      = 15  # Set this to the ID of the servo that we are controlling
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
     if not enable_torque(packetHandler, portHandler, DXL_ID):
         quit()
 
-    goal_pos = 405  # Make sure this pos/angle does not destroy anything
+    goal_pos = 505  # Make sure this pos/angle does not destroy anything
     write_goal(packetHandler, portHandler, DXL_ID, goal_pos)
     while True:
         # Read present position
