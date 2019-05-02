@@ -86,7 +86,7 @@ ROLL_BOUND = 25
 YAW_BOUND = 20
 
 PAN_BOUND = 45
-TILT_BOUND_UPPER = 0
+TILT_BOUND_UPPER = 80
 TILT_BOUND_LOWER = -60 
 
 # Bounds on linear and angular velocities (minimums for movement below)

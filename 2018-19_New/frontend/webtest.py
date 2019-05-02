@@ -35,9 +35,9 @@ state = {
     "phasebr":macros.phases[2],
     "phasefr":macros.phases[3],
     "useradio":True,
-    "usestable":False
+    "usestable":False,
+    "manual_tilt":True
 }
-manual_tilt=False
 
 # Initiate robot
 body = init_robot()
@@ -90,41 +90,51 @@ def read_message_loop():
             msg = msg[:-2]
             msg = [int(i) for i in msg.split(',')]
 #            print(msg)
-            state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
-            #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
-            state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
+            state["vx"] = scale(msg[6], macros.V_MAX)          # forward/backward trans
+            state["omega"] = scale(msg[8], macros.OMEGA_MAX) 
+#            state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire
-            state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
+            state["vy"] = scale(msg[7], macros.V_MAX)          # left/right trans
             #state["pitch"] = scale(msg[7], macros.PITCH_BOUND) # wire pulled out
             state["pitch"] = scale(1500, macros.OMEGA_MAX)
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
-            state["yaw"] = scale(msg[5], macros.YAW_BOUND)
+#            state["yaw"] = scale(msg[5], macros.YAW_BOUND)
+            state["yaw"] = scale(1500, macros.YAW_BOUND)
             
-            if manual_tilt: # Manual Control
+            state["manual_tilt"] = msg[4] > 1600 
+            
+            if state["manual_tilt"]: # Manual Control
                 if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
                      state["pan"] = float(state["pan"] + 2)
                 elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
                     state["pan"] = float(state["pan"] - 2)
-                if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND_UPPER):
-                    state["tilt"] = float(state["tilt"] + 2)
-                elif (msg[1] < 1400 and state["tilt"] > macros.TILT_BOUND_LOWER):
-                    state["tilt"] = float(state["tilt"] - 2)
+                if (msg[3] > 1600 and state["tilt"] > macros.TILT_BOUND_LOWER):
+                    state["tilt"] = float(state["tilt"] - 3)
+                elif (msg[3] < 1400 and state["tilt"] < macros.TILT_BOUND_UPPER):
+                    state["tilt"] = float(state["tilt"] + 3)
             ser.flushInput()
             ser.flushOutput()
         # Automatic Control using JeVois
         # Parse the JeVois line
         # print("serJ in_waiting: ", serJ.in_waiting)
-        if not manual_tilt and serJ.in_waiting > 0:
+        if not state["manual_tilt"] and serJ.in_waiting > 0:
             msgStable = serJ.readline().decode('utf-8')
             msgStable = [int(i) for i in msgStable[4:].split(' ')]
             # print("msg stable message!")
             # print(msgStable)
             changePan = msgStable[1] * 0.005
-            changeTilt = msgStable[2] * 0.005
+            changeTilt = msgStable[2] * 0.01
             # Track marker
-            state["pan"] = float(state["pan"] - changePan)
-            state["tilt"] = float(state["tilt"] - changeTilt)
-            #serJ.flushInput()
+            pan_goal = float(state["pan"] - changePan)
+            pan_goal = min([pan_goal, macros.PAN_BOUND])
+            pan_goal = max([pan_goal, -macros.PAN_BOUND])
+            state["pan"] = pan_goal
+            
+            tilt_goal = float(state["tilt"] + changeTilt)
+            tilt_goal = min([tilt_goal, macros.TILT_BOUND_UPPER])
+            tilt_goal = max([tilt_goal, macros.TILT_BOUND_LOWER])
+            state["tilt"] = tilt_goal
+            serJ.flushInput()
             #serJ.flushOutput()
         
 
