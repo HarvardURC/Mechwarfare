@@ -39,6 +39,12 @@ class leg_data:
 
 class body_data:
     def __init__(self, legs, side=macros.SIDE, zdist=macros.ZDIST, trolen=macros.TROLEN, femlen=macros.FEMLEN, tiblen=macros.TIBLEN):
+        """
+        legs: list of leg_data
+        .
+        .
+        .
+        """
         self.numlegs = macros.NUMLEGS
         self.legs = legs
         self.side = side

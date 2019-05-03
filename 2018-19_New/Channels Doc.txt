@@ -1,12 +1,12 @@
 Channel of radio controller - Pin on Teensy - Semantic meaning
 
-CH1 - pin 23 - JAM_CHANNEL
-CH2 - pin 22 - tilt (continuous control)
-CH3 - pin 21 - pan (continuous control)
-CH4 - pin 19 - vx
+CH1 - pin 23 - JAM_CHANNEL, and tilt (continuous control)
+CH2 - pin 22 - pan (continuous control)
+CH3 - pin 21 - vx
+CH4 - pin 19 - yaw
 CH5 - pin 18 - GUN_CHANNEL
-CH6 - pin 17 - yaw
-CH7 - pin 16 - vy
+CH6 - pin 17 - vy
+CH7 - pin 16 - not used
 CH8 - pin 15 - IDLE_SWITCH
 
 To see how the channels of radio controller map to buttons/sticks on the controller, look into the controller menu.
