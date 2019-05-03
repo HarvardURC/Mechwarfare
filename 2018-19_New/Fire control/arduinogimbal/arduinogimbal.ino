@@ -34,7 +34,7 @@ volatile unsigned long timers[9];
 #define CH8 15
 
 //remote control channels and switch bounds for parsing
-#define IDLE_SWITCH 8
+#define IDLE_SWITCH 8 // We are not using IDLE_SWITCH anymore
 #define GUN_CHANNEL 5
 #define SWITCH_BOUND 1200
 #define GUN_BOUND 1800
@@ -190,7 +190,8 @@ int gunState(int currState)
     case 0:
       hopperDriver(0, 0);
       analogWrite(gunmotor, 0);
-      if (state[IDLE_SWITCH] > SWITCH_BOUND) {
+      // if (state[IDLE_SWITCH] > SWITCH_BOUND) {
+      if (true) {
         //if no longer idle
         stateHold = 0;
         return 1;
@@ -198,7 +199,8 @@ int gunState(int currState)
       return 0;
     case 1:
       //load state, catchup
-      if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      // if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      if (false) {
         //if idle
         stateHold = 0;
         return 0;
@@ -223,7 +225,8 @@ int gunState(int currState)
       return 1;
     case 5:
       //load state, idle
-      if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      // if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      if (false) {
         //if idle
         stateHold = 0;
         return 0;
@@ -243,7 +246,8 @@ int gunState(int currState)
       analogWrite(gunmotor, GUN_POWER);
       hopperDriver(1, HOPPER_POWER);
       stateHold++;
-      if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      // if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      if (false) {
         //if idle
         stateHold = 0;
         return 0;
@@ -270,7 +274,8 @@ int gunState(int currState)
       analogWrite(gunmotor, 0);
       hopperDriver(1, HOPPER_POWER);
       stateHold++;
-      if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      // if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      if (false) {
         //if idle
         stateHold = 0;
         return 0;
@@ -296,7 +301,8 @@ int gunState(int currState)
       analogWrite(gunmotor, 0);
       hopperDriver(2, HOPPER_POWER);
       stateHold++;
-      if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      // if (state[IDLE_SWITCH] < SWITCH_BOUND) {
+      if (false) {
         //if idle
         computer.println("idle");
         stateHold = 0;
@@ -311,8 +317,6 @@ int gunState(int currState)
       return 4;
 
   }
-
-
 }
 
 int numChannels = 8;
@@ -324,10 +328,8 @@ void forwardChannels()
     baseString = baseString + String(state[i]) + ", ";
   }
   baseString = baseString + String(state[numChannels]);
-  //computer.println(baseString);
+  computer.println(baseString);
 }
-
-
 
 
 void loop() {
@@ -339,6 +341,4 @@ void loop() {
     forwardChannels();
 
   }
-
-
 }
