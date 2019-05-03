@@ -49,7 +49,7 @@ try:
 except:
     print("serial failed")
     ser = serial.Serial('/dev/ttyACM0', 38400, timeout=1)
-    
+
 ## Serial port from the JeVois
 try:
     serJ = serial.Serial('/dev/jevois', 115200, timeout=1)
@@ -91,7 +91,7 @@ def read_message_loop():
             msg = [int(i) for i in msg.split(',')]
 #            print(msg)
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
-            #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
+            #state["omega"] = scale(msg[4], macros.OMEGA_MAX)
             state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire
             state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
@@ -99,11 +99,11 @@ def read_message_loop():
             state["pitch"] = scale(1500, macros.OMEGA_MAX)
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
             state["yaw"] = scale(msg[5], macros.YAW_BOUND)
-            
+
             if manual_tilt: # Manual Control
-                if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
+                if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND):
                      state["pan"] = float(state["pan"] + 2)
-                elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
+                elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND):
                     state["pan"] = float(state["pan"] - 2)
                 if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND_UPPER):
                     state["tilt"] = float(state["tilt"] + 2)
@@ -126,7 +126,7 @@ def read_message_loop():
             state["tilt"] = float(state["tilt"] - changeTilt)
             #serJ.flushInput()
             #serJ.flushOutput()
-        
+
 
 def start_server():
     global app
@@ -142,15 +142,12 @@ def hello():
 def slidey():
     global state
     state = json.loads(request.data.decode('utf-8'))
-    return ""                                                                                                                                                                                                                                                
+    return ""
 
 # Run update robot and read message at the same time
 sched = BackgroundScheduler()
 sched.add_job(update_robot_loop, 'interval', seconds=state["timestep"])
-sched.add_job(read_message_loop, 'interval', seconds=state["teensytime"])                                                            
+sched.add_job(read_message_loop, 'interval', seconds=state["teensytime"])
 sched.start()
 
 start_server() # This was giving error
-
-
-                                                                              
