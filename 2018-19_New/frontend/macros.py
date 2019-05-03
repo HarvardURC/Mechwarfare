@@ -62,7 +62,7 @@ DEFAULT_VY = 0
 DEFAULT_OMEGA = 40
 
 DEFAULT_PAN = 0
-DEFAULT_TILT = 0
+DEFAULT_TILT = -30
 
 
 # # # # # # # # # # # # #
@@ -86,7 +86,8 @@ ROLL_BOUND = 25
 YAW_BOUND = 20
 
 PAN_BOUND = 45
-TILT_BOUND = 20
+TILT_BOUND_UPPER = 0
+TILT_BOUND_LOWER = -60 
 
 # Bounds on linear and angular velocities (minimums for movement below)
 V_MAX = 50

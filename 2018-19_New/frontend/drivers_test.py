@@ -32,7 +32,7 @@ os.sys.path.append('../dynamixel_functions_py')             # Path setting
 
 import dynamixel_functions as dynamixel                     # Uses Dynamixel SDK library
 
-DEVICENAME          = "/dev/ttyUSB1".encode('utf-8') # Could be "/dev/ttyUSB0"
+DEVICENAME          = "/dev/ttyUSB0".encode('utf-8') # Could be "/dev/ttyUSB0"
 BAUDRATE            = 57600
 PROTOCOL_VERSION    = 1
 

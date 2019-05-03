@@ -49,7 +49,7 @@ try:
 except:
     print("serial failed")
     ser = serial.Serial('/dev/ttyACM2', 38400, timeout=1)
-
+    
 ## Serial port from the JeVois
 try:
     serJ = serial.Serial('/dev/ttyACM1', 115200, timeout=1)
@@ -59,6 +59,7 @@ except:
 # Offset average for values from teensy
 OFFSET = (990+2014)/2
 CONTROLLER_RANGE = (2014-990)/2
+K_TILT = 0.01
 
 def scale(num, max):
     '''
@@ -87,6 +88,7 @@ def read_message_loop():
         ser.write("a\n".encode()) # Need to send message to read message from teensy (Don't know why, but worthwhile to find out)
 #            print("wrote")
 #        sleep(0.001)
+        
         if (ser.in_waiting > 0):
 #                print("can serial")
             msg = ser.readline().decode('utf-8')
@@ -96,7 +98,7 @@ def read_message_loop():
             msg = [int(i) for i in msg.split(',')]
 #            print(msg)
             state["vx"] = scale(msg[3], macros.V_MAX)          # forward/backward trans
-            #state["omega"] = scale(msg[4], macros.OMEGA_MAX)
+            #state["omega"] = scale(msg[4], macros.OMEGA_MAX) 
             state["omega"] = scale(1500, macros.OMEGA_MAX)   # stationary rotate
             # msg[4] # fire
             state["vy"] = scale(msg[6], macros.V_MAX)          # left/right trans
@@ -104,16 +106,17 @@ def read_message_loop():
             state["pitch"] = scale(1500, macros.OMEGA_MAX)
             state["roll"] = 0 #scale(msg[7], macros.ROLL_BOUND)
             state["yaw"] = scale(msg[5], macros.YAW_BOUND)
-
+            
             if manual_tilt: # Manual Control
-                if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND):
-                    state["pan"] = float(state["pan"] + 2)
-                elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND):
-                    state["pan"] = float(state["pan"] - 2)
-                if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND_UPPER):
-                    state["tilt"] = float(state["tilt"] + 2)
-                elif (msg[1] < 1400 and state["tilt"] > macros.TILT_BOUND_LOWER):
-                    state["tilt"] = float(state["tilt"] - 2)
+                state["tilt"] = K_TILT*(float(state["tilt"]-1500))
+                #if (msg[2] > 1600 and state["pan"] < macros.PAN_BOUND): 
+                #    state["pan"] = float(state["pan"] + 2)
+                #elif (msg[2] < 1400 and state["pan"] > -macros.PAN_BOUND): 
+                #    state["pan"] = float(state["pan"] - 2)
+                #if (msg[1] > 1600 and state["tilt"] < macros.TILT_BOUND_UPPER):
+                #    state["tilt"] = float(state["tilt"] + 2)
+                #elif (msg[1] < 1400 and state["tilt"] > macros.TILT_BOUND_LOWER):
+                #    state["tilt"] = float(state["tilt"] - 2)
             # Automatic Control using JeVois
             # Parse the JeVois line
 #        print(serJ.in_waiting)
@@ -122,7 +125,7 @@ def read_message_loop():
             msgStable = serJ.readline().decode('utf-8')
             msgStable = [int(i) for i in msgStable[4:].split(' ')]
             print(msgStable)
-            # Track marker
+            # Track marker                                                                                                                                                                                                                                 
             if(msgStable[1] > 5):
                 state["pan"] = float(state["pan"] + 2)
             elif(msgStable[1] < -5 and msg):
@@ -148,12 +151,15 @@ def hello():
 def slidey():
     global state
     state = json.loads(request.data.decode('utf-8'))
-    return ""
+    return ""                                                                                                                                                                                                                                                
 
 # Run update robot and read message at the same time
 sched = BackgroundScheduler()
 sched.add_job(update_robot_loop, 'interval', seconds=state["timestep"])
-sched.add_job(read_message_loop, 'interval', seconds=state["teensytime"])
+sched.add_job(read_message_loop, 'interval', seconds=state["teensytime"])                                                            
 sched.start()
 
 start_server() # This was giving error
+
+
+                                                                              
